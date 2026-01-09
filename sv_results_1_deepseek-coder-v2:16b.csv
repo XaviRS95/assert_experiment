@@ -1,0 +1,2064 @@
+original_code,generated_code,iverilog_output,exec_time
+"module case_example1(input logic [1:0] a, output logic y);
+    always_comb begin
+        case(a)
+            2'b00: y = 0;
+            2'b01: y = 1;
+            2'b10: y = 1;
+            2'b11: y = 0;
+            default: y = 0;
+        endcase
+    end
+endmodule"," module case_example1_assertions (input logic [1:0] a, output logic y);
+    property case_example1_prop;
+    @(posedge clk) disable iff (!resetn)
+    (a == 2'b00 && y == 0) ||
+    (a == 2'b01 && y == 1) ||
+    (a == 2'b10 && y == 1) ||
+    (a == 2'b11 && y == 0);
+endproperty
+
+assert_case_example1: assert property (case_example1_prop)
+    else $error(""Test failed for case_example1"");
+    endmodule;",OK,23.699663162231445
+"module case_example2(input logic [3:0] a, output logic [1:0] y);
+    always_comb begin
+        case(a)
+            4'd0: y = 2'b00;
+            4'd1: y = 2'b01;
+            4'd2: y = 2'b10;
+            default: y = 2'b11;
+        endcase
+    end
+endmodule
+"," module case_example2_assertions (input logic [3:0] a, output logic [1:0] y);
+    property prop_test(input logic [3:0] a);
+    casez (a)
+        4'b0???: assert property (@(posedge clk or posedge reset) disable iff (!reset) (y == 2'b00)) else `fail;
+        4'b1???: assert property (@(posedge clk or posedge reset) disable iff (!reset) (y == 2'b01)) else `fail;
+        4'b10??: assert property (@(posedge clk or posedge reset) disable iff (!reset) (y == 2'b10)) else `fail;
+        default: assert property (@(posedge clk or posedge reset) disable iff (!reset) (y == 2'b11)) else `fail;
+    endcase
+endproperty
+
+assert final property (prop_test(a)) else $error(""Test failed"");
+    endmodule;","sv_file.sv:2:24-28: syntax error at token ""input""
+sv_file.sv:3:5-9: syntax error at token ""casez""
+sv_file.sv:5:9: syntax error at token ""4""
+sv_file.sv:6:9: syntax error at token ""4""
+sv_file.sv:7:16: syntax error at token "":""
+",11.909755229949951
+"module case2(input logic [2:0] sel, output logic z);
+    always_comb begin
+        case(sel)
+            3'b000: z = 0;
+            3'b001: z = 1;
+            3'b010: z = 1;
+            3'b011: z = 0;
+            3'b100: z = 1;
+            default: z = 0;
+        endcase
+    end
+endmodule
+"," module case2_assertions (input logic [2:0] sel, output logic z);
+    property case2_prop;
+    @(posedge clk) disable iff (!resetn)  // Assuming clk and resetn are inputs for this hypothetical module
+        (sel == 3'b000 && z == 0) ||
+        (sel == 3'b001 && z == 1) ||
+        (sel == 3'b010 && z == 1) ||
+        (sel == 3'b011 && z == 0) ||
+        (sel == 3'b100 && z == 1) ||
+        (sel inside {3'b101, 3'b110, 3'b111} ==> z == 0);  // default case as catch-all for any other sel values
+endproperty
+
+assert property (case2_prop)
+    else $error(""Test failed: Property assertion not satisfied"");
+    endmodule;","sv_file.sv:9:48: syntax error at token "">""
+sv_file.sv:10:1-11: syntax error at token ""endproperty""
+",18.75756859779358
+"module case3(input logic [1:0] sel, input logic a, b, c, d, output logic y);
+    always_comb begin
+        case(sel)
+            2'b00: y = a;
+            2'b01: y = b;
+            2'b10: y = c;
+            2'b11: y = d;
+        endcase
+    end
+endmodule
+"," module case3_assertions (input logic [1:0] sel, input logic a, b, c, d, output logic y);
+    module case3(input logic [1:0] sel, input logic a, b, c, d, output logic y);
+    always_comb begin
+        case(sel)
+            2'b00: y = a;
+            2'b01: y = b;
+            2'b10: y = c;
+            2'b11: y = d;
+        endcase
+    end
+endmodule
+
+property prop_case3(input logic [1:0] sel, input logic a, b, c, d);
+    (sel == 2'b00) |-> (y == a);
+    (sel == 2'b01) |-> (y == b);
+    (sel == 2'b10) |-> (y == c);
+    (sel == 2'b11) |-> (y == d);
+endproperty
+    endmodule;","sv_file.sv:13:21-25: syntax error at token ""input""
+sv_file.sv:14:5: syntax error at token ""(""
+sv_file.sv:15:5: syntax error at token ""(""
+sv_file.sv:16:5: syntax error at token ""(""
+sv_file.sv:18:1-11: syntax error at token ""endproperty""
+sv_file.sv:19:15: syntax error (unexpected EOF)
+",22.029059886932373
+"module case4(input logic [3:0] in, output logic out);
+    always_comb begin
+        case(in)
+            4'b0001: out = 1;
+            4'b0010: out = 0;
+            4'b0100: out = 1;
+            4'b1000: out = 0;
+            default: out = 0;
+        endcase
+    end
+endmodule
+"," module case4_assertions (input logic [3:0] in, output logic out);
+    module case4(input logic [3:0] in, output logic out);
+    always_comb begin
+        case(in)
+            4'b0001: out = 1;
+            4'b0010: out = 0;
+            4'b0100: out = 1;
+            4'b1000: out = 0;
+            default: out = 0;
+        endcase
+    end
+endmodule
+
+// Property assertion to test the module
+property prop_test;
+    @(in) disable iff (in == 4'b0000) // Exclude the case where in is all zeros
+    (out == 1) |-> ((in == 4'b0001) || (in == 4'b0100) || (in == 4'b1000));
+endproperty
+
+assert property (prop_test) else $error(""Test failed"");
+    endmodule;",OK,33.36344599723816
+"module case5(input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
+    always_comb begin
+        case(op)
+            2'b00: result = a + b;
+            2'b01: result = a - b;
+            2'b10: result = a & b;
+            2'b11: result = a | b;
+        endcase
+    end
+endmodule
+"," module case5_assertions (input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
+    module case5(input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
+    always_comb begin
+        case(op)
+            2'b00: result = a + b;
+            2'b01: result = a - b;
+            2'b10: result = a & b;
+            2'b11: result = a | b;
+        endcase
+    end
+endmodule
+
+// Property assertion to test the module
+property prop_case5;
+    @(posedge clk) disable iff (!resetn)
+    (op == 2'b00 && result == (a + b)) ||
+    (op == 2'b01 && result == (a - b)) ||
+    (op == 2'b10 && result == (a & b)) ||
+    (op == 2'b11 && result == (a | b));
+endproperty
+
+assert property (prop_case5) else $error(""Test failed: Unexpected output for given inputs"");
+    endmodule;",OK,37.20315599441528
+"module case6(input logic [1:0] state, output logic [2:0] light);
+    always_comb begin
+        case(state)
+            2'b00: light = 3'b100; // Red
+            2'b01: light = 3'b010; // Yellow
+            2'b10: light = 3'b001; // Green
+            default: light = 3'b100;
+        endcase
+    end
+endmodule
+"," module case6_assertions (input logic [1:0] state, output logic [2:0] light);
+    module case6(input logic [1:0] state, output logic [2:0] light);
+    always_comb begin
+        case(state)
+            2'b00: light = 3'b100; // Red
+            2'b01: light = 3'b010; // Yellow
+            2'b10: light = 3'b001; // Green
+            default: light = 3'b100;
+        endcase
+    end
+endmodule
+    endmodule;",OK,29.41121768951416
+"module case8(input logic [3:0] in, output logic [1:0] out);
+    always_comb begin
+        case(in)
+            4'b0001: out = 2'b00;
+            4'b0010: out = 2'b01;
+            4'b0100: out = 2'b10;
+            4'b1000: out = 2'b11;
+            default: out = 2'b00;
+        endcase
+    end
+endmodule
+"," module case8_assertions (input logic [3:0] in, output logic [1:0] out);
+    module case8(input logic [3:0] in, output logic [1:0] out);
+    always_comb begin
+        case(in)
+            4'b0001: out = 2'b00;
+            4'b0010: out = 2'b01;
+            4'b0100: out = 2'b10;
+            4'b1000: out = 2'b11;
+            default: out = 2'b00;
+        endcase
+    end
+endmodule
+
+property case8_test;
+    @(posedge clk) disable iff (!resetn)
+    (in == 4'b0001 |-> ##[1:2] out == 2'b00) &&
+    (in == 4'b0010 |-> ##[1:2] out == 2'b01) &&
+    (in == 4'b0100 |-> ##[1:2] out == 2'b10) &&
+    (in == 4'b1000 |-> ##[1:2] out == 2'b11);
+endproperty
+    endmodule;",OK,22.161130905151367
+"module case9(input logic [3:0] digit, output logic [6:0] seg);
+    always_comb begin
+        case(digit)
+            4'd0: seg = 7'b0111111;
+            4'd1: seg = 7'b0000110;
+            4'd2: seg = 7'b1011011;
+            4'd3: seg = 7'b1001111;
+            4'd4: seg = 7'b1100110;
+            4'd5: seg = 7'b1101101;
+            4'd6: seg = 7'b1111101;
+            4'd7: seg = 7'b0000111;
+            4'd8: seg = 7'b1111111;
+            4'd9: seg = 7'b1101111;
+            default: seg = 7'b0000000;
+        endcase
+    end
+endmodule
+"," module case9_assertions (input logic [3:0] digit, output logic [6:0] seg);
+    module case9(input logic [3:0] digit, output logic [6:0] seg);
+    always_comb begin
+        case(digit)
+            4'd0: seg = 7'b0111111;
+            4'd1: seg = 7'b0000110;
+            4'd2: seg = 7'b1011011;
+            4'd3: seg = 7'b1001111;
+            4'd4: seg = 7'b1100110;
+            4'd5: seg = 7'b1101101;
+            4'd6: seg = 7'b1111101;
+            4'd7: seg = 7'b0000111;
+            4'd8: seg = 7'b1111111;
+            4'd9: seg = 7'b1101111;
+            default: seg = 7'b0000000;
+        endcase
+    end
+endmodule
+
+// Property Assertion
+property prop_seg_output(digit, seg);
+    digit inside {[0:9]}; // Ensure digit is between 0 and 9
+    case (digit)
+        4'd0: seg == 7'b0111111;
+        4'd1: seg == 7'b0000110;
+        4'd2: seg == 7'b1011011;
+        4'd3: seg == 7'b1001111;
+        4'd4: seg == 7'b1100110;
+        4'd5: seg == 7'b1101101;
+        4'd6: seg == 7'b1111101;
+        4'd7: seg == 7'b0000111;
+        4'd8: seg == 7'b1111111;
+        4'd9: seg == 7'b1101111;
+        default: seg == 7'b0000000; // This case is redundant due to digit inside {[0:9]}
+    endcase
+endproperty
+
+assert property (prop_seg_output(digit, seg))
+    else $error(""Test failed for digit %d with incorrect segment output"", digit);
+    endmodule;","sv_file.sv:22:11-16: syntax error at token ""inside""
+sv_file.sv:24:19-20: syntax error at token ""==""
+sv_file.sv:25:19-20: syntax error at token ""==""
+sv_file.sv:26:19-20: syntax error at token ""==""
+sv_file.sv:27:19-20: syntax error at token ""==""
+sv_file.sv:28:19-20: syntax error at token ""==""
+sv_file.sv:29:19-20: syntax error at token ""==""
+sv_file.sv:30:19-20: syntax error at token ""==""
+sv_file.sv:31:19-20: syntax error at token ""==""
+sv_file.sv:32:19-20: syntax error at token ""==""
+sv_file.sv:33:19-20: syntax error at token ""==""
+sv_file.sv:34:22-23: syntax error at token ""==""
+sv_file.sv:40:5-13: syntax error at token ""endmodule""
+sv_file.sv:40:15: syntax error (unexpected EOF)
+",43.15451908111572
+"module case10(input logic [2:0] pattern, output logic match);
+    always_comb begin
+        case(pattern)
+            3'b101: match = 1;
+            3'b010: match = 1;
+            3'b111: match = 0;
+            default: match = 0;
+        endcase
+    end
+endmodule
+"," module case10_assertions (input logic [2:0] pattern, output logic match);
+    property case10_prop(input logic [2:0] pattern);
+    disable iff (!pattern)
+    (pattern == 3'b101 || pattern == 3'b010) |-> match == 1;
+endproperty
+
+assert property (case10_prop(pattern))
+    else $error(""Test failed: case10 module did not meet the expected condition"");
+    endmodule;","sv_file.sv:2:26-30: syntax error at token ""input""
+sv_file.sv:5:1-11: syntax error at token ""endproperty""
+",10.020487785339355
+"module case11(input logic toggle, output logic state);
+    always_comb begin
+        case(toggle)
+            1'b0: state = 0;
+            1'b1: state = 1;
+        endcase
+    end
+endmodule
+"," module case11_assertions (input logic toggle, output logic state);
+    property prop_test;
+    @(posedge clk) disable iff (!resetn)
+    toggle == 1'b0 |-> ##[1:2] toggle == 1'b1;
+endproperty
+    endmodule;",OK,3.049663782119751
+"module case12(input logic [2:0] in, output logic [7:0] out);
+    always_comb begin
+        case(in)
+            3'b000: out = 8'b00000001;
+            3'b001: out = 8'b00000010;
+            3'b010: out = 8'b00000100;
+            3'b011: out = 8'b00001000;
+            3'b100: out = 8'b00010000;
+            3'b101: out = 8'b00100000;
+            3'b110: out = 8'b01000000;
+            3'b111: out = 8'b10000000;
+        endcase
+    end
+endmodule
+"," module case12_assertions (input logic [2:0] in, output logic [7:0] out);
+    module case12_test;
+    logic [2:0] in;
+    logic [7:0] out;
+
+    // Instantiate the module under test
+    case12 uut (
+        .in(in),
+        .out(out)
+    );
+
+    // Property assertion to check the mapping from `in` to `out`
+    property prop_check;
+        in == 3'b000 |-> out == 8'b00000001;
+    endproperty
+
+    // Assertion instance
+    assert property (prop_check) else $error(""Assertion failed: Incorrect mapping from in to out"");
+endmodule
+    endmodule;",OK,21.85460138320923
+"module case14(input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
+    always_comb begin
+        case(op)
+            2'b00: result = a ^ b; // XOR
+            2'b01: result = ~(a & b); // NAND
+            2'b10: result = a | b; // OR
+            2'b11: result = a & b; // AND
+        endcase
+    end
+endmodule
+"," module case14_assertions (input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
+    module case14_test;
+    logic [1:0] op;
+    logic [3:0] a, b;
+    logic [3:0] result;
+
+    // Instantiate the module
+    case14 uut (
+        .op(op),
+        .a(a),
+        .b(b),
+        .result(result)
+    );
+
+    // Property assertion
+    property prop_case14;
+        @(posedge clk) disable iff (!resetn) 
+        (op == 2'b00 && result == (a ^ b)) ||
+        (op == 2'b01 && result == ~(a & b)) ||
+        (op == 2'b10 && result == (a | b)) ||
+        (op == 2'b11 && result == (a & b));
+    endproperty
+
+    // Assertion using SystemVerilog Assertions (SVA)
+    assert property (prop_case14) else $error(""Test failed: Conditions not met"");
+endmodule
+    endmodule;",OK,28.038825035095215
+"module case15(input logic [3:0] num, output logic [1:0] mod3);
+    always_comb begin
+        case(num % 3)
+            2'd0: mod3 = 2'b00;
+            2'd1: mod3 = 2'b01;
+            2'd2: mod3 = 2'b10;
+        endcase
+    end
+endmodule
+"," module case15_assertions (input logic [3:0] num, output logic [1:0] mod3);
+    module case15(input logic [3:0] num, output logic [1:0] mod3);
+    always_comb begin
+        case(num % 3)
+            2'd0: mod3 = 2'b00;
+            2'd1: mod3 = 2'b01;
+            2'd2: mod3 = 2'b10;
+        endcase
+    end
+endmodule
+
+// Property assertion to test the module
+property prop_mod3(input logic [3:0] num);
+    case(num % 3)
+        2'd0: assert (mod3 == 2'b00) else $error(""Error in modulo 3 computation for num = %0d"", num);
+        2'd1: assert (mod3 == 2'b01) else $error(""Error in modulo 3 computation for num = %0d"", num);
+        2'd2: assert (mod3 == 2'b10) else $error(""Error in modulo 3 computation for num = %0d"", num);
+    endcase
+endproperty
+
+// Testbench to instantiate the module and check the property
+module test_case15;
+    logic [3:0] num;
+    logic [1:0] mod3;
+
+    case15 uut (.*); // Instantiating the module under test
+
+    initial begin
+        // Test cases to verify the modulo 3 computation
+        num = 4'd0; #1;
+        assert(mod3 == 2'b00) else $error(""Test failed for num = %0d"", num);
+        
+        num = 4'd1; #1;
+        assert(mod3 == 2'b01) else $error(""Test failed for num = %0d"", num);
+        
+        num = 4'd2; #1;
+        assert(mod3 == 2'b10) else $error(""Test failed for num = %0d"", num);
+        
+        num = 4'd3; #1;
+        assert(mod3 == 2'b00) else $error(""Test failed for num = %0d"", num);
+        
+        num = 4'd4; #1;
+        assert(mod3 == 2'b01) else $error(""Test failed for num = %0d"", num);
+        
+        num = 4'd5; #1;
+        assert(mod3 == 2'b00) else $error(""Test failed for num = %0d"", num);
+        
+        // Add more test cases as needed to cover different inputs
+        
+        $display(""All tests passed"");
+    end
+endmodule
+    endmodule;","sv_file.sv:13:20-24: syntax error at token ""input""
+sv_file.sv:15:22: syntax error at token ""(""
+sv_file.sv:16:22: syntax error at token ""(""
+sv_file.sv:17:22: syntax error at token ""(""
+sv_file.sv:23:17-19: syntax error at token ""num""
+sv_file.sv:53:5-13: syntax error at token ""endmodule""
+",44.108176946640015
+"module case17(input logic [1:0] state, output logic [1:0] next);
+    always_comb begin
+        case(state)
+            2'b00: next = 2'b01;
+            2'b01: next = 2'b10;
+            2'b10: next = 2'b11;
+            2'b11: next = 2'b00;
+            default: next = 2'b00; // safe default
+        endcase
+    end
+endmodule
+"," module case17_assertions (input logic [1:0] state, output logic [1:0] next);
+    property test_next_state;
+    @(posedge clk) disable iff (!resetn)
+    state == 2'b11 |-> ##[1:4] (state == 2'b00);
+endproperty
+assert property (test_next_state)
+    else $error(""Test failed"");
+    endmodule;",OK,5.886408567428589
+"module case18(input logic [3:0] key, output logic [6:0] seg);
+    always_comb begin
+        case(key)
+            4'd0: seg = 7'b0111111;
+            4'd1: seg = 7'b0000110;
+            4'd2: seg = 7'b1011011;
+            4'd3: seg = 7'b1001111;
+            default: seg = 7'b0000000;
+        endcase
+    end
+endmodule
+"," module case18_assertions (input logic [3:0] key, output logic [6:0] seg);
+    module case18(input logic [3:0] key, output logic [6:0] seg);
+    always_comb begin
+        case(key)
+            4'd0: seg = 7'b0111111;
+            4'd1: seg = 7'b0000110;
+            4'd2: seg = 7'b1011011;
+            4'd3: seg = 7'b1001111;
+            default: seg = 7'b0000000;
+        endcase
+    end
+endmodule
+
+// Property Assertion to test the module
+property prop_seg_mapping;
+    @(posedge clk) disable iff (!resetn)
+    $fell(key) |-> ##1 (key == 4'd0 && seg == 7'b0111111) ||
+                    (key == 4'd1 && seg == 7'b0000110) ||
+                    (key == 4'd2 && seg == 7'b1011011) ||
+                    (key == 4'd3 && seg == 7'b1001111);
+endproperty
+
+// Assuming a clock and reset signal are defined elsewhere in the testbench
+logic clk;
+logic resetn;
+
+assert property(prop_seg_mapping) else $error(""Test failed: Invalid segment mapping"");
+    endmodule;",OK,40.66827344894409
+"module case21(input logic [1:0] counter, input logic reset, output logic [1:0] next_count);
+    always_comb begin
+        case({reset, counter})
+            3'b100: next_count = 2'b00; // reset active
+            3'b000: next_count = 2'b01;
+            3'b001: next_count = 2'b10;
+            3'b010: next_count = 2'b11;
+            3'b011: next_count = 2'b00;
+            default: next_count = 2'b00;
+        endcase
+    end
+endmodule
+"," module case21_assertions (input logic [1:0] counter, input logic reset, output logic [1:0] next_count);
+    property case21_prop;
+    @(posedge clk) disable iff (reset)
+    $past(next_count, 1) == 2'b01 || next_count == 2'b10;
+endproperty
+
+assert property (case21_prop) else $error(""Property failed: unexpected value of next_count"");
+    endmodule;",OK,6.5512001514434814
+"module case27(input logic [3:0] temp, output logic warning);
+    always_comb begin
+        case(temp)
+            4'd0, 4'd1, 4'd2, 4'd3, 4'd4, 4'd5: warning = 0;
+            4'd6, 4'd7, 4'd8, 4'd9, 4'd10: warning = 1;
+            default: warning = 0;
+        endcase
+    end
+endmodule
+"," module case27_assertions (input logic [3:0] temp, output logic warning);
+    property case27_prop(input logic [3:0] temp);
+    !warning |-> (temp inside {4'd6, 4'd7, 4'd8, 4'd9, 4'd10} iff warning == 1);
+endproperty
+
+assert property (@(posedge clock) case27_prop(temp))
+    else $error(""Test failed: case27 does not meet the expected behavior."");
+    endmodule;","sv_file.sv:2:26-30: syntax error at token ""input""
+sv_file.sv:4:1-11: syntax error at token ""endproperty""
+",14.304521322250366
+"module case31(input logic [3:0] value, output logic flag);
+    always_comb begin
+        case(value)
+            4'd1, 4'd3, 4'd5, 4'd7: flag = 1; // odd numbers
+            default: flag = 0;
+        endcase
+    end
+endmodule
+"," module case31_assertions (input logic [3:0] value, output logic flag);
+    module case31(input logic [3:0] value, output logic flag);
+    always_comb begin
+        case(value)
+            4'd1, 4'd3, 4'd5, 4'd7: flag = 1; // odd numbers
+            default: flag = 0;
+        endcase
+    end
+endmodule
+
+// Property Assertion
+property prop_odd_numbers is
+    disable iff (!($past(value) inside {4'd1, 4'd3, 4'd5, 4'd7}))
+    !flag |-> flag == 1;
+endproperty
+
+assert property (prop_odd_numbers)
+    else $error(""Test failed: flag is not set to 1 for odd numbers."");
+    endmodule;","sv_file.sv:12:27-28: syntax error at token ""is""
+sv_file.sv:15:1-11: syntax error at token ""endproperty""
+",27.15455722808838
+"module case32(input logic [3:0] temp, output logic warning);
+    always_comb begin
+        case(temp)
+            4'd0: warning = 0;
+            4'd1: warning = 0;
+            4'd2: warning = 0;
+            4'd3: warning = 0;
+            4'd4, 4'd5, 4'd6: warning = 1; // range 4 to 6
+            default: warning = 0;
+        endcase
+    end
+endmodule
+"," module case32_assertions (input logic [3:0] temp, output logic warning);
+    module case32(input logic [3:0] temp, output logic warning);
+    always_comb begin
+        case(temp)
+            4'd0: warning = 0;
+            4'd1: warning = 0;
+            4'd2: warning = 0;
+            4'd3: warning = 0;
+            4'd4, 4'd5, 4'd6: warning = 1; // range 4 to 6
+            default: warning = 0;
+        endcase
+    end
+endmodule
+
+// Property assertion to test the module
+property case32_prop;
+    @(posedge clk) disable iff (!resetn)
+    (temp inside {[4'd4 : 4'd6} |-> warning == 1);
+endproperty
+
+assert property (case32_prop)
+    else $error(""Test failed: Condition not met"");
+    endmodule;","sv_file.sv:18:31: syntax error at token ""}""
+sv_file.sv:19:1-11: syntax error at token ""endproperty""
+",21.146955728530884
+"module case34(input logic [3:0] level, output logic alarm);
+    always_comb begin
+        case(level)
+            4'd0, 4'd1, 4'd2: alarm = 0;   // safe range
+            4'd3, 4'd4, 4'd5, 4'd6: alarm = 1; // warning range
+            4'd7, 4'd8, 4'd9, 4'd10: alarm = 1; // critical range
+            default: alarm = 0;
+        endcase
+    end
+endmodule
+"," module case34_assertions (input logic [3:0] level, output logic alarm);
+    module case34(input logic [3:0] level, output logic alarm);
+    always_comb begin
+        case(level)
+            4'd0, 4'd1, 4'd2: alarm = 0;   // safe range
+            4'd3, 4'd4, 4'd5, 4'd6: alarm = 1; // warning range
+            4'd7, 4'd8, 4'd9, 4'd10: alarm = 1; // critical range
+            default: alarm = 0;
+        endcase
+    end
+endmodule
+
+// Property Assertion to test the module
+property prop_alarm(level);
+    logic [3:0] lv = level;
+    (lv == 4'd0 || lv == 4'd1 || lv == 4'd2) |-> (alarm == 0); // safe range check
+    ((lv == 4'd3 || lv == 4'd4 || lv == 4'd5 || lv == 4'd6)) |-> (alarm == 1); // warning range check
+    ((lv == 4'd7 || lv == 4'd8 || lv == 4'd9 || lv == 4'd10)) |-> (alarm == 1); // critical range check
+endproperty
+
+assert property (prop_alarm(level))
+    else $error(""Test failed: alarm logic does not match expected behavior."");
+    endmodule;","sv_file.sv:16:5: syntax error at token ""(""
+sv_file.sv:17:5: syntax error at token ""(""
+sv_file.sv:19:1-11: syntax error at token ""endproperty""
+",35.3909797668457
+"module case35(input logic [3:0] digit, output logic display);
+    always_comb begin
+        case(digit)
+            4'd0, 4'd2, 4'd4, 4'd6, 4'd8: display = 1; // even numbers
+            4'd1, 4'd3, 4'd5, 4'd7, 4'd9: display = 0; // odd numbers
+            default: display = 0;
+        endcase
+    end
+endmodule
+"," module case35_assertions (input logic [3:0] digit, output logic display);
+    property p_test_display(input logic [3:0] digit);
+    case(digit)
+        4'd0, 4'd2, 4'd4, 4'd6, 4'd8: assert property (display == 1) else $error(""Expected display=1 for even numbers"");
+        4'd1, 4'd3, 4'd5, 4'd7, 4'd9: assert property (display == 0) else $error(""Expected display=0 for odd numbers"");
+        default: assert property (display == 0) else $error(""Unexpected digit should result in display=0"");
+    endcase
+endproperty
+
+assert property (p_test_display(digit)) else $error(""Failed p_test_display assertion"");
+    endmodule;","sv_file.sv:2:29-33: syntax error at token ""input""
+sv_file.sv:6:107: syntax error at token "";""
+sv_file.sv:11:5-13: syntax error at token ""endmodule""
+sv_file.sv:11:15: syntax error (unexpected EOF)
+",11.086743593215942
+"module case40(input logic [3:0] req, output logic [1:0] grant);
+    always_comb begin
+        case(req)
+            4'd1, 4'd2: grant = 2'b00; // low priority
+            4'd3, 4'd4, 4'd5: grant = 2'b01; // medium priority
+            4'd6, 4'd7: grant = 2'b10; // high priority
+            4'd8, 4'd9: grant = 2'b11; // highest priority
+            default: grant = 2'b00;
+        endcase
+    end
+endmodule
+"," module case40_assertions (input logic [3:0] req, output logic [1:0] grant);
+    property p_grant_priority(input logic [3:0] req);
+    bit [1:0] expected_grant;
+    case (req)
+        4'd1, 4'd2: expected_grant = 2'b00; // low priority
+        4'd3, 4'd4, 4'd5: expected_grant = 2'b01; // medium priority
+        4'd6, 4'd7: expected_grant = 2'b10; // high priority
+        4'd8, 4'd9: expected_grant = 2'b11; // highest priority
+        default: expected_grant = 2'b00;
+    endcase
+
+    // Assert that the grant signal matches the expected priority
+    assert property (@(posedge clk) disable iff (!resetn) (grant == expected_grant))
+        else $error(""Invalid request %d, expected grant %b but got %b"", req, expected_grant, grant);
+endproperty
+    endmodule;","sv_file.sv:2:31-35: syntax error at token ""input""
+sv_file.sv:5:36: syntax error at token ""=""
+sv_file.sv:6:42: syntax error at token ""=""
+sv_file.sv:7:36: syntax error at token ""=""
+sv_file.sv:8:36: syntax error at token ""=""
+sv_file.sv:9:33: syntax error at token ""=""
+sv_file.sv:15:1-11: syntax error at token ""endproperty""
+sv_file.sv:16:15: syntax error (unexpected EOF)
+",13.477953910827637
+"module case41(input int temp, output logic warning);
+    always_comb begin
+        case(temp)
+            0:10: warning = 0;   // safe
+            11:20: warning = 1;  // moderate
+            21:30: warning = 1;  // high
+            default: warning = 1; // out of range
+        endcase
+    end
+Endmodule"," module case41_assertions (input int temp, output logic warning);
+    property case41_test;
+  @(posedge clk) disable iff (!resetn)
+    (temp >= 0 && temp <= 10) |-> (warning == 0);
+endproperty
+
+assert property (case41_test)
+  else $error(""Test failed: warning signal does not match expected value."");
+    endmodule;",OK,13.352612257003784
+"module case42(input int score, output logic [1:0] grade);
+    always_comb begin
+        case(score)
+            0:49: grade = 2'b00;   // F
+            50:69: grade = 2'b01;  // D-C
+            70:89: grade = 2'b10;  // B
+            90:100: grade = 2'b11; // A
+            default: grade = 2'b00; // invalid
+        endcase
+    end
+endmodule
+"," module case42_assertions (input int score, output logic [1:0] grade);
+    module case42_test;
+    logic [1:0] grade;
+    int score;
+
+    // Instantiate the module under test (not actual instantiation, assumed here)
+    case42 dut (.score(score), .grade(grade));
+
+    property p_check_grade is
+        @(posedge clk)  // Assuming a clock signal for timing checks
+        disable iff (!resetn)  // Assuming a reset signal
+        (score >= 0 && score <= 49) |-> (grade == 2'b00);  // F
+        (score >= 50 && score <= 69) |-> (grade == 2'b01); // D-C
+        (score >= 70 && score <= 89) |-> (grade == 2'b10); // B
+        (score >= 90 && score <= 100) |-> (grade == 2'b11); // A
+    endproperty
+
+    // Instantiate an assertion to check the property
+    assert_p_check_grade: assert property(p_check_grade)
+        else $error(""Grade assertion failed"");
+endmodule
+    endmodule;","sv_file.sv:9:28-29: syntax error at token ""is""
+sv_file.sv:13:9: syntax error at token ""(""
+sv_file.sv:14:9: syntax error at token ""(""
+sv_file.sv:16:5-15: syntax error at token ""endproperty""
+",40.21796989440918
+"module case43(input int temp, output logic [1:0] fan_speed);
+    always_comb begin
+        case(temp)
+            0:25: fan_speed = 0;   // off
+            26:50: fan_speed = 1;  // low
+            51:75: fan_speed = 2;  // medium
+            76:100: fan_speed = 3; // high
+            default: fan_speed = 0;
+        endcase
+    end
+endmodule
+"," module case43_assertions (input int temp, output logic [1:0] fan_speed);
+    module case43(input int temp, output logic [1:0] fan_speed);
+    always_comb begin
+        case(temp)
+            0:25: fan_speed = 0;   // off
+            26:50: fan_speed = 1;  // low
+            51:75: fan_speed = 2;  // medium
+            76:100: fan_speed = 3; // high
+            default: fan_speed = 0;
+        endcase
+    end
+endmodule
+
+property prop_case43(int temp) is
+    case (temp)
+        0 to 25 : assert (fan_speed == 0);
+        26 to 50 : assert (fan_speed == 1);
+        51 to 75 : assert (fan_speed == 2);
+        76 to 100: assert (fan_speed == 3);
+        default  : assert (fan_speed == 0);
+    endcase;
+endproperty
+
+assert property (prop_case43(temp)) else $error(""Test failed"");
+    endmodule;","sv_file.sv:5:15-16: syntax error at token ""25""
+sv_file.sv:6:16-17: syntax error at token ""50""
+sv_file.sv:7:16-17: syntax error at token ""75""
+sv_file.sv:8:16-18: syntax error at token ""100""
+sv_file.sv:14:32-33: syntax error at token ""is""
+sv_file.sv:17:9-10: syntax error at token ""26""
+sv_file.sv:18:9-10: syntax error at token ""51""
+sv_file.sv:19:9-10: syntax error at token ""76""
+sv_file.sv:20:18: syntax error at token "":""
+sv_file.sv:22:1-11: syntax error at token ""endproperty""
+",21.301307201385498
+"module case44(input int load, output logic [2:0] power);
+    always_comb begin
+        case(load)
+            0:10: power = 3'b001;   // very low
+            11:20: power = 3'b010;  // low
+            21:50: power = 3'b100;  // medium
+            51:100: power = 3'b111; // high
+            default: power = 3'b000;
+        endcase
+    end
+endmodule
+"," module case44_assertions (input int load, output logic [2:0] power);
+    module case44(input int load, output logic [2:0] power);
+    always_comb begin
+        case(load)
+            0:10: power = 3'b001;   // very low
+            11:20: power = 3'b010;  // low
+            21:50: power = 3'b100;  // medium
+            51:100: power = 3'b111; // high
+            default: power = 3'b000;
+        endcase
+    end
+endmodule
+
+property prop_power_assignment(int load);
+    logic [2:0] power;
+    case44 i (.*, .load(load), .power(power));
+    // Assertions to check the correctness of power assignment
+    assert property (@(posedge clk) disable iff (!resetn) 
+        (load >= 0 && load <= 10 ? power == 3'b001 :
+         load >= 11 && load <= 20 ? power == 3'b010 :
+         load >= 21 && load <= 50 ? power == 3'b100 :
+         load >= 51 && load <= 100 ? power == 3'b111 :
+         power == 3'b000))
+        else $error(""Power assignment does not match the expected value for load=%0d"", load);
+endproperty
+    endmodule;","sv_file.sv:5:15-16: syntax error at token ""10""
+sv_file.sv:6:16-17: syntax error at token ""20""
+sv_file.sv:7:16-17: syntax error at token ""50""
+sv_file.sv:8:16-18: syntax error at token ""100""
+sv_file.sv:16:14: syntax error at token ""(""
+sv_file.sv:25:1-11: syntax error at token ""endproperty""
+sv_file.sv:26:15: syntax error (unexpected EOF)
+",29.13988184928894
+"module case48(input int hp, output logic [1:0] status);
+    always_comb begin
+        case(hp)
+            0:25: status = 2'b00;   // critical
+            26:50: status = 2'b01;  // weak
+            51:75: status = 2'b10;  // healthy
+            76:100: status = 2'b11; // full
+            default: status = 2'b00;
+        endcase
+    end
+endmodule
+"," module case48_assertions (input int hp, output logic [1:0] status);
+    module case48(input int hp, output logic [1:0] status);
+    always_comb begin
+        case(hp)
+            0:25: status = 2'b00;   // critical
+            26:50: status = 2'b01;  // weak
+            51:75: status = 2'b10;  // healthy
+            76:100: status = 2'b11; // full
+            default: status = 2'b00;
+        endcase
+    end
+endmodule
+
+property prop_case48(int hp) {
+    case (hp)
+        0 to 25: assert property (@(posedge clk) disable iff (!resetn) (status == 2'b00));
+        26 to 50: assert property (@(posedge clk) disable iff (!resetn) (status == 2'b01));
+        51 to 75: assert property (@(posedge clk) disable iff (!resetn) (status == 2'b10));
+        76 to 100: assert property (@(posedge clk) disable iff (!resetn) (status == 2'b11));
+        default: assert property (@(posedge clk) disable iff (!resetn) (status == 2'b00));
+    endcase
+}
+    endmodule;","sv_file.sv:5:15-16: syntax error at token ""25""
+sv_file.sv:6:16-17: syntax error at token ""50""
+sv_file.sv:7:16-17: syntax error at token ""75""
+sv_file.sv:8:16-18: syntax error at token ""100""
+sv_file.sv:14:30: syntax error at token ""{""
+sv_file.sv:17:9-10: syntax error at token ""26""
+sv_file.sv:18:9-10: syntax error at token ""51""
+sv_file.sv:19:9-10: syntax error at token ""76""
+sv_file.sv:20:16: syntax error at token "":""
+sv_file.sv:21:5-11: syntax error at token ""endcase""
+sv_file.sv:23:15: syntax error (unexpected EOF)
+",26.692636489868164
+"module fsm51(
+    input logic clk, reset,
+    output logic state_out
+);
+    typedef enum logic [0:0] {S0, S1} state_t;
+    state_t state, next_state;
+
+    // Next-state logic
+    always_comb begin
+        case(state)
+            S0: next_state = S1;
+            S1: next_state = S0;
+            default: next_state = S0;
+        endcase
+    end
+
+    // State register
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            state <= S0;
+        else
+            state <= next_state;
+    end
+
+    // Output logic (Moore)
+    assign state_out = (state == S1);
+endmodule
+"," module fsm51_assertions (input logic clk, reset,
+    output logic state_out);
+    property p_fsm51(clk, reset);
+    @(posedge clk) disable iff (reset)
+        $fell(reset) |-> ##[1:2] ($past(state, 2) == S1);
+endproperty
+
+assert property (p_fsm51(clk, reset)) else $error(""FSM assertion failed"");
+    endmodule;",OK,6.033515930175781
+"module fsm52(
+    input logic clk, reset, in_bit,
+    output logic detected
+);
+    typedef enum logic [1:0] {IDLE, S1, S2} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            IDLE: next_state = (in_bit) ? S1 : IDLE;
+            S1:   next_state = (in_bit) ? S2 : IDLE;
+            S2:   next_state = (in_bit) ? S2 : IDLE;
+            default: next_state = IDLE;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= IDLE;
+        else state <= next_state;
+    end
+
+    assign detected = (state == S2);
+endmodule
+"," module fsm52_assertions (input logic clk, reset, in_bit,
+    output logic detected);
+    property p_fsm52;
+    @(posedge clk) disable iff (reset)
+    $fell(reset) |-> ##1 state == IDLE && !detected;
+endproperty
+
+assert property (p_fsm52)
+else $error(""FSM assertion failed"");
+    endmodule;",OK,5.338906526565552
+"module fsm53(
+    input logic clk, reset,
+    output logic [2:0] light
+);
+    typedef enum logic [1:0] {RED, GREEN, YELLOW} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            RED:    next_state = GREEN;
+            GREEN:  next_state = YELLOW;
+            YELLOW: next_state = RED;
+            default: next_state = RED;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= RED;
+        else state <= next_state;
+    end
+
+    always_comb begin
+        case(state)
+            RED: light = 3'b100;
+            GREEN: light = 3'b001;
+            YELLOW: light = 3'b010;
+            default: light = 3'b100;
+        endcase
+    end
+endmodule
+"," module fsm53_assertions (input logic clk, reset,
+    output logic [2:0] light);
+    module fsm53_test;
+    logic clk, reset;
+    logic [2:0] light;
+
+    // Instantiate the module under test
+    fsm53 dut (.*);
+
+    // Define expected light pattern for each state
+    function automatic logic [2:0] expected_light(state_t state);
+        case(state)
+            RED:    return 3'b100;
+            GREEN:  return 3'b001;
+            YELLOW: return 3'b010;
+            default: return 3'b100;
+        endcase
+    endfunction
+
+    // Property assertion to check the light signal
+    property p_light_assertion;
+        @(posedge clk) disable iff (reset)
+        ($past(state) == RED && $past(next_state) == GREEN ||
+         $past(state) == GREEN && $past(next_state) == YELLOW ||
+         $past(state) == YELLOW && $past(next_state) == RED) |->
+        (light == expected_light($past(state)));
+    endproperty
+
+    // Assert the property
+    assert property (p_light_assertion)
+        else $error(""Light signal does not match expected pattern"");
+endmodule
+    endmodule;",OK,34.267584800720215
+"module fsm54(
+    input logic clk, reset,
+    output logic [1:0] count
+);
+    typedef enum logic [1:0] {C0, C1, C2, C3} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            C0: next_state = C1;
+            C1: next_state = C2;
+            C2: next_state = C3;
+            C3: next_state = C0;
+            default: next_state = C0;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= C0;
+        else state <= next_state;
+    end
+
+    assign count = state;
+endmodule
+"," module fsm54_assertions (input logic clk, reset,
+    output logic [1:0] count);
+    module fsm54_test;
+    logic clk, reset;
+    logic [1:0] count;
+
+    // Instantiate the module under test
+    fsm54 dut (.*);
+
+    // Define the clock and reset signals for the testbench
+    initial begin
+        clk = 0;
+        forever #5 clk = ~clk;
+    end
+
+    initial begin
+        reset = 1;
+        repeat(2) @(posedge clk);
+        reset = 0;
+    end
+
+    // Property assertion to test the FSM
+    property fsm_sequence;
+        @(posedge clk) disable iff (reset)
+        state_t next_state = dut.next_state;
+        case(next_state)
+            C0: assert (count == 2'b00);
+            C1: assert (count == 2'b01);
+            C2: assert (count == 2'b10);
+            C3: assert (count == 2'b11);
+        endcase
+    endproperty
+
+    // Assert the property
+    assert property (fsm_sequence)
+        else $error(""FSM assertion failed"");
+endmodule
+    endmodule;","sv_file.sv:24:9: syntax error at token ""@""
+sv_file.sv:27:24: syntax error at token ""(""
+sv_file.sv:28:24: syntax error at token ""(""
+sv_file.sv:29:24: syntax error at token ""(""
+sv_file.sv:30:24: syntax error at token ""(""
+sv_file.sv:37:1-9: syntax error at token ""endmodule""
+sv_file.sv:38:15: syntax error (unexpected EOF)
+",34.632694482803345
+"module fsm55(
+    input logic clk, reset, code_entered,
+    output logic unlock
+);
+    typedef enum logic [1:0] {LOCKED, WAIT, UNLOCKED} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            LOCKED: next_state = code_entered ? WAIT : LOCKED;
+            WAIT:   next_state = code_entered ? UNLOCKED : LOCKED;
+            UNLOCKED: next_state = LOCKED;
+            default: next_state = LOCKED;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= LOCKED;
+        else state <= next_state;
+    end
+
+    assign unlock = (state == UNLOCKED);
+endmodule
+"," module fsm55_assertions (input logic clk, reset, code_entered,
+    output logic unlock);
+    module fsm55_test;
+    logic clk, reset, code_entered;
+    wire unlock;
+
+    // Instantiate the FSM module
+    fsm55 dut (.*);
+
+    // Define properties for testing
+    property p1;
+        @(posedge clk) disable iff (reset)
+        !code_entered |-> ##[1:2] LOCKED;
+    endproperty
+
+    property p2;
+        @(posedge clk) disable iff (reset)
+        code_entered && state == LOCKED |-> ##[1:2] WAIT;
+    endproperty
+
+    property p3;
+        @(posedge clk) disable iff (reset)
+        code_entered && state == LOCKED && next_state == WAIT |-> ##[1:2] UNLOCKED;
+    endproperty
+
+    property p4;
+        @(posedge clk) disable iff (reset)
+        unlock |-> (state == UNLOCKED);
+    endproperty
+
+    // Instantiate the monitor for assertion coverage
+    covergroup state_cov;
+        option.per_instance = 1;
+        coverpoint dut.state {
+            bins LOCKED = {LOCKED};
+            bins WAIT = {WAIT};
+            bins UNLOCKED = {UNLOCKED};
+        }
+    endgroup
+
+    initial begin
+        // Initialize signals for testing
+        clk = 0;
+        reset = 1;
+        code_entered = 0;
+
+        // De-assert reset and apply test pattern
+        #5 reset = 0;
+
+        // Test sequence: enter valid code to unlock the system
+        repeat (3) begin
+            @(posedge clk) code_entered = 1;
+            @(posedge clk) code_entered = 0;
+        end
+
+        // Stay unlocked until a new reset or another code entry
+        repeat (2) begin
+            @(posedge clk);
+        end
+
+        // Test with invalid code to keep the system locked
+        repeat (3) begin
+            @(posedge clk) code_entered = 1;
+            @(posedge clk) code_entered = 0;
+        end
+    end
+
+    // Generate clock signal
+    always #5 clk = ~clk;
+
+    // Assertion check
+    assert property (p1) else $error(""Failed p1: Unexpected transition from LOCKED to UNLOCKED without a valid code entry."");
+    assert property (p2) else $error(""Failed p2: Failed to transition from LOCKED to WAIT upon code_entered assertion."");
+    assert property (p3) else $error(""Failed p3: Failed to transition from WAIT to UNLOCKED upon subsequent code_entered assertion."");
+    assert property (p4) else $error(""Failed p4: Unlocked state does not persist until a new reset or another code entry."");
+endmodule
+    endmodule;",OK,58.75050711631775
+"module fsm56(
+    input logic clk, reset, coin,
+    output logic dispense
+);
+    typedef enum logic [1:0] {S0, S1, S2} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            S0: next_state = coin ? S1 : S0;
+            S1: next_state = coin ? S2 : S1;
+            S2: next_state = S0;
+            default: next_state = S0;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= S0;
+        else state <= next_state;
+    end
+
+    assign dispense = (state == S2);
+endmodule
+"," module fsm56_assertions (input logic clk, reset, coin,
+    output logic dispense);
+    module fsm56_test;
+    logic clk;
+    logic reset;
+    logic coin;
+    logic dispense;
+
+    // Instantiate the module under test
+    fsm56 dut (.*);
+
+    // Define properties for assertion
+    property p_fsm56;
+        @(posedge clk) disable iff (reset)  // Ensure reset is handled properly
+            (state == S2) |-> ##1 dispense;  // Dispense should be high one cycle after state transitions to S2
+    endproperty
+
+    // Instantiate the assertion
+    assert property (p_fsm56)
+        else $error(""Assertion failed: fsm56 property not satisfied"");
+endmodule
+    endmodule;",OK,25.796377420425415
+"module fsm57(
+    input logic clk, reset, start,
+    output logic a, b
+);
+    typedef enum logic [1:0] {IDLE, STATE1, STATE2} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            IDLE: next_state = start ? STATE1 : IDLE;
+            STATE1: next_state = STATE2;
+            STATE2: next_state = IDLE;
+            default: next_state = IDLE;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= IDLE;
+        else state <= next_state;
+    end
+
+    always_comb begin
+        case(state)
+            IDLE:   begin a=0; b=0; end
+            STATE1: begin a=1; b=0; end
+            STATE2: begin a=0; b=1; end
+            default: begin a=0; b=0; end
+        endcase
+    end
+endmodule
+"," module fsm57_assertions (input logic clk, reset, start,
+    output logic a, b);
+    module fsm57_test;
+    logic clk, reset, start;
+    logic a, b;
+
+    // Instantiate the module under test
+    fsm57 dut (.*);
+
+    // Define properties for assertion
+    property p_output_correct;
+        @(posedge clk) disable iff (reset)
+        ($fell(start) && state == STATE1 |-> ##[1:2] $past(a, 1) == 1 && $past(b, 1) == 0);
+    endproperty
+
+    // Instantiate the assertion
+    assert property (p_output_correct)
+        else $error(""FSM output incorrect"");
+endmodule
+    endmodule;",OK,25.66148328781128
+"module fsm59(
+    input logic clk, reset, trigger,
+    output logic done
+);
+    typedef enum logic [1:0] {IDLE, BUSY, DONE} state_t;
+    state_t state, next_state;
+    logic [3:0] counter;
+
+    always_comb begin
+        case(state)
+            IDLE:   next_state = trigger ? BUSY : IDLE;
+            BUSY:   next_state = (counter==4'd10) ? DONE : BUSY;
+            DONE:   next_state = IDLE;
+            default: next_state = IDLE;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) begin
+            state <= IDLE;
+            counter <= 0;
+        end else begin
+            state <= next_state;
+            if(state==BUSY) counter <= counter+1;
+            else counter <= 0;
+        end
+    end
+
+    assign done = (state==DONE);
+endmodule
+"," module fsm59_assertions (input logic clk, reset, trigger,
+    output logic done);
+    property fsm_test;
+    @(posedge clk) disable iff (reset)
+    state == DONE |-> ##[1:2] state == IDLE;
+endproperty
+
+assert_final : assert property(fsm_test)
+  else $error(""FSM did not return to IDLE after DONE."");
+    endmodule;",OK,10.45077657699585
+"module fsm60(
+    input logic clk, reset, in_bit,
+    output logic detected
+);
+    typedef enum logic [1:0] {S0, S1, S2} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            S0: next_state = in_bit ? S1 : S0;
+            S1: next_state = in_bit ? S2 : S0;
+            S2: next_state = in_bit ? S2 : S0;
+            default: next_state = S0;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= S0;
+        else state <= next_state;
+    end
+
+    always_comb begin
+        case({state, in_bit})
+            {S2,1'b0}: detected = 1; // pattern detected
+            default: detected = 0;
+        endcase
+    end
+endmodule
+"," module fsm60_assertions (input logic clk, reset, in_bit,
+    output logic detected);
+    property p_fsm60;
+    @(posedge clk) disable iff (reset)
+    $fell(in_bit) |-> ##1 detected == 1;
+endproperty
+
+assert_p_fsm60: assert property (p_fsm60)
+    else begin
+        $error(""FSM pattern detection failed"");
+    end
+    endmodule;",OK,14.187088251113892
+"module case61(
+    input logic sel,
+    input logic a, b,
+    output logic y
+);
+    always_comb begin
+        case(sel)
+            1'b0: y = a;
+            1'b1: y = b;
+        endcase
+    end
+endmodule
+"," module case61_assertions (input logic sel,
+    input logic a, b,
+    output logic y);
+    module case61_test;
+    logic sel, a, b, y;
+
+    // Instantiate the module for testbench purposes
+    case61 uut (
+        .sel(sel),
+        .a(a),
+        .b(b),
+        .y(y)
+    );
+
+    // Property assertion to check the expected behavior
+    property prop_check;
+        @(posedge sel) disable iff (!sel) y == a |-> (sel == 1'b0);
+    endproperty
+
+    // Assert property if needed, for example in a testbench or formal verification environment
+    assert property (prop_check) else $error(""Test failed: Property assertion violated"");
+endmodule
+    endmodule;",OK,25.87607479095459
+"module case62(
+    input logic [1:0] sel,
+    input logic [3:0] data,
+    output logic y
+);
+    always_comb begin
+        case(sel)
+            2'b00: y = data[0];
+            2'b01: y = data[1];
+            2'b10: y = data[2];
+            2'b11: y = data[3];
+        endcase
+    end
+endmodule
+"," module case62_assertions (input logic [1:0] sel,
+    input logic [3:0] data,
+    output logic y);
+    module case62(
+    input logic [1:0] sel,
+    input logic [3:0] data,
+    output logic y
+);
+    always_comb begin
+        case(sel)
+            2'b00: y = data[0];
+            2'b01: y = data[1];
+            2'b10: y = data[2];
+            2'b11: y = data[3];
+        endcase
+    end
+endmodule
+
+property prop_case62;
+    @(posedge clk) disable iff (!resetn)
+    (sel == 2'b00 && y === data[0]) ||
+    (sel == 2'b01 && y === data[1]) ||
+    (sel == 2'b10 && y === data[2]) ||
+    (sel == 2'b11 && y === data[3]);
+endproperty
+    endmodule;",OK,21.930732488632202
+"module case63(
+    input logic [1:0] op,
+    input logic [3:0] a, b,
+    output logic [3:0] result
+);
+    always_comb begin
+        case(op)
+            2'b00: result = a + b;
+            2'b01: result = a - b;
+            2'b10: result = a & b;
+            2'b11: result = a | b;
+        endcase
+    End
+endmodule
+"," module case63_assertions (input logic [1:0] op,
+    input logic [3:0] a, b,
+    output logic [3:0] result);
+    module case63(
+    input logic [1:0] op,
+    input logic [3:0] a, b,
+    output logic [3:0] result
+);
+    always_comb begin
+        case(op)
+            2'b00: result = a + b;
+            2'b01: result = a - b;
+            2'b10: result = a & b;
+            2'b11: result = a | b;
+        endcase
+    end
+endmodule
+
+// Property Assertion
+property prop_case63(input logic [1:0] op, input logic [3:0] a, input logic [3:0] b);
+    case (op)
+        2'b00: assert property ((a + b) == result) else $error(""Failed for 2'b00"");
+        2'b01: assert property ((a - b) == result) else $error(""Failed for 2'b01"");
+        2'b10: assert property ((a & b) == result) else $error(""Failed for 2'b10"");
+        2'b11: assert property ((a | b) == result) else $error(""Failed for 2'b11"");
+    endcase
+endproperty
+
+// Testbench to instantiate the module and check the property
+module testbench;
+    logic [1:0] op;
+    logic [3:0] a, b;
+    logic [3:0] result;
+
+    case63 uut (.*); // Instantiate the unit under test
+
+    initial begin
+        // Test cases
+        op = 2'b00; a = 4'd10; b = 4'd5; #1; // Expected result: 15
+        op = 2'b01; a = 4'd10; b = 4'd5; #1; // Expected result: 5
+        op = 2'b10; a = 4'd10; b = 4'd5; #1; // Expected result: 10 & 5 = 0 (binary)
+        op = 2'b11; a = 4'd10; b = 4'd5; #1; // Expected result: 10 | 5 = 15
+
+        // Check assertions
+        assert property (@(posedge clk) prop_case63(op, a, b)) else $error(""Assertion failed"");
+    end
+endmodule
+    endmodule;","sv_file.sv:20:22-26: syntax error at token ""input""
+sv_file.sv:25:83: syntax error at token "";""
+sv_file.sv:31:17-18: syntax error at token ""op""
+sv_file.sv:48:5-13: syntax error at token ""endmodule""
+",43.50271821022034
+"module case64(
+    input logic [3:0] req,
+    output logic [1:0] grant
+);
+    always_comb begin
+        case(req)
+            4'b0001: grant = 2'b00;
+            4'b0010: grant = 2'b01;
+            4'b0100: grant = 2'b10;
+            4'b1000: grant = 2'b11;
+            default: grant = 2'b00;
+        endcase
+    end
+endmodule
+"," module case64_assertions (input logic [3:0] req,
+    output logic [1:0] grant);
+    property case64_test;
+    @(posedge clk) disable iff (!rst_n)
+    req == 4'b0001 |-> ##[1:2] grant == 2'b00;
+endproperty
+
+assert property (case64_test)
+else $error(""Test failed"");
+    endmodule;",OK,16.44596552848816
+"module case65(
+    input logic [3:0] val,
+    output logic match
+);
+    always_comb begin
+        case(val)
+            4'd1, 4'd3, 4'd5, 4'd7: match = 1; // selected values
+            default: match = 0;
+        endcase
+    end
+endmodule
+"," module case65_assertions (input logic [3:0] val,
+    output logic match);
+    module case65_test;
+    logic [3:0] val;
+    logic match;
+
+    // Instantiate the module under test
+    case65 uut (
+        .val(val),
+        .match(match)
+    );
+
+    // Property assertion to check the functionality
+    property p_check_match;
+        @(posedge clk) disable iff (!resetn)
+        val inside {4'd1, 4'd3, 4'd5, 4'd7} |-> (match == 1);
+    endproperty
+
+    // Instantiate the assertion with a clock and reset
+    assert property (@(posedge clk) disable iff (!resetn) p_check_match)
+        else $error(""Assertion failed: match is not correctly set based on val"");
+endmodule
+    endmodule;",OK,36.421682357788086
+"module case67(
+    input logic [1:0] gray,
+    output logic [1:0] bin
+);
+    always_comb begin
+        case(gray)
+            2'b00: bin = 2'b00;
+            2'b01: bin = 2'b01;
+            2'b11: bin = 2'b10;
+            2'b10: bin = 2'b11;
+        endcase
+    end
+endmodule
+"," module case67_assertions (input logic [1:0] gray,
+    output logic [1:0] bin);
+    property case67_prop(input logic [1:0] gray, output logic [1:0] bin);
+    disable iff (!(|gray)) // Ensure that gray is not all zeros to avoid undefined behavior
+    (bin == 2'b00) |-> (gray == 2'b00);
+    (bin == 2'b01) |-> (gray == 2'b01);
+    (bin == 2'b10) |-> (gray == 2'b10);
+    (bin == 2'b11) |-> (gray == 2'b11);
+endproperty
+
+assert property (case67_prop(gray, bin))
+else $error(""Test failed: Property assertion for case67 did not hold"");
+    endmodule;","sv_file.sv:3:26-30: syntax error at token ""input""
+sv_file.sv:4:5-11: syntax error at token ""disable""
+sv_file.sv:6:5: syntax error at token ""(""
+sv_file.sv:7:5: syntax error at token ""(""
+sv_file.sv:9:1-11: syntax error at token ""endproperty""
+",11.013433456420898
+"module case68(
+    input logic [3:0] num,
+    output logic even
+);
+    always_comb begin
+        case(num[0])
+            1'b0: even = 1;
+            1'b1: even = 0;
+        endcase
+    end
+endmodule
+"," module case68_assertions (input logic [3:0] num,
+    output logic even);
+    module case68_test;
+    logic [3:0] num;
+    logic even;
+
+    // Instantiate the module under test
+    case68 uut (
+        .num(num),
+        .even(even)
+    );
+
+    // Property assertion to check if 'even' is correct based on 'num'
+    property prop_even;
+        @(posedge num) disable iff (!(|num)) even == 1;
+    endproperty
+
+    assert property (prop_even) else $error(""Test failed: even signal is incorrect"");
+endmodule
+    endmodule;",OK,26.161150217056274
+"module case69(
+    input logic [1:0] sel,
+    output logic [3:0] leds
+);
+    always_comb begin
+        case(sel)
+            2'b00: leds = 4'b0001;
+            2'b01: leds = 4'b0010;
+            2'b10: leds = 4'b0100;
+            2'b11: leds = 4'b1000;
+        endcase
+    end
+endmodule
+"," module case69_assertions (input logic [1:0] sel,
+    output logic [3:0] leds);
+    module case69(
+    input logic [1:0] sel,
+    output logic [3:0] leds
+);
+    always_comb begin
+        case(sel)
+            2'b00: leds = 4'b0001;
+            2'b01: leds = 4'b0010;
+            2'b10: leds = 4'b0100;
+            2'b11: leds = 4'b1000;
+        endcase
+    end
+endmodule
+
+property case69_prop;
+    @(posedge clk) disable iff (!resetn)
+    (sel == 2'b00 && leds == 4'b0001) ||
+    (sel == 2'b01 && leds == 4'b0010) ||
+    (sel == 2'b10 && leds == 4'b0100) ||
+    (sel == 2'b11 && leds == 4'b1000);
+endproperty
+
+assert property (case69_prop) else $error(""Test failed: LEDs do not match the expected values based on sel."");
+    endmodule;",OK,26.363419771194458
+"module case70(
+    input logic [1:0] op,
+    input logic [3:0] a, b,
+    output logic [7:0] result
+);
+    always_comb begin
+        case(op)
+            2'b00: result = a + b;
+            2'b01: result = a - b;
+            2'b10: result = a * b;
+            2'b11: result = a / (b != 0 ? b : 1);
+        endcase
+    end
+endmodule
+"," module case70_assertions (input logic [1:0] op,
+    input logic [3:0] a, b,
+    output logic [7:0] result);
+    module case70(
+    input logic [1:0] op,
+    input logic [3:0] a, b,
+    output logic [7:0] result
+);
+    always_comb begin
+        case(op)
+            2'b00: result = a + b;
+            2'b01: result = a - b;
+            2'b10: result = a * b;
+            2'b11: result = a / (b != 0 ? b : 1);
+        endcase
+    end
+endmodule
+
+property p_test_case70(input logic [1:0] op, input logic [3:0] a, input logic [3:0] b) {
+    case (op)
+        2'b00: assert property (@(posedge clk or negedge rstn) (result == a + b));
+        2'b01: assert property (@(posedge clk or negedge rstn) (result == a - b));
+        2'b10: assert property (@(posedge clk or negedge rstn) (result == a * b));
+        2'b11: assert property (@(posedge clk or negedge rstn) (result == a / (b != 0 ? b : 1)));
+    endcase
+}
+    endmodule;","sv_file.sv:19:24-28: syntax error at token ""input""
+sv_file.sv:22:9: syntax error at token ""2""
+sv_file.sv:23:9: syntax error at token ""2""
+sv_file.sv:24:9: syntax error at token ""2""
+sv_file.sv:25:5-11: syntax error at token ""endcase""
+sv_file.sv:27:15: syntax error (unexpected EOF)
+",29.094264268875122
+"module seq_case71(
+    input logic clk, reset,
+    output logic [1:0] count
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            count <= 2'b00;
+        else
+            case(count)
+                2'b00: count <= 2'b01;
+                2'b01: count <= 2'b10;
+                2'b10: count <= 2'b11;
+                2'b11: count <= 2'b00;
+                default: count <= 2'b00;
+            endcase
+    end
+endmodule
+"," module seq_case71_assertions (input logic clk, reset,
+    output logic [1:0] count);
+    module seq_case71(
+    input logic clk, reset,
+    output logic [1:0] count
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            count <= 2'b00;
+        else
+            case(count)
+                2'b00: count <= 2'b01;
+                2'b01: count <= 2'b10;
+                2'b10: count <= 2'b11;
+                2'b11: count <= 2'b00;
+                default: count <= 2'b00;
+            endcase
+    end
+endmodule
+
+// Property Assertion to test the module
+property seq_test;
+    @(posedge clk) disable iff (reset)
+    count == 2'b01 || count == 2'b10 || count == 2'b11 ##1
+    (count == 2'b00);
+endproperty
+
+assert property (seq_test) else $error(""Test failed: sequence not followed correctly"");
+    endmodule;",OK,30.1607346534729
+"module seq_case72(
+    input logic clk, reset,
+    output logic [1:0] state
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            state <= 2'b00;
+        else
+            case(state)
+                2'b00: state <= 2'b01;
+                2'b01: state <= 2'b10;
+                2'b10: state <= 2'b00;
+                default: state <= 2'b00;
+            endcase
+    end
+endmodule
+"," module seq_case72_assertions (input logic clk, reset,
+    output logic [1:0] state);
+    property seq_case72_prop;
+    @(posedge clk) disable iff (reset)
+    state == 2'b01 ##[1:$] state == 2'b10 ##[1:$] state == 2'b00;
+endproperty
+
+assert property (seq_case72_prop)
+else $error(""Test failed: State transition does not follow the expected sequence."");
+    endmodule;",OK,17.82510781288147
+"module seq_case73(
+    input logic clk, reset, serial_in,
+    output logic [3:0] q
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            q <= 4'b0000;
+        else
+            case(q)
+                default: q <= {q[2:0], serial_in}; // shift left
+            endcase
+    end
+endmodule
+"," module seq_case73_assertions (input logic clk, reset, serial_in,
+    output logic [3:0] q);
+    property seq_check;
+    @(posedge clk) disable iff (reset) 
+    q == {q[2:0], serial_in}; // Ensure that at every positive edge of clock, if reset is not asserted, then q should be a shifted version of its previous value plus the current serial_in.
+endproperty
+
+assert_seq_check: assert property (seq_check)
+    else $error(""Assertion failed: seq_check"");
+    endmodule;",OK,15.04615330696106
+"module seq_case74(
+    input logic clk, reset, in_bit,
+    output logic detected
+);
+    typedef enum logic [1:0] {S0, S1, S2} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            S0: next_state = in_bit ? S1 : S0;
+            S1: next_state = in_bit ? S2 : S0;
+            S2: next_state = in_bit ? S2 : S0;
+            default: next_state = S0;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= S0;
+        else state <= next_state;
+    end
+
+    assign detected = (state == S2);
+endmodule
+"," module seq_case74_assertions (input logic clk, reset, in_bit,
+    output logic detected);
+    property seq_case74_prop;
+    @(posedge clk) disable iff (reset)
+    $fell(reset) |-> ##1 $past(detected, 1) == 1'b1;
+endproperty
+
+assert property (seq_case74_prop)
+    else $error(""Test failed: detected is not high when state reaches S2"");
+    endmodule;",OK,6.409496784210205
+"module seq_case75(
+    input logic clk, reset, enable,
+    output logic [3:0] count
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            count <= 4'b0000;
+        else
+            case(enable)
+                1'b0: count <= count;      // hold
+                1'b1: count <= count + 1;  // increment
+                default: count <= 4'b0000;
+            endcase
+    end
+endmodule
+"," module seq_case75_assertions (input logic clk, reset, enable,
+    output logic [3:0] count);
+    property seq_case75_prop(clk, reset, enable, count);
+    @(posedge clk) disable iff (reset)  // Ensure that resets are observed at positive edges of the clock
+        (enable == 1'b0 -> ##1 count == $past(count)) &&  // Hold when enable is low
+        (enable == 1'b1 -> ##1 count == $past(count) + 1);  // Increment when enable is high
+endproperty
+
+assert property (seq_case75_prop(clk, reset, enable, count))
+    else $error(""Test failed: seq_case75 properties not met"");
+    endmodule;","sv_file.sv:5:28-29: syntax error at token ""##""
+sv_file.sv:7:1-11: syntax error at token ""endproperty""
+",14.448264122009277
+"module seq_case76(
+    input logic clk, reset, start,
+    output logic a, b
+);
+    typedef enum logic [1:0] {IDLE, STATE1, STATE2} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            IDLE: next_state = start ? STATE1 : IDLE;
+            STATE1: next_state = STATE2;
+            STATE2: next_state = IDLE;
+            default: next_state = IDLE;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= IDLE;
+        else state <= next_state;
+    end
+
+    always_ff @(posedge clk) begin
+        case(state)
+            IDLE: begin a<=0; b<=0; end
+            STATE1: begin a<=1; b<=0; end
+            STATE2: begin a<=0; b<=1; end
+            default: begin a<=0; b<=0; end
+        endcase
+    end
+endmodule
+"," module seq_case76_assertions (input logic clk, reset, start,
+    output logic a, b);
+    property seq_check;
+    @(posedge clk) disable iff (reset)  // Ensure this runs only after reset is deasserted
+        (!start throughout !IDLE && // After reset, state should not be IDLE unless start is asserted
+         (state == STATE1 || state == STATE2) && // During STATE1 or STATE2, either a or b should be high
+         ((state == STATE1 && next_state == STATE2) || // Transition from STATE1 to STATE2
+          (state == STATE2 && next_state == IDLE))));  // Transition from STATE2 to IDLE
+endproperty
+
+assert property (seq_check) else $error(""Sequence assertion failed"");
+    endmodule;","sv_file.sv:8:52: syntax error at token "")""
+sv_file.sv:9:1-11: syntax error at token ""endproperty""
+",27.61414885520935
+"module seq_case79(
+    input logic clk, reset, start,
+    output logic x, y
+);
+    typedef enum logic [1:0] {IDLE, S1, S2} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            IDLE: next_state = start ? S1 : IDLE;
+            S1: next_state = S2;
+            S2: next_state = IDLE;
+            default: next_state = IDLE;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= IDLE;
+        else state <= next_state;
+    end
+
+    always_ff @(posedge clk) begin
+        case(state)
+            IDLE: x<=0; y<=0;
+            S1: x<=1; y<=0;
+            S2: x<=0; y<=1;
+            default: x<=0; y<=0;
+        endcase
+    end
+endmodule
+"," module seq_case79_assertions (input logic clk, reset, start,
+    output logic x, y);
+    module seq_case79(
+    input logic clk, reset, start,
+    output logic x, y
+);
+    typedef enum logic [1:0] {IDLE, S1, S2} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            IDLE: next_state = start ? S1 : IDLE;
+            S1: next_state = S2;
+            S2: next_state = IDLE;
+            default: next_state = IDLE;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= IDLE;
+        else state <= next_state;
+    end
+
+    always_ff @(posedge clk) begin
+        case(state)
+            IDLE: x<=0; y<=0;
+            S1: x<=1; y<=0;
+            S2: x<=0; y<=1;
+            default: x<=0; y<=0;
+        endcase
+    end
+endmodule
+
+// Property assertion to test the module
+property seq_test;
+    @(posedge clk) disable iff (reset)
+     state == IDLE |-> ##[1:2] ((state == S1 && x == 1 && y == 0) |-> ##1 (state == S2 && x == 0 && y == 1)) |-> ##1 (state == IDLE && x == 0 && y == 0);
+endproperty
+
+assert_seq_test: assert property(seq_test) else $error(""Test failed"");
+    endmodule;","sv_file.sv:26:29: syntax error at token "";""
+sv_file.sv:29:13-19: syntax error at token ""default""
+sv_file.sv:30:9-15: syntax error at token ""endcase""
+sv_file.sv:38:1-11: syntax error at token ""endproperty""
+sv_file.sv:41:5-13: syntax error at token ""endmodule""
+sv_file.sv:41:15: syntax error (unexpected EOF)
+",49.98596954345703
+"module seq_case80(
+    input logic clk, reset, sensor,
+    output logic alarm
+);
+    typedef enum logic [1:0] {SAFE, WARN, DANGER} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            SAFE: next_state = sensor ? WARN : SAFE;
+            WARN: next_state = sensor ? DANGER : SAFE;
+            DANGER: next_state = SAFE;
+            default: next_state = SAFE;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= SAFE;
+        else state <= next_state;
+    end
+
+    always_ff @(posedge clk) begin
+        case(state)
+            SAFE: alarm <= 0;
+            WARN: alarm <= 0;
+            DANGER: alarm <= 1;
+            default: alarm <= 0;
+        endcase
+    end
+endmodule
+"," module seq_case80_assertions (input logic clk, reset, sensor,
+    output logic alarm);
+    property prop_seq_case80;
+    @(posedge clk) disable iff (reset)  // Disable the property during reset or on clock edges while reset is active
+        (state == DANGER |-> ##1 alarm == 1);  // Assert that when state becomes DANGER, there will be a delay of one clock cycle and then alarm will be asserted to 1
+endproperty
+
+assert_seq_case80: assert property (prop_seq_case80) else $error(""Test failed: Alarm not asserted when in Danger state."");
+    endmodule;",OK,19.469480752944946
