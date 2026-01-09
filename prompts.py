@@ -36,163 +36,174 @@ def experiment2_simple_call(code: str) -> str:
 
     Example 1
     
-    case (sel) 
-        2'b00: y = a; 
-        2'b01: y = b; 
-        2'b10: y = c; 
-        default: y = d; 
-    endcase 
-    
+    case (sel)
+      2'b00: y = a;
+      2'b01: y = b;
+      2'b10: y = c;
+      default: y = d;
+    endcase
+
     Properties: 
     
-    property p_y_a_assign; 
-    @(posedge clk) (sel == 2'b00) |-> (y == a); 
-    endproperty 
-    assert property (p_y_a_assign); 
+    property p_y_a;
+      @(posedge clk) (sel == 2'b00) |-> (y == a);
+    endproperty
+    assert property (p_y_a);
     
-    property p_y_b_assign; 
-    @(posedge clk) (sel == 2'b01) |-> (y == b); 
-    endproperty 
-    assert property (p_y_b_assign); 
+    property p_y_b;
+      @(posedge clk) (sel == 2'b01) |-> (y == b);
+    endproperty
+    assert property (p_y_b);
     
-    property p_y_c_assign; 
-    @(posedge clk) (sel == 2'b10) |-> (y == c); 
-    endproperty 
-    assert property (p_y_c_assign); 
+    property p_y_c;
+      @(posedge clk) (sel == 2'b10) |-> (y == c);
+    endproperty
+    assert property (p_y_c);
     
-    property p_y_d_assign; 
-    @(posedge clk) (sel != 2'b00 && sel != 2'b01 && sel != 2'b10) |-> (y == d); 
-    endproperty 
-    assert property (p_y_d_assign); 
-    
+    property p_y_d;
+      @(posedge clk) (sel != 2'b00 && sel != 2'b01 && sel != 2'b10) |-> (y == d);
+    endproperty
+    assert property (p_y_d);
+
     Example 2
     
-    always_ff @(posedge clk) begin 
-        case (ctrl) 
-            INC: count <= count + 1; 
-            DEC: count <= count - 1; 
-            default: count <= count; 
-        endcase 
-    end 
-    
-    Properties: 
-    
-    property p_count_inc_assign; 
-    @(posedge clk) (ctrl == INC) |-> (count == count + 1); 
-    endproperty 
-    
-    assert property (p_count_inc_assign); 
-    
-    property p_count_dec_assign; 
-    @(posedge clk) (ctrl == DEC) |-> (count == count - 1); 
-    endproperty 
-    
-    assert property (p_count_dec_assign); 
-    
-    property p_count_default_assign; 
-    @(posedge clk) (ctrl != INC && ctrl != DEC) |-> (count == count); 
-    endproperty 
-    
-    assert property (p_count_default_assign); 
-    
-    Example 3
+    always_ff @(posedge clk) begin
+      case (ctrl)
+        INC: count <= count + 1;
+        DEC: count <= count - 1;
+        default: count <= count;
+      endcase
+    end
 
-    case (addr) 
-        [0:15]:   region = LOW; 
-        [16:31]:  region = MID; 
-        default:  region = HIGH; 
-    endcase 
-    
     Properties: 
     
-    property p_region_low_assign; 
-    @(posedge clk) (addr >= 0 && addr <= 15) |-> (region == LOW); 
-    endproperty 
+    property p_inc;
+      @(posedge clk) (ctrl == INC) |-> (count == $past(count) + 1);
+    endproperty
+    assert property (p_inc);
     
-    assert property (p_region_low_assign); 
+    property p_dec;
+      @(posedge clk) (ctrl == DEC) |-> (count == $past(count) - 1);
+    endproperty
+    assert property (p_dec);
     
-    property p_region_mid_assign; 
-    @(posedge clk) (addr >= 16 && addr <= 31) |-> (region == MID); 
-    endproperty 
+    property p_hold;
+      @(posedge clk) (ctrl != INC && ctrl != DEC) |-> (count == $past(count));
+    endproperty
+    assert property (p_hold);
+
+    Example 3
     
-    assert property (p_region_mid_assign); 
+    casez (addr)
+      8'b10??????: hit = 1;
+      8'b01??????: hit = 0;
+      default:    hit = 0;
+    endcase
+
+    Properties: 
     
-    property p_region_default_assign; 
-    @(posedge clk) (addr < 0 || addr > 31) |-> (region == HIGH); 
-    endproperty 
+    property p_hit_hi;
+      @(posedge clk) (addr[7:6] == 2'b10) |-> (hit == 1);
+    endproperty
+    assert property (p_hit_hi);
     
-    assert property (p_region_default_assign); 
+    property p_hit_lo;
+      @(posedge clk) (addr[7:6] == 2'b01) |-> (hit == 0);
+    endproperty
+    assert property (p_hit_lo);
+
     
     Example 4
+    
+    case (op)
+      2'b00: begin
+        case (func)
+          2'b00: y = a + b;
+          2'b01: y = a - b;
+        endcase
+      end
+      2'b01: y = a & b;
+    endcase
 
-    always_ff @(posedge clk or negedge rst_n) begin 
-        if (!rst_n) 
-            state <= IDLE; 
-        else        
-            state <= next_state; 
-    end 
-    
-    always_comb begin 
-        next_state = state; 
-        case (state) 
-            IDLE: if (start) next_state = RUN; 
-            RUN:  if (done)  next_state = DONE; 
-            DONE:            next_state = IDLE; 
-    
-        endcase 
-    
-    end 
-    
     Properties: 
     
-    property p_next_idle_assign; 
-    @(posedge clk) (state == IDLE && start) |-> (next_state == RUN); 
-    endproperty 
+    property p_add;
+      @(posedge clk) (op == 2'b00 && func == 2'b00) |-> (y == a + b);
+    endproperty
+    assert property (p_add);
     
-    assert property (p_next_idle_assign); 
+    property p_sub;
+      @(posedge clk) (op == 2'b00 && func == 2'b01) |-> (y == a - b);
+    endproperty
+    assert property (p_sub);
     
-    property p_next_run_assign; 
-    @(posedge clk) (state == RUN && done) |-> (next_state == DONE); 
-    endproperty 
-    
-    assert property (p_next_run_assign); 
-    
-    property p_next_done_assign; 
-    @(posedge clk) (state == DONE) |-> (next_state == IDLE); 
-    endproperty 
-    
-    assert property (p_next_done_assign); 
+    property p_and;
+      @(posedge clk) (op == 2'b01) |-> (y == (a & b));
+    endproperty
+    assert property (p_and);
     
     Example 5
-
-    always_comb begin 
-        y = '0; 
-        case (sel) 
-            2'd0: y = a; 
-            2'd1: y = b; 
-            2'd2: y = c; 
-        endcase 
-    end 
     
+    case (mode)
+      2'b00: begin en = 0; valid = 0; end
+      2'b01: begin en = 1; valid = 0; end
+      2'b10: begin en = 1; valid = 1; end
+    endcase
+
     Properties: 
     
-    property p_y_0_assign; 
-    @(posedge clk) (sel == 2'd0) |-> (y == a); 
-    endproperty 
+    property p_valid_implies_en;
+      @(posedge clk) valid |-> en;
+    endproperty
+    assert property (p_valid_implies_en);
     
-    assert property (p_y_0_assign); 
+    property p_mode_valid;
+      @(posedge clk) (mode == 2'b10) |-> (valid == 1 && en == 1);
+    endproperty
+    assert property (p_mode_valid);
+
+    Example 6
     
-    property p_y_1_assign; 
-    @(posedge clk) (sel == 2'd1) |-> (y == b); 
-    endproperty 
+    always_comb begin
+      case (sel)
+        2'b01: y = d;
+      endcase
+    end
+
+    Properties:
     
-    assert property (p_y_1_assign); 
+    property p_update;
+      @(posedge clk) (sel == 2'b01) |-> (y == d);
+    endproperty
+    assert property (p_update);
     
-    property p_y_2_assign; 
-    @(posedge clk) (sel == 2'd2) |-> (y == c); 
-    endproperty 
+    property p_hold;
+      @(posedge clk) (sel != 2'b01) |-> (y == $past(y));
+    endproperty
+    assert property (p_hold);
     
-    assert property (p_y_2_assign); 
+    Example 7
+    
+    priority casez (a)
+      8'b1???????: y = 1;
+      8'b10??????: y = 0;
+      default:    y = 0;
+    endcase
+
+    
+    Properties:
+    
+    property p_priority_hi;
+      @(posedge clk) (a[7] == 1'b1) |-> (y == 1);
+    endproperty
+    assert property (p_priority_hi);
+    
+    property p_priority_lo;
+      @(posedge clk) (a[7:6] == 2'b10) |-> (y == 0);
+    endproperty
+    assert property (p_priority_lo);
+    
+    
     
     Input Format: The user will provide: 
 
