@@ -1471,3 +1471,157 @@ always_ff @(posedge clk or posedge rst) begin
 end
 endmodule
 "
+"module router_fsm (
+    input  logic clk,
+    input  logic rst_n,
+    input  logic [3:0] req,
+    output logic [1:0] selected,
+    output logic grant
+);
+    typedef enum logic [1:0] {IDLE, LOOKUP, FORWARD, DROP} state_t;
+    state_t state;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            state <= IDLE;
+            selected <= 2'b00;
+            grant <= 1'b0;
+        end else begin
+            case (state)
+                IDLE: begin
+                    grant <= 1'b0;
+                    if (req != 4'b0000)
+                        state <= LOOKUP;
+                end
+
+                LOOKUP: begin
+                    casez (req)
+                        4'b1???: selected <= 2'd3;
+                        4'b01??: selected <= 2'd2;
+                        4'b001?: selected <= 2'd1;
+                        4'b0001: selected <= 2'd0;
+                        default: selected <= 2'd0;
+                    endcase
+                    state <= (req == 4'b0000) ? IDLE : FORWARD;
+                end
+
+                FORWARD: begin
+                    grant <= 1'b1;
+                    if (req[selected] == 1'b0)
+                        state <= IDLE;
+                end
+
+                DROP: state <= IDLE;
+            endcase
+        end
+    end
+endmodule
+"
+"module instr_decoder (
+    input  logic [31:0] instr,
+    output logic [3:0] alu_op,
+    output logic writeback,
+    output logic [2:0] opcode
+);
+    typedef enum logic [2:0] {ALU, LOAD, STORE, BRANCH, SYS} op_t;
+    always_comb begin
+        writeback = 0;
+        alu_op = 0;
+        opcode = instr[31:29];
+
+        unique case (opcode)
+            ALU: begin
+                writeback = 1;
+                case (instr[28:25])
+                    4'h0: alu_op = 4'h1; // ADD
+                    4'h1: alu_op = 4'h2; // SUB
+                    4'h2: alu_op = 4'h3; // AND
+                    default: alu_op = 4'hF; // illegal
+                endcase
+            end
+
+            LOAD:  writeback = 1;
+            STORE: writeback = 0;
+            BRANCH: writeback = 0;
+            SYS: writeback = 0;
+        endcase
+    end
+endmodule
+"
+"module phy_link (
+    input logic clk,
+    input logic [3:0] mode,
+    output logic [1:0] speed,
+    output logic training
+);
+    always_ff @(posedge clk) begin
+        casez (mode)
+            4'b1???: speed <= 2'b11;   // Gen3
+            4'b01??: speed <= 2'b10;   // Gen2
+            4'b001?: speed <= 2'b01;   // Gen1
+            4'b0001: speed <= 2'b00;   // Safe
+        endcase
+    end
+
+    always_ff @(posedge clk)
+        training <= (speed != 2'b00);
+endmodule
+"
+"module mem_ctrl (
+    input logic clk,
+    input logic [1:0] cmd,
+    input logic [1:0] burst,
+    output logic ack,
+    output logic err
+);
+    always_ff @(posedge clk) begin
+        ack <= 0;
+        err <= 0;
+        case (cmd)
+            2'b00: begin // READ
+                case (burst)
+                    2'b00, 2'b01: ack <= 1;
+                    default: err <= 1;
+                endcase
+            end
+
+            2'b01: begin // WRITE
+                case (burst)
+                    2'b00, 2'b10: ack <= 1;
+                    default: err <= 1;
+                endcase
+            end
+
+            default: err <= 1;
+        endcase
+    end
+endmodule
+"
+"module dma_engine (
+    input logic clk,
+    input logic [1:0] size,
+    output logic busy,
+    output logic done
+);
+    typedef enum logic [1:0] {SMALL, MEDIUM, LARGE} size_t;
+
+    always_ff @(posedge clk) begin
+        case (size)
+            SMALL: begin
+                busy <= 1;
+                done <= ##1 1;
+            end
+
+            MEDIUM: begin
+                busy <= 1;
+                done <= ##2 1;
+            end
+
+            LARGE: begin
+                busy <= 1;
+                done <= ##4 1;
+            end
+        endcase
+    end
+endmodule
+"
