@@ -1,5 +1,5 @@
 import csv, os, requests, subprocess, time
-import prompts, utils
+import prompts.prompts_experiment1, utils
 
 def read_code_files(csv_path: str) -> list:
     code_list = []
