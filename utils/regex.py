@@ -21,7 +21,7 @@ DECL_ASSIGN_FUNC_RE = re.compile(
         # Net / variable declarations
         # -----------------------------
         ^\s*
-        (?:logic|wire|reg|bit|byte|int|integer|shortint|longint)
+        (?:logic|wire|reg|bit|byte|int|integer|shortint|longint|localparam)
         (?:\s+signed|\s+unsigned)?
         (?:\s*\[[^]]+\])*
         \s+\w+(?:\s*,\s*\w+)*

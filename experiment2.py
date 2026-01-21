@@ -26,20 +26,20 @@ if __name__ == "__main__":
             prompt = generate_prompt(code=code)
             module_name, parameters = regex.extract_module_ports(code=code)
             aux_vars = regex.extract_func_var_assign(code=code)
-            generated_asserts = utils.query_ollama(prompt=prompt, model=MODEL)
-            final_assertion_content = utils.generate_final_assertion_content(module_name = module_name, parameters = parameters, aux_vars= aux_vars, assertions = generated_asserts)
-            compiler_output = utils.check_code_syntax(code=final_assertion_content)
+            generated_module = utils.query_ollama(prompt=prompt, model=MODEL)
+            #final_assertion_content = utils.generate_final_assertion_content(module_name = module_name, parameters = parameters, aux_vars= aux_vars, assertions = generated_asserts)
+            compiler_output = utils.check_code_syntax(code=generated_module)
 
             time2 = time.time()
             writer.writerow([
                 code,
-                final_assertion_content,
+                generated_module,
                 compiler_output,
                 time2 - time1
             ])
             print(f"Original code: \n{code}")
             print('')
-            print(f'Generated properties: \n{final_assertion_content}')
+            print(f'Generated properties: \n{generated_module}')
             print('')
             print(compiler_output, time2 - time1)
             if compiler_output == "OK":

@@ -1,4 +1,5 @@
 import re, requests, csv, json
+from .regex import extract_code
 
 def read_code_files(csv_path: str) -> list:
     code_list = []
@@ -13,14 +14,12 @@ def read_code_files(csv_path: str) -> list:
     return code_list
 
 def generate_final_assertion_content(module_name:str, parameters: str, aux_vars: str, assertions: str) -> str:
-    new_module = f""" 
-    module {module_name}_assertions ({parameters}, input logic clk);
-    
-    {aux_vars}
-    
-    {assertions}
-    
-    endmodule;"""
+
+    #if f'module {module_name}' in
+
+    header = f""" module {module_name}_assertions ({parameters});"""
+
+    new_module = f"""{header}\n\n{aux_vars}\n\n{assertions}\n\nendmodule;"""
 
     return new_module
 
