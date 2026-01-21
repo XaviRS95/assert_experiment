@@ -29,12 +29,7 @@ property p_y_11;
   @(posedge clk) (a == 2'b11) |-> (y == 0);
 endproperty
 assert property (p_y_11);
-
-property p_default;
-  @(posedge clk) ((a != 2'b00) && (a != 2'b01) && (a != 2'b10) && (a != 2'b11)) |-> (y == 0);
-endproperty
-assert property (p_default);
-    endmodule;",OK,5.149492263793945
+    endmodule;",OK,7.379991292953491
 "module case_example2(input logic [3:0] a, output logic [1:0] y);
     always_comb begin
         case(a)
@@ -65,7 +60,7 @@ property p_y_default;
   @(posedge clk) (a != 4'd0 && a != 4'd1 && a != 4'd2) |-> (y == 2'b11);
 endproperty
 assert property (p_y_default);
-    endmodule;",OK,2.948000431060791
+    endmodule;",OK,2.9765946865081787
 "module case2(input logic [2:0] sel, output logic z);
     always_comb begin
         case(sel)
@@ -108,7 +103,7 @@ property p_default_z;
   @(posedge clk) (sel != 3'b000 && sel != 3'b001 && sel != 3'b010 && sel != 3'b011 && sel != 3'b100) |-> (z == 0);
 endproperty
 assert property (p_default_z);
-    endmodule;",OK,4.612421274185181
+    endmodule;",OK,4.64741063117981
 "module case3(input logic [1:0] sel, input logic a, b, c, d, output logic y);
     always_comb begin
         case(sel)
@@ -139,7 +134,7 @@ property p_y_d;
   @(posedge clk) (sel == 2'b11) |-> (y == d);
 endproperty
 assert property (p_y_d);
-    endmodule;",OK,2.5392301082611084
+    endmodule;",OK,2.556983232498169
 "module case4(input logic [3:0] in, output logic out);
     always_comb begin
         case(in)
@@ -176,7 +171,7 @@ property p_default;
   @(posedge clk) (in != 4'b0001 && in != 4'b0010 && in != 4'b0100 && in != 4'b1000) |-> (out == 0);
 endproperty
 assert property (p_default);
-    endmodule;",OK,3.9739038944244385
+    endmodule;",OK,4.009192705154419
 "module case5(input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
     always_comb begin
         case(op)
@@ -191,23 +186,23 @@ endmodule
     property p_add;
   @(posedge clk) (op == 2'b00) |-> (result == a + b);
 endproperty
-assert property (p_add);
+assert property (p_add) else $error(""Assertion failed: Addition operation not correctly handled"");
 
 property p_sub;
   @(posedge clk) (op == 2'b01) |-> (result == a - b);
 endproperty
-assert property (p_sub);
+assert property (p_sub) else $error(""Assertion failed: Subtraction operation not correctly handled"");
 
 property p_and;
   @(posedge clk) (op == 2'b10) |-> (result == a & b);
 endproperty
-assert property (p_and);
+assert property (p_and) else $error(""Assertion failed: Bitwise AND operation not correctly handled"");
 
 property p_or;
   @(posedge clk) (op == 2'b11) |-> (result == a | b);
 endproperty
-assert property (p_or);
-    endmodule;",OK,2.4490110874176025
+assert property (p_or) else $error(""Assertion failed: Bitwise OR operation not correctly handled"");
+    endmodule;",OK,4.294313907623291
 "module case6(input logic [1:0] state, output logic [2:0] light);
     always_comb begin
         case(state)
@@ -234,11 +229,11 @@ property p_light_green;
 endproperty
 assert property (p_light_green);
 
-property p_default_red;
-  @(posedge clk) ((state != 2'b00) && (state != 2'b01) && (state != 2'b10)) |-> (light == 3'b100);
+property p_default_light;
+  @(posedge clk) (state != 2'b00 && state != 2'b01 && state != 2'b10) |-> (light == 3'b100);
 endproperty
-assert property (p_default_red);
-    endmodule;",OK,3.1350619792938232
+assert property (p_default_light);
+    endmodule;",OK,3.104865550994873
 "module case8(input logic [3:0] in, output logic [1:0] out);
     always_comb begin
         case(in)
@@ -254,28 +249,28 @@ endmodule
     property p_out_00;
   @(posedge clk) (in == 4'b0001) |-> (out == 2'b00);
 endproperty
-assert property (p_out_00);
+assert property (p_out_00) else $error(""Assertion failed: out does not match expected value for in = 4'b0001"");
 
 property p_out_01;
   @(posedge clk) (in == 4'b0010) |-> (out == 2'b01);
 endproperty
-assert property (p_out_01);
+assert property (p_out_01) else $error(""Assertion failed: out does not match expected value for in = 4'b0010"");
 
 property p_out_10;
   @(posedge clk) (in == 4'b0100) |-> (out == 2'b10);
 endproperty
-assert property (p_out_10);
+assert property (p_out_10) else $error(""Assertion failed: out does not match expected value for in = 4'b0100"");
 
 property p_out_11;
   @(posedge clk) (in == 4'b1000) |-> (out == 2'b11);
 endproperty
-assert property (p_out_11);
+assert property (p_out_11) else $error(""Assertion failed: out does not match expected value for in = 4'b1000"");
 
 property p_default;
   @(posedge clk) (in != 4'b0001 && in != 4'b0010 && in != 4'b0100 && in != 4'b1000) |-> (out == 2'b00);
 endproperty
-assert property (p_default);
-    endmodule;",OK,4.05272912979126
+assert property (p_default) else $error(""Assertion failed: out does not match expected value for default case"");
+    endmodule;",OK,5.595448017120361
 "module case9(input logic [3:0] digit, output logic [6:0] seg);
     always_comb begin
         case(digit)
@@ -348,7 +343,7 @@ property p_default;
   @(posedge clk) (digit != 4'd0 && digit != 4'd1 && digit != 4'd2 && digit != 4'd3 && digit != 4'd4 && digit != 4'd5 && digit != 4'd6 && digit != 4'd7 && digit != 4'd8 && digit != 4'd9) |-> (seg == 7'b0000000);
 endproperty
 assert property (p_default);
-    endmodule;",OK,9.035906553268433
+    endmodule;",OK,9.091505765914917
 "module case10(input logic [2:0] pattern, output logic match);
     always_comb begin
         case(pattern)
@@ -360,21 +355,16 @@ assert property (p_default);
     end
 endmodule
 "," module case10_assertions (input logic [2:0] pattern, output logic match);
-    property p_match_101;
+    property p_match_pattern;
   @(posedge clk) (pattern == 3'b101) |-> (match == 1);
 endproperty
-assert property (p_match_101);
+assert property (p_match_pattern);
 
-property p_match_010;
-  @(posedge clk) (pattern == 3'b010) |-> (match == 1);
+property p_no_match_other_patterns;
+  @(posedge clk) ((pattern != 3'b101) && (pattern != 3'b010) && (pattern != 3'b111)) |-> (match == 0);
 endproperty
-assert property (p_match_010);
-
-property p_default;
-  @(posedge clk) (pattern != 3'b101 && pattern != 3'b010 && pattern != 3'b111) |-> (match == 0);
-endproperty
-assert property (p_default);
-    endmodule;",OK,2.3329522609710693
+assert property (p_no_match_other_patterns);
+    endmodule;",OK,1.8565599918365479
 "module case11(input logic toggle, output logic state);
     always_comb begin
         case(toggle)
@@ -384,16 +374,16 @@ assert property (p_default);
     end
 endmodule
 "," module case11_assertions (input logic toggle, output logic state);
-    property p_state_low;
+    property p_state_when_toggle_zero;
   @(posedge clk) (toggle == 1'b0) |-> (state == 0);
 endproperty
-assert property (p_state_low);
+assert property (p_state_when_toggle_zero);
 
-property p_state_high;
+property p_state_when_toggle_one;
   @(posedge clk) (toggle == 1'b1) |-> (state == 1);
 endproperty
-assert property (p_state_high);
-    endmodule;",OK,1.3799731731414795
+assert property (p_state_when_toggle_one);
+    endmodule;",OK,1.5825579166412354
 "module case12(input logic [2:0] in, output logic [7:0] out);
     always_comb begin
         case(in)
@@ -412,43 +402,43 @@ endmodule
     property p_out_000;
   @(posedge clk) (in == 3'b000) |-> (out == 8'b00000001);
 endproperty
-assert property (p_out_000) else $error(""Assertion failed: p_out_000"");
+assert property (p_out_000);
 
 property p_out_001;
   @(posedge clk) (in == 3'b001) |-> (out == 8'b00000010);
 endproperty
-assert property (p_out_001) else $error(""Assertion failed: p_out_001"");
+assert property (p_out_001);
 
 property p_out_010;
   @(posedge clk) (in == 3'b010) |-> (out == 8'b00000100);
 endproperty
-assert property (p_out_010) else $error(""Assertion failed: p_out_010"");
+assert property (p_out_010);
 
 property p_out_011;
   @(posedge clk) (in == 3'b011) |-> (out == 8'b00001000);
 endproperty
-assert property (p_out_011) else $error(""Assertion failed: p_out_011"");
+assert property (p_out_011);
 
 property p_out_100;
   @(posedge clk) (in == 3'b100) |-> (out == 8'b00010000);
 endproperty
-assert property (p_out_100) else $error(""Assertion failed: p_out_100"");
+assert property (p_out_100);
 
 property p_out_101;
   @(posedge clk) (in == 3'b101) |-> (out == 8'b00100000);
 endproperty
-assert property (p_out_101) else $error(""Assertion failed: p_out_101"");
+assert property (p_out_101);
 
 property p_out_110;
   @(posedge clk) (in == 3'b110) |-> (out == 8'b01000000);
 endproperty
-assert property (p_out_110) else $error(""Assertion failed: p_out_110"");
+assert property (p_out_110);
 
 property p_out_111;
   @(posedge clk) (in == 3'b111) |-> (out == 8'b10000000);
 endproperty
-assert property (p_out_111) else $error(""Assertion failed: p_out_111"");
-    endmodule;",OK,8.209233045578003
+assert property (p_out_111);
+    endmodule;",OK,6.688574552536011
 "module case14(input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
     always_comb begin
         case(op)
@@ -460,26 +450,26 @@ assert property (p_out_111) else $error(""Assertion failed: p_out_111"");
     end
 endmodule
 "," module case14_assertions (input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
-    property p_result_xor;
-  @(posedge clk) (op == 2'b00) |-> (result == (a ^ b));
+    property p_xor;
+  @(posedge clk) (op == 2'b00) |-> (result == a ^ b);
 endproperty
-assert property (p_result_xor);
+assert property (p_xor) else $error(""Assertion failed: XOR operation mismatch"");
 
-property p_result_nand;
+property p_nand;
   @(posedge clk) (op == 2'b01) |-> (result == ~(a & b));
 endproperty
-assert property (p_result_nand);
+assert property (p_nand) else $error(""Assertion failed: NAND operation mismatch"");
 
-property p_result_or;
-  @(posedge clk) (op == 2'b10) |-> (result == (a | b));
+property p_or;
+  @(posedge clk) (op == 2'b10) |-> (result == a | b);
 endproperty
-assert property (p_result_or);
+assert property (p_or) else $error(""Assertion failed: OR operation mismatch"");
 
-property p_result_and;
-  @(posedge clk) (op == 2'b11) |-> (result == (a & b));
+property p_and;
+  @(posedge clk) (op == 2'b11) |-> (result == a & b);
 endproperty
-assert property (p_result_and);
-    endmodule;",OK,2.7588939666748047
+assert property (p_and) else $error(""Assertion failed: AND operation mismatch"");
+    endmodule;",OK,4.620535850524902
 "module case15(input logic [3:0] num, output logic [1:0] mod3);
     always_comb begin
         case(num % 3)
@@ -490,21 +480,21 @@ assert property (p_result_and);
     end
 endmodule
 "," module case15_assertions (input logic [3:0] num, output logic [1:0] mod3);
-    property p_mod3_0;
-  @(posedge clk) (num % 3 == 2'd0) |-> (mod3 == 2'b00);
+    property p_mod3_zero;
+  @(posedge clk) (num % 3 == 0) |-> (mod3 == 2'b00);
 endproperty
-assert property (p_mod3_0);
+assert property (p_mod3_zero);
 
-property p_mod3_1;
-  @(posedge clk) (num % 3 == 2'd1) |-> (mod3 == 2'b01);
+property p_mod3_one;
+  @(posedge clk) (num % 3 == 1) |-> (mod3 == 2'b01);
 endproperty
-assert property (p_mod3_1);
+assert property (p_mod3_one);
 
-property p_mod3_2;
-  @(posedge clk) (num % 3 == 2'd2) |-> (mod3 == 2'b10);
+property p_mod3_two;
+  @(posedge clk) (num % 3 == 2) |-> (mod3 == 2'b10);
 endproperty
-assert property (p_mod3_2);
-    endmodule;",OK,2.3429222106933594
+assert property (p_mod3_two);
+    endmodule;",OK,2.24513578414917
 "module case17(input logic [1:0] state, output logic [1:0] next);
     always_comb begin
         case(state)
@@ -520,23 +510,28 @@ endmodule
     property p_next_00;
   @(posedge clk) (state == 2'b00) |-> (next == 2'b01);
 endproperty
-assert property (p_next_00);
+assert property (p_next_00) else $error(""Property p_next_00 failed"");
 
 property p_next_01;
   @(posedge clk) (state == 2'b01) |-> (next == 2'b10);
 endproperty
-assert property (p_next_01);
+assert property (p_next_01) else $error(""Property p_next_01 failed"");
 
 property p_next_10;
   @(posedge clk) (state == 2'b10) |-> (next == 2'b11);
 endproperty
-assert property (p_next_10);
+assert property (p_next_10) else $error(""Property p_next_10 failed"");
 
 property p_next_11;
   @(posedge clk) (state == 2'b11) |-> (next == 2'b00);
 endproperty
-assert property (p_next_11);
-    endmodule;",OK,2.920567512512207
+assert property (p_next_11) else $error(""Property p_next_11 failed"");
+
+property p_default;
+  @(posedge clk) (state != 2'b00 && state != 2'b01 && state != 2'b10 && state != 2'b11) |-> (next == 2'b00);
+endproperty
+assert property (p_default) else $error(""Property p_default failed"");
+    endmodule;",OK,4.680591583251953
 "module case18(input logic [3:0] key, output logic [6:0] seg);
     always_comb begin
         case(key)
@@ -573,7 +568,7 @@ property p_seg_default;
   @(posedge clk) (key != 4'd0 && key != 4'd1 && key != 4'd2 && key != 4'd3) |-> (seg == 7'b0000000);
 endproperty
 assert property (p_seg_default);
-    endmodule;",OK,4.0259459018707275
+    endmodule;",OK,4.074394702911377
 "module case21(input logic [1:0] counter, input logic reset, output logic [1:0] next_count);
     always_comb begin
         case({reset, counter})
@@ -588,35 +583,30 @@ assert property (p_seg_default);
 endmodule
 "," module case21_assertions (input logic [1:0] counter, input logic reset, output logic [1:0] next_count);
     property p_reset;
-  @(posedge clk) (reset == 1) |-> (next_count == 2'b00);
+  @(posedge clk) (reset == 1'b1 && counter != 3'b000 && counter != 3'b001 && counter != 3'b010) |-> (next_count == 2'b00);
 endproperty
-assert property (p_reset);
+assert property (p_reset) else $error(""Reset condition failed"");
 
-property p_count_00;
-  @(posedge clk) ({reset, counter} == 3'b000) |-> (next_count == 2'b01);
+property p_count0;
+  @(posedge clk) (reset == 1'b0 && counter == 3'b000) |-> (next_count == 2'b01);
 endproperty
-assert property (p_count_00);
+assert property (p_count0) else $error(""Count 0 condition failed"");
 
-property p_count_01;
-  @(posedge clk) ({reset, counter} == 3'b001) |-> (next_count == 2'b10);
+property p_count1;
+  @(posedge clk) (reset == 1'b0 && counter == 3'b001) |-> (next_count == 2'b10);
 endproperty
-assert property (p_count_01);
+assert property (p_count1) else $error(""Count 1 condition failed"");
 
-property p_count_02;
-  @(posedge clk) ({reset, counter} == 3'b010) |-> (next_count == 2'b11);
+property p_count2;
+  @(posedge clk) (reset == 1'b0 && counter == 3'b010) |-> (next_count == 2'b11);
 endproperty
-assert property (p_count_02);
+assert property (p_count2) else $error(""Count 2 condition failed"");
 
-property p_count_03;
-  @(posedge clk) ({reset, counter} == 3'b011) |-> (next_count == 2'b00);
+property p_count3;
+  @(posedge clk) (reset == 1'b0 && counter == 3'b011) |-> (next_count == 2'b00);
 endproperty
-assert property (p_count_03);
-
-property p_default;
-  @(posedge clk) (!({reset, counter} == 3'b100 && {reset, counter} == 3'b000 && {reset, counter} == 3'b001 && {reset, counter} == 3'b010 && {reset, counter} == 3'b011)) |-> (next_count == 2'b00);
-endproperty
-assert property (p_default);
-    endmodule;",OK,5.226728916168213
+assert property (p_count3) else $error(""Count 3 condition failed"");
+    endmodule;",OK,4.936055898666382
 "module case27(input logic [3:0] temp, output logic warning);
     always_comb begin
         case(temp)
@@ -630,13 +620,13 @@ endmodule
     property p_warning_low;
   @(posedge clk) (temp >= 4'd0 && temp <= 4'd5) |-> (warning == 0);
 endproperty
-assert property (p_warning_low) else $error(""Assertion failed for low temperature range"");
+assert property (p_warning_low) else $error(""Property failed: warning is not 0 for low range"");
 
 property p_warning_high;
   @(posedge clk) (temp >= 4'd6 && temp <= 4'd10) |-> (warning == 1);
 endproperty
-assert property (p_warning_high) else $error(""Assertion failed for high temperature range"");
-    endmodule;",OK,1.9053435325622559
+assert property (p_warning_high) else $error(""Property failed: warning is not 1 for high range"");
+    endmodule;",OK,2.051682710647583
 "module case31(input logic [3:0] value, output logic flag);
     always_comb begin
         case(value)
@@ -651,11 +641,11 @@ endmodule
 endproperty
 assert property (p_flag_odd);
 
-property p_flag_default;
+property p_default;
   @(posedge clk) !(value == 4'd1 || value == 4'd3 || value == 4'd5 || value == 4'd7) |-> (flag == 0);
 endproperty
-assert property (p_flag_default);
-    endmodule;",OK,1.9849467277526855
+assert property (p_default);
+    endmodule;",OK,1.937699317932129
 "module case32(input logic [3:0] temp, output logic warning);
     always_comb begin
         case(temp)
@@ -669,16 +659,16 @@ assert property (p_flag_default);
     end
 endmodule
 "," module case32_assertions (input logic [3:0] temp, output logic warning);
-    property p_warning_low;
+    property p_warning_range;
   @(posedge clk) (temp >= 4'd4 && temp <= 4'd6) |-> (warning == 1);
 endproperty
-assert property (p_warning_low) else $error(""Assertion failed for range check in case statement"");
+assert property (p_warning_range) else $error(""Assertion failed for range check"");
 
-property p_default;
-  @(posedge clk) !(temp >= 4'd4 && temp <= 4'd6) |-> (warning == 0);
+property p_default_behavior;
+  @(posedge clk) (temp < 4'd4 || temp > 4'd6) |-> (warning == 0);
 endproperty
-assert property (p_default) else $error(""Assertion failed for default case in case statement"");
-    endmodule;",OK,1.8952741622924805
+assert property (p_default_behavior) else $error(""Assertion failed for default case check"");
+    endmodule;",OK,1.9022884368896484
 "module case34(input logic [3:0] level, output logic alarm);
     always_comb begin
         case(level)
@@ -690,21 +680,21 @@ assert property (p_default) else $error(""Assertion failed for default case in c
     end
 endmodule
 "," module case34_assertions (input logic [3:0] level, output logic alarm);
-    property p_alarm_safe;
+    property p_safe;
   @(posedge clk) (level == 4'd0 || level == 4'd1 || level == 4'd2) |-> (alarm == 0);
 endproperty
-assert property (p_alarm_safe);
+assert property (p_safe);
 
-property p_alarm_warning;
+property p_warning;
   @(posedge clk) (level == 4'd3 || level == 4'd4 || level == 4'd5 || level == 4'd6) |-> (alarm == 1);
 endproperty
-assert property (p_alarm_warning);
+assert property (p_warning);
 
-property p_alarm_critical;
+property p_critical;
   @(posedge clk) (level == 4'd7 || level == 4'd8 || level == 4'd9 || level == 4'd10) |-> (alarm == 1);
 endproperty
-assert property (p_alarm_critical);
-    endmodule;",OK,2.8165290355682373
+assert property (p_critical);
+    endmodule;",OK,2.691540002822876
 "module case35(input logic [3:0] digit, output logic display);
     always_comb begin
         case(digit)
@@ -724,7 +714,12 @@ property p_odd;
   @(posedge clk) (digit == 4'd1 || digit == 4'd3 || digit == 4'd5 || digit == 4'd7 || digit == 4'd9) |-> (display == 0);
 endproperty
 assert property (p_odd);
-    endmodule;",OK,2.1170859336853027
+
+property p_default;
+  @(posedge clk) !(digit == 4'd0 || digit == 4'd1 || digit == 4'd2 || digit == 4'd3 || digit == 4'd4 || digit == 4'd5 || digit == 4'd6 || digit == 4'd7 || digit == 4'd8 || digit == 4'd9) |-> (display == 0);
+endproperty
+assert property (p_default);
+    endmodule;",OK,3.5834953784942627
 "module case40(input logic [3:0] req, output logic [1:0] grant);
     always_comb begin
         case(req)
@@ -737,31 +732,26 @@ assert property (p_odd);
     end
 endmodule
 "," module case40_assertions (input logic [3:0] req, output logic [1:0] grant);
-    property p_grant_low;
+    property p_grant_low_priority;
   @(posedge clk) (req == 4'd1 || req == 4'd2) |-> (grant == 2'b00);
 endproperty
-assert property (p_grant_low) else $error(""Assertion failed: Grant should be 2'b00 for requests 4'd1 or 4'd2"");
+assert property (p_grant_low_priority);
 
-property p_grant_medium;
+property p_grant_medium_priority;
   @(posedge clk) (req == 4'd3 || req == 4'd4 || req == 4'd5) |-> (grant == 2'b01);
 endproperty
-assert property (p_grant_medium) else $error(""Assertion failed: Grant should be 2'b01 for requests 4'd3, 4'd4 or 4'd5"");
+assert property (p_grant_medium_priority);
 
-property p_grant_high;
+property p_grant_high_priority;
   @(posedge clk) (req == 4'd6 || req == 4'd7) |-> (grant == 2'b10);
 endproperty
-assert property (p_grant_high) else $error(""Assertion failed: Grant should be 2'b10 for requests 4'd6 or 4'd7"");
+assert property (p_grant_high_priority);
 
-property p_grant_highest;
+property p_grant_highest_priority;
   @(posedge clk) (req == 4'd8 || req == 4'd9) |-> (grant == 2'b11);
 endproperty
-assert property (p_grant_highest) else $error(""Assertion failed: Grant should be 2'b11 for requests 4'd8 or 4'd9"");
-
-property p_default;
-  @(posedge clk) !(req == 4'd1 || req == 4'd2 || req == 4'd3 || req == 4'd4 || req == 4'd5 || req == 4'd6 || req == 4'd7 || req == 4'd8 || req == 4'd9) |-> (grant == 2'b00);
-endproperty
-assert property (p_default) else $error(""Assertion failed: Grant should default to 2'b00 for all other requests"");
-    endmodule;",OK,8.023882627487183
+assert property (p_grant_highest_priority);
+    endmodule;",OK,3.534787654876709
 "module case41(input int temp, output logic warning);
     always_comb begin
         case(temp)
@@ -787,17 +777,17 @@ property p_high;
 endproperty
 assert property (p_high);
 
-property p_out_of_range;
-  @(posedge clk) (!($past(temp inside [0:10], 1)) && !($past(temp inside [21:30], 1))) |-> (warning == 1);
+property p_default;
+  @(posedge clk) !(temp inside [0:30]) |-> (warning == 1);
 endproperty
-assert property (p_out_of_range);
+assert property (p_default);
     endmodule;","sv_file.sv:8:31: syntax error at token ""[""
 sv_file.sv:9:1-11: syntax error at token ""endproperty""
 sv_file.sv:13:31: syntax error at token ""[""
 sv_file.sv:14:1-11: syntax error at token ""endproperty""
-sv_file.sv:18:39: syntax error at token ""[""
+sv_file.sv:18:32: syntax error at token ""[""
 sv_file.sv:19:1-11: syntax error at token ""endproperty""
-",2.71453595161438
+",2.331026077270508
 "module case42(input int score, output logic [1:0] grade);
     always_comb begin
         case(score)
@@ -813,28 +803,28 @@ endmodule
     property p_grade_F;
   @(posedge clk) (score >= 0 && score <= 49) |-> (grade == 2'b00);
 endproperty
-assert property (p_grade_F) else $error(""Grade is not F for scores between 0 and 49"");
+assert property (p_grade_F);
 
-property p_grade_D;
+property p_grade_D_C;
   @(posedge clk) (score >= 50 && score <= 69) |-> (grade == 2'b01);
 endproperty
-assert property (p_grade_D) else $error(""Grade is not D for scores between 50 and 69"");
+assert property (p_grade_D_C);
 
 property p_grade_B;
   @(posedge clk) (score >= 70 && score <= 89) |-> (grade == 2'b10);
 endproperty
-assert property (p_grade_B) else $error(""Grade is not B for scores between 70 and 89"");
+assert property (p_grade_B);
 
 property p_grade_A;
   @(posedge clk) (score >= 90 && score <= 100) |-> (grade == 2'b11);
 endproperty
-assert property (p_grade_A) else $error(""Grade is not A for scores between 90 and 100"");
+assert property (p_grade_A);
 
 property p_default;
-  @(posedge clk) !(score >= 0 && score <= 100) |-> (grade == 2'b00);
+  @(posedge clk) (score < 0 || score > 100) |-> (grade == 2'b00);
 endproperty
-assert property (p_default) else $error(""Grade is not F for invalid scores outside the range 0 to 100"");
-    endmodule;",OK,4.849581003189087
+assert property (p_default);
+    endmodule;",OK,3.6763226985931396
 "module case43(input int temp, output logic [1:0] fan_speed);
     always_comb begin
         case(temp)
@@ -847,26 +837,26 @@ assert property (p_default) else $error(""Grade is not F for invalid scores outs
     end
 endmodule
 "," module case43_assertions (input int temp, output logic [1:0] fan_speed);
-    property p_fan_speed_off;
+    property p_fan_off;
   @(posedge clk) (temp >= 0 && temp <= 25) |-> (fan_speed == 0);
 endproperty
-assert property (p_fan_speed_off) else $error(""Fan speed not off when temp is in the range 0 to 25"");
+assert property (p_fan_off) else $error(""Fan speed is not off when temperature is between 0 and 25"");
 
-property p_fan_speed_low;
+property p_fan_low;
   @(posedge clk) (temp >= 26 && temp <= 50) |-> (fan_speed == 1);
 endproperty
-assert property (p_fan_speed_low) else $error(""Fan speed not low when temp is in the range 26 to 50"");
+assert property (p_fan_low) else $error(""Fan speed is not low when temperature is between 26 and 50"");
 
-property p_fan_speed_medium;
+property p_fan_medium;
   @(posedge clk) (temp >= 51 && temp <= 75) |-> (fan_speed == 2);
 endproperty
-assert property (p_fan_speed_medium) else $error(""Fan speed not medium when temp is in the range 51 to 75"");
+assert property (p_fan_medium) else $error(""Fan speed is not medium when temperature is between 51 and 75"");
 
-property p_fan_speed_high;
+property p_fan_high;
   @(posedge clk) (temp >= 76 && temp <= 100) |-> (fan_speed == 3);
 endproperty
-assert property (p_fan_speed_high) else $error(""Fan speed not high when temp is in the range 76 to 100"");
-    endmodule;",OK,4.177349090576172
+assert property (p_fan_high) else $error(""Fan speed is not high when temperature is between 76 and 100"");
+    endmodule;",OK,3.9348580837249756
 "module case44(input int load, output logic [2:0] power);
     always_comb begin
         case(load)
@@ -882,28 +872,28 @@ endmodule
     property p_power_very_low;
   @(posedge clk) (load >= 0 && load <= 10) |-> (power == 3'b001);
 endproperty
-assert property (p_power_very_low) else $error(""Assertion failed: power should be very low when load is between 0 and 10"");
+assert property (p_power_very_low) else $error(""Assertion failed: power should be very low when load is between 0 and 10."");
 
 property p_power_low;
   @(posedge clk) (load >= 11 && load <= 20) |-> (power == 3'b010);
 endproperty
-assert property (p_power_low) else $error(""Assertion failed: power should be low when load is between 11 and 20"");
+assert property (p_power_low) else $error(""Assertion failed: power should be low when load is between 11 and 20."");
 
 property p_power_medium;
   @(posedge clk) (load >= 21 && load <= 50) |-> (power == 3'b100);
 endproperty
-assert property (p_power_medium) else $error(""Assertion failed: power should be medium when load is between 21 and 50"");
+assert property (p_power_medium) else $error(""Assertion failed: power should be medium when load is between 21 and 50."");
 
 property p_power_high;
   @(posedge clk) (load >= 51 && load <= 100) |-> (power == 3'b111);
 endproperty
-assert property (p_power_high) else $error(""Assertion failed: power should be high when load is between 51 and 100"");
+assert property (p_power_high) else $error(""Assertion failed: power should be high when load is between 51 and 100."");
 
 property p_default;
-  @(posedge clk) !(load >= 0 && load <= 10 || load >= 11 && load <= 20 || load >= 21 && load <= 50 || load >= 51 && load <= 100) |-> (power == 3'b000);
+  @(posedge clk) !(load >= 0 && load <= 100) |-> (power == 3'b000);
 endproperty
-assert property (p_default) else $error(""Assertion failed: power should be default when load is outside the specified ranges"");
-    endmodule;",OK,5.6028454303741455
+assert property (p_default) else $error(""Assertion failed: power should be default when load is outside the valid range."");
+    endmodule;",OK,5.175492763519287
 "module case48(input int hp, output logic [1:0] status);
     always_comb begin
         case(hp)
@@ -919,23 +909,28 @@ endmodule
     property p_status_critical;
   @(posedge clk) (hp >= 0 && hp <= 25) |-> (status == 2'b00);
 endproperty
-assert property (p_status_critical);
+assert property (p_status_critical) else $error(""Assertion failed: status should be 2'b00 for critical range"");
 
 property p_status_weak;
   @(posedge clk) (hp >= 26 && hp <= 50) |-> (status == 2'b01);
 endproperty
-assert property (p_status_weak);
+assert property (p_status_weak) else $error(""Assertion failed: status should be 2'b01 for weak range"");
 
 property p_status_healthy;
   @(posedge clk) (hp >= 51 && hp <= 75) |-> (status == 2'b10);
 endproperty
-assert property (p_status_healthy);
+assert property (p_status_healthy) else $error(""Assertion failed: status should be 2'b10 for healthy range"");
 
 property p_status_full;
   @(posedge clk) (hp >= 76 && hp <= 100) |-> (status == 2'b11);
 endproperty
-assert property (p_status_full);
-    endmodule;",OK,2.974036455154419
+assert property (p_status_full) else $error(""Assertion failed: status should be 2'b11 for full range"");
+
+property p_default_status;
+  @(posedge clk) (hp < 0 || hp > 100) |-> (status == 2'b00);
+endproperty
+assert property (p_default_status) else $error(""Assertion failed: status should default to 2'b00 for out-of-range values"");
+    endmodule;",OK,6.201254367828369
 "module fsm51(
     input logic clk, reset,
     output logic state_out
@@ -965,28 +960,16 @@ assert property (p_status_full);
 endmodule
 "," module fsm51_assertions (input logic clk, reset,
     output logic state_out);
-    // Properties for the FSM module fsm51
-
-property p_next_s0;
-  @(posedge clk) disable iff (reset) (state == S0) |-> ##1 (next_state == S1);
+    property p_next_s1;
+  @(posedge clk) !reset |-> ##[0:$] (state == S1);
 endproperty
-assert property (p_next_s0) else $error(""FSM next state logic does not match expected for S0 to S1 transition"");
+assert property (p_next_s1) else $error(""State transition does not match expected behavior"");
 
-property p_next_s1;
-  @(posedge clk) disable iff (reset) (state == S1) |-> ##1 (next_state == S0);
+property p_default_s0;
+  @(posedge clk) reset && (state != S0 && state != S1) |-> ##[0:$] !(state == S1);
 endproperty
-assert property (p_next_s1) else $error(""FSM next state logic does not match expected for S1 to S0 transition"");
-
-property p_default;
-  @(posedge clk) disable iff (reset) (state != S0 && state != S1) |-> ##1 (next_state == S0);
-endproperty
-assert property (p_default) else $error(""FSM default case does not reset to S0"");
-
-// Assert properties for the FSM module
-assert property (p_next_s0) else $error(""FSM next state logic does not match expected for S0 to S1 transition"");
-assert property (p_next_s1) else $error(""FSM next state logic does not match expected for S1 to S0 transition"");
-assert property (p_default) else $error(""FSM default case does not reset to S0"");
-    endmodule;",OK,4.4445860385894775
+assert property (p_default_s0) else $error(""Default state does not revert to S0 or handle reset correctly"");
+    endmodule;",OK,1.9825639724731445
 "module fsm52(
     input logic clk, reset, in_bit,
     output logic detected
@@ -1013,25 +996,20 @@ endmodule
 "," module fsm52_assertions (input logic clk, reset, in_bit,
     output logic detected);
     property p_next_idle;
-  @(posedge clk) (state == IDLE && in_bit) |-> ##1 (state == S1);
+  @(posedge clk or posedge reset) ((reset || (state == IDLE && !in_bit)) |-> (next_state == IDLE));
 endproperty
-assert property (p_next_idle) else $error(""Property p_next_idle failed"");
+assert property (p_next_idle);
 
 property p_next_s1;
-  @(posedge clk) (state == S1 && in_bit) |-> ##1 (state == S2);
+  @(posedge clk or posedge reset) ((reset || (state == S1 && in_bit)) |-> (next_state == S2));
 endproperty
-assert property (p_next_s1) else $error(""Property p_next_s1 failed"");
+assert property (p_next_s1);
 
 property p_next_s2;
-  @(posedge clk) (state == S2 && in_bit) |-> ##1 (state == S2);
+  @(posedge clk or posedge reset) ((reset || (state == S2 && !in_bit)) |-> (next_state == IDLE));
 endproperty
-assert property (p_next_s2) else $error(""Property p_next_s2 failed"");
-
-property p_default;
-  @(posedge clk) !(state == IDLE || state == S1 || state == S2) |-> ##1 (state == IDLE);
-endproperty
-assert property (p_default) else $error(""Property p_default failed"");
-    endmodule;",OK,3.460498809814453
+assert property (p_next_s2);
+    endmodule;",OK,2.527480363845825
 "module fsm53(
     input logic clk, reset,
     output logic [2:0] light
@@ -1064,26 +1042,46 @@ assert property (p_default) else $error(""Property p_default failed"");
 endmodule
 "," module fsm53_assertions (input logic clk, reset,
     output logic [2:0] light);
-    property p_red_to_green;
+    property p_next_state_green;
   @(posedge clk) (state == RED) |-> (next_state == GREEN);
 endproperty
-assert property (p_red_to_green) else $error(""Assertion failed: Red state does not transition to Green"");
+assert property (p_next_state_green);
 
-property p_green_to_yellow;
+property p_next_state_yellow;
   @(posedge clk) (state == GREEN) |-> (next_state == YELLOW);
 endproperty
-assert property (p_green_to_yellow) else $error(""Assertion failed: Green state does not transition to Yellow"");
+assert property (p_next_state_yellow);
 
-property p_yellow_to_red;
+property p_next_state_red;
   @(posedge clk) (state == YELLOW) |-> (next_state == RED);
 endproperty
-assert property (p_yellow_to_red) else $error(""Assertion failed: Yellow state does not transition to Red"");
+assert property (p_next_state_red);
 
-property p_default_transition;
-  @(posedge clk) (state != RED && state != GREEN && state != YELLOW) |-> (next_state == RED);
+property p_default_state;
+  @(posedge clk) !($isunknown(state)) |-> (next_state == RED);
 endproperty
-assert property (p_default_transition) else $error(""Assertion failed: Default state does not transition to Red"");
-    endmodule;",OK,3.592094898223877
+assert property (p_default_state);
+
+property p_light_green;
+  @(posedge clk) (state == RED) |-> (light == 3'b001);
+endproperty
+assert property (p_light_green);
+
+property p_light_yellow;
+  @(posedge clk) (state == GREEN) |-> (light == 3'b010);
+endproperty
+assert property (p_light_yellow);
+
+property p_light_red;
+  @(posedge clk) (state == YELLOW) |-> (light == 3'b100);
+endproperty
+assert property (p_light_red);
+
+property p_default_light;
+  @(posedge clk) !($isunknown(state)) |-> (light == 3'b100);
+endproperty
+assert property (p_default_light);
+    endmodule;",OK,5.204083204269409
 "module fsm54(
     input logic clk, reset,
     output logic [1:0] count
@@ -1110,26 +1108,26 @@ assert property (p_default_transition) else $error(""Assertion failed: Default s
 endmodule
 "," module fsm54_assertions (input logic clk, reset,
     output logic [1:0] count);
-    property p_next_c1;
+    property p_next_c0;
   @(posedge clk) (state == C0) |-> (next_state == C1);
 endproperty
-assert property (p_next_c1);
+assert property (p_next_c0) else $error(""Property p_next_c0 failed"");
 
-property p_next_c2;
+property p_next_c1;
   @(posedge clk) (state == C1) |-> (next_state == C2);
 endproperty
-assert property (p_next_c2);
+assert property (p_next_c1) else $error(""Property p_next_c1 failed"");
 
-property p_next_c3;
+property p_next_c2;
   @(posedge clk) (state == C2) |-> (next_state == C3);
 endproperty
-assert property (p_next_c3);
+assert property (p_next_c2) else $error(""Property p_next_c2 failed"");
 
-property p_next_c0;
+property p_next_c3;
   @(posedge clk) (state == C3) |-> (next_state == C0);
 endproperty
-assert property (p_next_c0);
-    endmodule;",OK,2.662492513656616
+assert property (p_next_c3) else $error(""Property p_next_c3 failed"");
+    endmodule;",OK,3.356581211090088
 "module fsm55(
     input logic clk, reset, code_entered,
     output logic unlock
@@ -1155,26 +1153,31 @@ assert property (p_next_c0);
 endmodule
 "," module fsm55_assertions (input logic clk, reset, code_entered,
     output logic unlock);
-    property p_locked_to_wait;
-  @(posedge clk or posedge reset) ((state == LOCKED && code_entered) |-> (next_state == WAIT));
+    property p_next_state_locked;
+  @(posedge clk or posedge reset) ((reset || state == LOCKED) && !code_entered) |-> (next_state == LOCKED);
 endproperty
-assert property (p_locked_to_wait);
+assert property (p_next_state_locked) else $error(""Failed on next_state when in LOCKED and code_entered is false"");
 
-property p_wait_to_unlocked;
-  @(posedge clk or posedge reset) ((state == WAIT && code_entered) |-> (next_state == UNLOCKED));
+property p_next_state_wait;
+  @(posedge clk or posedge reset) ((reset || state == LOCKED) && code_entered) |-> (next_state == WAIT);
 endproperty
-assert property (p_wait_to_unlocked);
+assert property (p_next_state_wait) else $error(""Failed on next_state when in LOCKED and code_entered is true"");
 
-property p_default_locked;
-  @(posedge clk or posedge reset) ((state != LOCKED && state != WAIT) |-> (next_state == LOCKED));
+property p_next_state_unlocked;
+  @(posedge clk or posedge reset) ((reset || state == WAIT) && code_entered) |-> (next_state == UNLOCKED);
 endproperty
-assert property (p_default_locked);
+assert property (p_next_state_unlocked) else $error(""Failed on next_state when in WAIT and code_entered is true"");
 
-property p_reset_to_locked;
-  @(posedge clk or posedge reset) (reset |-> (state == LOCKED));
+property p_state_transition;
+  @(posedge clk or posedge reset) (!reset && state != LOCKED) |-> ##1 (state == $past(state));
 endproperty
-assert property (p_reset_to_locked);
-    endmodule;",OK,3.008418083190918
+assert property (p_state_transition) else $error(""Failed on state transition when not in RESET"");
+
+property p_unlocked;
+  @(posedge clk or posedge reset) (!reset && state == UNLOCKED) |-> (unlock == 1);
+endproperty
+assert property (p_unlocked) else $error(""Failed to assert unlock when state is UNLOCKED"");
+    endmodule;",OK,5.031485319137573
 "module fsm56(
     input logic clk, reset, coin,
     output logic dispense
@@ -1200,26 +1203,31 @@ assert property (p_reset_to_locked);
 endmodule
 "," module fsm56_assertions (input logic clk, reset, coin,
     output logic dispense);
-    property p_next_s1_coin;
+    property p_next_state_s1_coin;
   @(posedge clk) (state == S0 && coin) |-> (next_state == S1);
 endproperty
-assert property (p_next_s1_coin);
+assert property (p_next_state_s1_coin) else $error(""Failed at state transition from S0 to S1 on coin signal"");
 
-property p_next_s2_no_coin;
-  @(posedge clk) (state == S1 && !coin) |-> (next_state == S2);
+property p_next_state_s2_coin;
+  @(posedge clk) (state == S1 && coin) |-> (next_state == S2);
 endproperty
-assert property (p_next_s2_no_coin);
+assert property (p_next_state_s2_coin) else $error(""Failed at state transition from S1 to S2 on coin signal"");
 
-property p_hold_s0;
-  @(posedge clk) (state != S0 || coin) |-> (state == $past(state));
+property p_next_state_s0_no_coin;
+  @(posedge clk) (state == S2 && !coin) |-> (next_state == S0);
 endproperty
-assert property (p_hold_s0);
+assert property (p_next_state_s0_no_coin) else $error(""Failed at state transition from S2 to S0 on no coin signal"");
 
-property p_default_next_state;
-  @(posedge clk) !reset && state != S0 && state != S1 && state != S2 |-> (next_state == S0);
+property p_default_state;
+  @(posedge clk) !(state == S0 || state == S1 || state == S2) |-> (next_state == S0);
 endproperty
-assert property (p_default_next_state);
-    endmodule;",OK,3.065835475921631
+assert property (p_default_state) else $error(""Failed at default state transition"");
+
+property p_dispense;
+  @(posedge clk) (state == S2) |-> ##1 (dispense == 1);
+endproperty
+assert property (p_dispense) else $error(""Failed to assert dispense signal when in state S2"");
+    endmodule;",OK,4.817492246627808
 "module fsm57(
     input logic clk, reset, start,
     output logic a, b
@@ -1252,53 +1260,61 @@ assert property (p_default_next_state);
 endmodule
 "," module fsm57_assertions (input logic clk, reset, start,
     output logic a, b);
-    module fsm57(
-    input logic clk, reset, start,
-    output logic a, b
-);
-    typedef enum logic [1:0] {IDLE, STATE1, STATE2} state_t;
-    state_t state, next_state;
-
-    always_comb begin
-        case(state)
-            IDLE: next_state = start ? STATE1 : IDLE;
-            STATE1: next_state = STATE2;
-            STATE2: next_state = IDLE;
-            default: next_state = IDLE;
-        endcase
-    end
-
-    always_ff @(posedge clk or posedge reset) begin
-        if(reset) state <= IDLE;
-        else state <= next_state;
-    end
-
-    always_comb begin
-        case(state)
-            IDLE:   begin a=0; b=0; end
-            STATE1: begin a=1; b=0; end
-            STATE2: begin a=0; b=1; end
-            default: begin a=0; b=0; end
-        endcase
-    end
-endmodule
-
-// Assertions for the FSM module
-property p_state_idle;
-  @(posedge clk) (state == IDLE) |-> ##1 (a == 0 && b == 0);
+    property p_next_state_start;
+  @(posedge clk) (state == IDLE && start) |-> (next_state == STATE1);
 endproperty
-assert property (p_state_idle) else $error(""FSM state transition is incorrect in IDLE"");
+assert property (p_next_state_start);
 
-property p_state_state1;
-  @(posedge clk) (state == STATE1) |-> ##1 (a == 1 && b == 0);
+property p_next_state_idle;
+  @(posedge clk) (state == IDLE && !start) |-> (next_state == IDLE);
 endproperty
-assert property (p_state_state1) else $error(""FSM state transition is incorrect in STATE1"");
+assert property (p_next_state_idle);
 
-property p_state_state2;
-  @(posedge clk) (state == STATE2) |-> ##1 (a == 0 && b == 1);
+property p_next_state_state1;
+  @(posedge clk) state == STATE1 |-> next_state == STATE2;
 endproperty
-assert property (p_state_state2) else $error(""FSM state transition is incorrect in STATE2"");
-    endmodule;",OK,7.984798192977905
+assert property (p_next_state_state1);
+
+property p_next_state_state2;
+  @(posedge clk) state == STATE2 |-> next_state == IDLE;
+endproperty
+assert property (p_next_state_state2);
+
+property p_default_state;
+  @(posedge clk) !(state == IDLE || state == STATE1 || state == STATE2) |-> (next_state == IDLE);
+endproperty
+assert property (p_default_state);
+
+property p_a_idle;
+  @(posedge clk) state == IDLE |-> a == 0;
+endproperty
+assert property (p_a_idle);
+
+property p_b_idle;
+  @(posedge clk) state == IDLE |-> b == 0;
+endproperty
+assert property (p_b_idle);
+
+property p_a_state1;
+  @(posedge clk) state == STATE1 |-> a == 1;
+endproperty
+assert property (p_a_state1);
+
+property p_b_state1;
+  @(posedge clk) state == STATE1 |-> b == 0;
+endproperty
+assert property (p_b_state1);
+
+property p_a_state2;
+  @(posedge clk) state == STATE2 |-> a == 0;
+endproperty
+assert property (p_a_state2);
+
+property p_b_state2;
+  @(posedge clk) state == STATE2 |-> b == 1;
+endproperty
+assert property (p_b_state2);
+    endmodule;",OK,6.783840894699097
 "module fsm59(
     input logic clk, reset, trigger,
     output logic done
@@ -1331,31 +1347,21 @@ assert property (p_state_state2) else $error(""FSM state transition is incorrect
 endmodule
 "," module fsm59_assertions (input logic clk, reset, trigger,
     output logic done);
-    property p_trigger_to_busy;
-  @(posedge clk) (state == IDLE && trigger) |-> (next_state == BUSY);
+    property p_next_state_trigger;
+  @(posedge clk) disable iff (reset) state == IDLE |-> ##1 next_state == BUSY;
 endproperty
-assert property (p_trigger_to_busy) else $error(""Trigger does not lead to Busy state"");
+assert property (p_next_state_trigger);
 
-property p_busy_to_done;
-  @(posedge clk) (state == BUSY && counter == 4'd10) |-> (next_state == DONE);
+property p_next_state_busy;
+  @(posedge clk) disable iff (reset) state == BUSY && counter != 4'd10 |-> ##1 next_state == BUSY;
 endproperty
-assert property (p_busy_to_done) else $error(""Busy state does not transition to Done after counter reaches 10"");
+assert property (p_next_state_busy);
 
-property p_done_reset;
-  @(posedge clk or posedge reset) if(reset) state |-> ##1 (state == IDLE);
+property p_done;
+  @(posedge clk) disable iff (reset) state == DONE |-> ##1 done;
 endproperty
-assert property (p_done_reset) else $error(""Done state does not reset to Idle on reset"");
-
-property p_counter_increment;
-  @(posedge clk) (state == BUSY) |-> (counter == $past(counter) + 1);
-endproperty
-assert property (p_counter_increment) else $error(""Counter does not increment when in Busy state"");
-
-property p_done_high;
-  @(posedge clk) (state == DONE) |-> ##0 done;
-endproperty
-assert property (p_done_high) else $error(""Done signal is not high when state is DONE"");
-    endmodule;",OK,4.40730619430542
+assert property (p_done);
+    endmodule;",OK,2.3124141693115234
 "module fsm60(
     input logic clk, reset, in_bit,
     output logic detected
@@ -1389,28 +1395,28 @@ endmodule
     property p_next_state_s0_in_bit;
   @(posedge clk) (state == S0 && in_bit) |-> (next_state == S1);
 endproperty
-assert property (p_next_state_s0_in_bit);
+assert property (p_next_state_s0_in_bit) else $error(""Property p_next_state_s0_in_bit failed"");
 
 property p_next_state_s1_in_bit;
   @(posedge clk) (state == S1 && in_bit) |-> (next_state == S2);
 endproperty
-assert property (p_next_state_s1_in_bit);
+assert property (p_next_state_s1_in_bit) else $error(""Property p_next_state_s1_in_bit failed"");
 
-property p_next_state_s2_no_in_bit;
-  @(posedge clk) (state == S2 && !in_bit) |-> (next_state == S0);
+property p_next_state_s2_in_bit;
+  @(posedge clk) (state == S2 && in_bit) |-> (next_state == S2);
 endproperty
-assert property (p_next_state_s2_no_in_bit);
+assert property (p_next_state_s2_in_bit) else $error(""Property p_next_state_s2_in_bit failed"");
 
-property p_default_state_reset;
-  @(posedge clk or posedge reset) if(reset) state == S0;
+property p_default_next_state;
+  @(posedge clk) (!($past(state == S0 && in_bit, 1) || $past(state == S1 && in_bit, 1)) && state != S2) |-> (next_state == S0);
 endproperty
-assert property (p_default_state_reset);
+assert property (p_default_next_state) else $error(""Property p_default_next_state failed"");
 
-property p_detected_pattern;
+property p_detected;
   @(posedge clk) ({state, in_bit} == {S2,1'b0}) |-> (detected == 1);
 endproperty
-assert property (p_detected_pattern);
-    endmodule;",OK,4.049298286437988
+assert property (p_detected) else $error(""Property p_detected failed"");
+    endmodule;",OK,5.467742204666138
 "module case61(
     input logic sel,
     input logic a, b,
@@ -1435,7 +1441,7 @@ property p_y_b;
   @(posedge clk) (sel == 1'b1) |-> (y == b);
 endproperty
 assert property (p_y_b);
-    endmodule;",OK,1.3461847305297852
+    endmodule;",OK,1.3558814525604248
 "module case62(
     input logic [1:0] sel,
     input logic [3:0] data,
@@ -1472,7 +1478,7 @@ property p_y_data3;
   @(posedge clk) (sel == 2'b11) |-> (y == data[3]);
 endproperty
 assert property (p_y_data3);
-    endmodule;",OK,2.7552592754364014
+    endmodule;",OK,2.7737717628479004
 "module case63(
     input logic [1:0] op,
     input logic [3:0] a, b,
@@ -1509,7 +1515,7 @@ property p_or;
   @(posedge clk) (op == 2'b11) |-> (result == a | b);
 endproperty
 assert property (p_or);
-    endmodule;",OK,2.4571337699890137
+    endmodule;",OK,2.477354049682617
 "module case64(
     input logic [3:0] req,
     output logic [1:0] grant
@@ -1526,31 +1532,31 @@ assert property (p_or);
 endmodule
 "," module case64_assertions (input logic [3:0] req,
     output logic [1:0] grant);
-    property p_grant_00;
+    property p_grant_0001;
   @(posedge clk) (req == 4'b0001) |-> (grant == 2'b00);
 endproperty
-assert property (p_grant_00);
+assert property (p_grant_0001);
 
-property p_grant_01;
+property p_grant_0010;
   @(posedge clk) (req == 4'b0010) |-> (grant == 2'b01);
 endproperty
-assert property (p_grant_01);
+assert property (p_grant_0010);
 
-property p_grant_10;
+property p_grant_0100;
   @(posedge clk) (req == 4'b0100) |-> (grant == 2'b10);
 endproperty
-assert property (p_grant_10);
+assert property (p_grant_0100);
 
-property p_grant_11;
+property p_grant_1000;
   @(posedge clk) (req == 4'b1000) |-> (grant == 2'b11);
 endproperty
-assert property (p_grant_11);
+assert property (p_grant_1000);
 
 property p_default;
-  @(posedge clk) ((req != 4'b0001) && (req != 4'b0010) && (req != 4'b0100) && (req != 4'b1000)) |-> (grant == 2'b00);
+  @(posedge clk) (req != 4'b0001 && req != 4'b0010 && req != 4'b0100 && req != 4'b1000) |-> (grant == 2'b00);
 endproperty
 assert property (p_default);
-    endmodule;",OK,4.127093076705933
+    endmodule;",OK,4.2878570556640625
 "module case65(
     input logic [3:0] val,
     output logic match
@@ -1569,11 +1575,11 @@ endmodule
 endproperty
 assert property (p_match_selected);
 
-property p_no_match;
+property p_default;
   @(posedge clk) !(val == 4'd1 || val == 4'd3 || val == 4'd5 || val == 4'd7) |-> (match == 0);
 endproperty
-assert property (p_no_match);
-    endmodule;",OK,1.9837675094604492
+assert property (p_default);
+    endmodule;",OK,1.9406075477600098
 "module case67(
     input logic [1:0] gray,
     output logic [1:0] bin
@@ -1592,23 +1598,23 @@ endmodule
     property p_bin_00;
   @(posedge clk) (gray == 2'b00) |-> (bin == 2'b00);
 endproperty
-assert property (p_bin_00);
+assert property (p_bin_00) else $error(""Failed for case bin = 2'b00 when gray = 2'b00"");
 
 property p_bin_01;
   @(posedge clk) (gray == 2'b01) |-> (bin == 2'b01);
 endproperty
-assert property (p_bin_01);
+assert property (p_bin_01) else $error(""Failed for case bin = 2'b01 when gray = 2'b01"");
 
 property p_bin_11;
   @(posedge clk) (gray == 2'b11) |-> (bin == 2'b10);
 endproperty
-assert property (p_bin_11);
+assert property (p_bin_11) else $error(""Failed for case bin = 2'b10 when gray = 2'b11"");
 
 property p_bin_10;
   @(posedge clk) (gray == 2'b10) |-> (bin == 2'b11);
 endproperty
-assert property (p_bin_10);
-    endmodule;",OK,2.9032726287841797
+assert property (p_bin_10) else $error(""Failed for case bin = 2'b11 when gray = 2'b10"");
+    endmodule;",OK,4.192869424819946
 "module case68(
     input logic [3:0] num,
     output logic even
@@ -1623,15 +1629,15 @@ endmodule
 "," module case68_assertions (input logic [3:0] num,
     output logic even);
     property p_even_zero;
-  @(posedge clk) (num[3:1] == 3'b000 && num[0] == 1'b0) |-> (even == 1);
+  @(posedge clk) (num[0] == 1'b0) |-> (even == 1);
 endproperty
 assert property (p_even_zero);
 
-property p_odd_one;
-  @(posedge clk) (num[3:1] == 3'b000 && num[0] == 1'b1) |-> (even == 0);
+property p_even_one;
+  @(posedge clk) (num[0] == 1'b1) |-> (even == 0);
 endproperty
-assert property (p_odd_one);
-    endmodule;",OK,1.8240511417388916
+assert property (p_even_one);
+    endmodule;",OK,1.4546782970428467
 "module case69(
     input logic [1:0] sel,
     output logic [3:0] leds
@@ -1666,7 +1672,7 @@ property p_leds_11;
   @(posedge clk) (sel == 2'b11) |-> (leds == 4'b1000);
 endproperty
 assert property (p_leds_11);
-    endmodule;",OK,3.167830467224121
+    endmodule;",OK,3.1795759201049805
 "module case70(
     input logic [1:0] op,
     input logic [3:0] a, b,
@@ -1703,7 +1709,7 @@ property p_div;
   @(posedge clk) (op == 2'b11 && b != 0) |-> (result == a / b);
 endproperty
 assert property (p_div);
-    endmodule;",OK,2.53397274017334
+    endmodule;",OK,2.5504870414733887
 "module seq_case71(
     input logic clk, reset,
     output logic [1:0] count
@@ -1726,23 +1732,23 @@ endmodule
     property p_count_00_to_01;
   @(posedge clk or posedge reset) (count == 2'b00) |-> ##[1:2] (count == 2'b01);
 endproperty
-assert property (p_count_00_to_01) else $error(""Property p_count_00_to_01 failed"");
+assert property (p_count_00_to_01);
 
 property p_count_01_to_10;
   @(posedge clk or posedge reset) (count == 2'b01) |-> ##[1:2] (count == 2'b10);
 endproperty
-assert property (p_count_01_to_10) else $error(""Property p_count_01_to_10 failed"");
+assert property (p_count_01_to_10);
 
 property p_count_10_to_11;
   @(posedge clk or posedge reset) (count == 2'b10) |-> ##[1:2] (count == 2'b11);
 endproperty
-assert property (p_count_10_to_11) else $error(""Property p_count_10_to_11 failed"");
+assert property (p_count_10_to_11);
 
 property p_count_11_to_00;
   @(posedge clk or posedge reset) (count == 2'b11) |-> ##[1:2] (count == 2'b00);
 endproperty
-assert property (p_count_11_to_00) else $error(""Property p_count_11_to_00 failed"");
-    endmodule;",OK,4.866649866104126
+assert property (p_count_11_to_00);
+    endmodule;",OK,3.970268726348877
 "module seq_case72(
     input logic clk, reset,
     output logic [1:0] state
@@ -1762,25 +1768,25 @@ endmodule
 "," module seq_case72_assertions (input logic clk, reset,
     output logic [1:0] state);
     property p_state_00_to_01;
-  @(posedge clk) (state == 2'b00) |-> ##1 (state == 2'b01);
+  @(posedge clk) (state == 2'b00) |-> ##[1:2] (state == 2'b01);
 endproperty
-assert property (p_state_00_to_01) else $error(""Property p_state_00_to_01 failed"");
+assert property (p_state_00_to_01) else $error(""Assertion p_state_00_to_01 failed"");
 
 property p_state_01_to_10;
-  @(posedge clk) (state == 2'b01) |-> ##1 (state == 2'b10);
+  @(posedge clk) (state == 2'b01) |-> ##[1:2] (state == 2'b10);
 endproperty
-assert property (p_state_01_to_10) else $error(""Property p_state_01_to_10 failed"");
+assert property (p_state_01_to_10) else $error(""Assertion p_state_01_to_10 failed"");
 
 property p_state_10_to_00;
-  @(posedge clk) (state == 2'b10) |-> ##1 (state == 2'b00);
+  @(posedge clk) (state == 2'b10) |-> ##[1:2] (state == 2'b00);
 endproperty
-assert property (p_state_10_to_00) else $error(""Property p_state_10_to_00 failed"");
+assert property (p_state_10_to_00) else $error(""Assertion p_state_10_to_00 failed"");
 
 property p_default;
-  @(posedge clk) ((state != 2'b00) && (state != 2'b01) && (state != 2'b10)) |-> ##1 (state == 2'b00);
+  @(posedge clk) ((state != 2'b00) && (state != 2'b01) && (state != 2'b10)) |-> ##[1:2] (state == 2'b00);
 endproperty
-assert property (p_default) else $error(""Property p_default failed"");
-    endmodule;",OK,4.410425662994385
+assert property (p_default) else $error(""Assertion p_default failed"");
+    endmodule;",OK,4.642451524734497
 "module seq_case73(
     input logic clk, reset, serial_in,
     output logic [3:0] q
@@ -1796,11 +1802,11 @@ assert property (p_default) else $error(""Property p_default failed"");
 endmodule
 "," module seq_case73_assertions (input logic clk, reset, serial_in,
     output logic [3:0] q);
-    property p_shift_default;
-  @(posedge clk or posedge reset) (reset || (q == $past(q))) |-> (q == {q[2:0], serial_in});
+    property p_shift;
+  @(posedge clk) (!reset && (q == $past(q))) |-> (q == {$past(q[2:0]), serial_in});
 endproperty
-assert property (p_shift_default);
-    endmodule;",OK,0.9967970848083496
+assert property (p_shift);
+    endmodule;",OK,0.9285979270935059
 "module seq_case74(
     input logic clk, reset, in_bit,
     output logic detected
@@ -1826,50 +1832,28 @@ assert property (p_shift_default);
 endmodule
 "," module seq_case74_assertions (input logic clk, reset, in_bit,
     output logic detected);
-    module seq_case74(
-    input logic clk, reset, in_bit,
-    output logic detected
-);
-    typedef enum logic [1:0] {S0, S1, S2} state_t;
-    state_t state, next_state;
-
-    always_comb begin
-        case(state)
-            S0: next_state = in_bit ? S1 : S0;
-            S1: next_state = in_bit ? S2 : S0;
-            S2: next_state = in_bit ? S2 : S0;
-            default: next_state = S0;
-        endcase
-    end
-
-    always_ff @(posedge clk or posedge reset) begin
-        if(reset) state <= S0;
-        else state <= next_state;
-    end
-
-    assign detected = (state == S2);
-endmodule
-
-property p_next_s1;
-  @(posedge clk) (!reset && state == S0 && in_bit |-> ##1 state == S1);
+    property p_next_state_s1;
+  @(posedge clk) disable iff (reset) (state == S0 && in_bit) |-> (next_state == S1);
 endproperty
-assert property (p_next_s1) else $error(""Failed on transitioning from S0 to S1 when in_bit is high"");
+assert property (p_next_state_s1) else $error(""Property p_next_state_s1 failed"");
 
-property p_next_s2;
-  @(posedge clk) (!reset && state == S1 |-> ##1 state == S2);
+property p_next_state_s2;
+  @(posedge clk) disable iff (reset) (state == S1 && in_bit) |-> (next_state == S2);
 endproperty
-assert property (p_next_s2) else $error(""Failed on transitioning from S1 to S2 when in_bit is high"");
+assert property (p_next_state_s2) else $error(""Property p_next_state_s2 failed"");
 
-property p_hold_s0;
-  @(posedge clk) (!reset && state == S0 |-> ##1 state == S0);
+property p_next_state_default;
+  @(posedge clk) disable iff (reset) (state != S0 && state != S1 && !in_bit) |-> (next_state == S0);
 endproperty
-assert property (p_hold_s0) else $error(""Failed on holding state at S0 when in_bit is low"");
+assert property (p_next_state_default) else $error(""Property p_next_state_default failed"");
 
 property p_detected;
-  @(posedge clk) (!reset |-> ##1 detected == (state == S2));
+  @(posedge clk or posedge reset) if(reset) disable iff (1) (!reset && state == S2) |-> ##1 detected;
 endproperty
-assert property (p_detected) else $error(""Failed on detecting state S2 correctly"");
-    endmodule;",OK,6.143665313720703
+assert property (p_detected) else $error(""Property p_detected failed"");
+    endmodule;","sv_file.sv:19:45-51: syntax error at token ""disable""
+sv_file.sv:20:1-11: syntax error at token ""endproperty""
+",4.005650520324707
 "module seq_case75(
     input logic clk, reset, enable,
     output logic [3:0] count
@@ -1887,21 +1871,16 @@ assert property (p_detected) else $error(""Failed on detecting state S2 correctl
 endmodule
 "," module seq_case75_assertions (input logic clk, reset, enable,
     output logic [3:0] count);
-    property p_hold;
-  @(posedge clk) (enable == 1'b0) |-> (count == $past(count));
+    property p_count_hold;
+  @(posedge clk or posedge reset) (enable == 1'b0) |-> (count == $past(count));
 endproperty
-assert property (p_hold);
+assert property (p_count_hold);
 
-property p_increment;
-  @(posedge clk) (enable == 1'b1 && reset != 1'b1) |-> (count == $past(count) + 1);
+property p_count_increment;
+  @(posedge clk or posedge reset) (enable == 1'b1) |-> (count == $past(count) + 1);
 endproperty
-assert property (p_increment);
-
-property p_reset;
-  @(posedge clk or posedge reset) if (reset) count == 4'b0000;
-endproperty
-assert property (p_reset);
-    endmodule;",OK,2.064037561416626
+assert property (p_count_increment);
+    endmodule;",OK,1.6229779720306396
 "module seq_case76(
     input logic clk, reset, start,
     output logic a, b
@@ -1944,26 +1923,31 @@ property p_next_state_idle;
 endproperty
 assert property (p_next_state_idle);
 
-property p_state1_a;
-  @(posedge clk) state == STATE1 |-> (a == 1);
+property p_next_state_state1;
+  @(posedge clk) (state == STATE1) |-> (next_state == STATE2);
 endproperty
-assert property (p_state1_a);
+assert property (p_next_state_state1);
 
-property p_state1_b;
-  @(posedge clk) state == STATE1 |-> (b == 0);
+property p_next_state_state2;
+  @(posedge clk) (state == STATE2) |-> (next_state == IDLE);
 endproperty
-assert property (p_state1_b);
+assert property (p_next_state_state2);
 
-property p_state2_a;
-  @(posedge clk) state == STATE2 |-> (a == 0);
+property p_state_idle_output;
+  @(posedge clk) (state == IDLE) |-> ((a == 0) && (b == 0));
 endproperty
-assert property (p_state2_a);
+assert property (p_state_idle_output);
 
-property p_state2_b;
-  @(posedge clk) state == STATE2 |-> (b == 1);
+property p_state_state1_output;
+  @(posedge clk) (state == STATE1) |-> ((a == 1) && (b == 0));
 endproperty
-assert property (p_state2_b);
-    endmodule;",OK,3.8242688179016113
+assert property (p_state_state1_output);
+
+property p_state_state2_output;
+  @(posedge clk) (state == STATE2) |-> ((a == 0) && (b == 1));
+endproperty
+assert property (p_state_state2_output);
+    endmodule;",OK,5.096497535705566
 "module seq_case79(
     input logic clk, reset, start,
     output logic x, y
@@ -2026,55 +2010,11 @@ endmodule
         endcase
     end
 endmodule
-
-// Properties and Assertions for the module seq_case79
-
-property p_x_idle;
-  @(posedge clk) (state == IDLE) |-> (x == 0);
-endproperty
-assert property (p_x_idle) else $error(""Property p_x_idle failed"");
-
-property p_y_idle;
-  @(posedge clk) (state == IDLE) |-> (y == 0);
-endproperty
-assert property (p_y_idle) else $error(""Property p_y_idle failed"");
-
-property p_x_s1;
-  @(posedge clk) (state == S1) |-> (x == 1);
-endproperty
-assert property (p_x_s1) else $error(""Property p_x_s1 failed"");
-
-property p_y_s1;
-  @(posedge clk) (state == S1) |-> (y == 0);
-endproperty
-assert property (p_y_s1) else $error(""Property p_y_s1 failed"");
-
-property p_x_s2;
-  @(posedge clk) (state == S2) |-> (x == 0);
-endproperty
-assert property (p_x_s2) else $error(""Property p_x_s2 failed"");
-
-property p_y_s2;
-  @(posedge clk) (state == S2) |-> (y == 1);
-endproperty
-assert property (p_y_s2) else $error(""Property p_y_s2 failed"");
     endmodule;","sv_file.sv:26:29: syntax error at token "";""
 sv_file.sv:29:13-19: syntax error at token ""default""
 sv_file.sv:30:9-15: syntax error at token ""endcase""
-sv_file.sv:38:1-11: syntax error at token ""endproperty""
-sv_file.sv:41:1-8: syntax error at token ""property""
-sv_file.sv:43:1-11: syntax error at token ""endproperty""
-sv_file.sv:46:1-8: syntax error at token ""property""
-sv_file.sv:48:1-11: syntax error at token ""endproperty""
-sv_file.sv:51:1-8: syntax error at token ""property""
-sv_file.sv:53:1-11: syntax error at token ""endproperty""
-sv_file.sv:56:1-8: syntax error at token ""property""
-sv_file.sv:58:1-11: syntax error at token ""endproperty""
-sv_file.sv:61:1-8: syntax error at token ""property""
-sv_file.sv:63:1-11: syntax error at token ""endproperty""
-sv_file.sv:65:5-13: syntax error at token ""endmodule""
-sv_file.sv:65:15: syntax error (unexpected EOF)
-",10.463212490081787
+sv_file.sv:33:15: syntax error (unexpected EOF)
+",11.923537254333496
 "module seq_case80(
     input logic clk, reset, sensor,
     output logic alarm
@@ -2107,21 +2047,21 @@ sv_file.sv:65:15: syntax error (unexpected EOF)
 endmodule
 "," module seq_case80_assertions (input logic clk, reset, sensor,
     output logic alarm);
-    property p_alarm_safe;
+    property p_safe;
   @(posedge clk) (state == SAFE) |-> (alarm == 0);
 endproperty
-assert property (p_alarm_safe) else $error(""Alarm not safe when state is SAFE"");
+assert property (p_safe);
 
-property p_alarm_warn;
+property p_warn;
   @(posedge clk) (state == WARN) |-> (alarm == 0);
 endproperty
-assert property (p_alarm_warn) else $error(""Alarm not warn when state is WARN"");
+assert property (p_warn);
 
-property p_alarm_danger;
+property p_danger;
   @(posedge clk) (state == DANGER) |-> (alarm == 1);
 endproperty
-assert property (p_alarm_danger) else $error(""Alarm danger when state is DANGER"");
-    endmodule;",OK,2.4688007831573486
+assert property (p_danger);
+    endmodule;",OK,1.8570122718811035
 "module nested_case_1(input logic [1:0] op, func, input logic [7:0] a,b, output logic [7:0] y);
 always_comb begin
   case(op)
@@ -2137,26 +2077,22 @@ always_comb begin
   endcase
 end
 endmodule"," module nested_case_1_assertions (input logic [1:0] op, func, input logic [7:0] a,b, output logic [7:0] y);
-    property p_add;
-  @(posedge clk) (op == 2'b00 && func == 2'b00) |-> (y == a + b);
-endproperty
-assert property (p_add);
-
-property p_sub;
-  @(posedge clk) (op == 2'b00 && func == 2'b01) |-> (y == a - b);
-endproperty
-assert property (p_sub);
-
-property p_and;
-  @(posedge clk) (op == 2'b01) |-> (y == (a & b));
-endproperty
-assert property (p_and);
-
-property p_default;
-  @(posedge clk) (op != 2'b00 && op != 2'b01) |-> (y == 8'h00);
-endproperty
-assert property (p_default);
-    endmodule;",OK,2.880786180496216
+    module nested_case_1(input logic [1:0] op, func, input logic [7:0] a, b, output logic [7:0] y);
+  always_comb begin
+    case(op)
+      2'b00: begin
+        case(func)
+          2'b00: y = a + b;
+          2'b01: y = a - b;
+          default: y = 0;
+        endcase
+      end
+      2'b01: y = a & b;
+      default: y = 8'h00;
+    endcase
+  end
+endmodule
+    endmodule;",OK,6.779775142669678
 "module nested_case_2(input logic [2:0] mode, sel, output logic [3:0] y);
 always_comb begin
   case(mode)
@@ -2173,26 +2109,21 @@ always_comb begin
 end
 endmodule
 "," module nested_case_2_assertions (input logic [2:0] mode, sel, output logic [3:0] y);
-    property p_nested_mode_sel_y;
+    property p_y_mode_sel;
   @(posedge clk) (mode == 3'b000 && sel == 3'b000) |-> (y == 1);
 endproperty
-assert property (p_nested_mode_sel_y) else $error(""Assertion p_nested_mode_sel_y failed"");
+assert property (p_y_mode_sel) else $error(""Assertion failed: y does not match expected value when mode is 3'b000 and sel is 3'b000"");
 
-property p_nested_mode_sel_default;
-  @(posedge clk) ((mode == 3'b000 && sel != 3'b000 && sel != 3'b001) || (mode != 3'b000 && mode != 3'b001)) |-> (y == 0);
+property p_y_mode_default;
+  @(posedge clk) (mode != 3'b000 && mode != 3'b001) |-> (y == 0);
 endproperty
-assert property (p_nested_mode_sel_default) else $error(""Assertion p_nested_mode_sel_default failed"");
+assert property (p_y_mode_default) else $error(""Assertion failed: y does not match expected value when mode is neither 3'b000 nor 3'b001"");
 
-property p_nested_mode_sel_default2;
-  @(posedge clk) ((mode != 3'b000 && mode != 3'b001)) |-> (y == 0);
-endproperty
-assert property (p_nested_mode_sel_default2) else $error(""Assertion p_nested_mode_sel_default2 failed"");
-
-property p_nested_mode_sel_y2;
+property p_y_sel;
   @(posedge clk) (mode == 3'b001) |-> (y == 4);
 endproperty
-assert property (p_nested_mode_sel_y2) else $error(""Assertion p_nested_mode_sel_y2 failed"");
-    endmodule;",OK,4.74832820892334
+assert property (p_y_sel) else $error(""Assertion failed: y does not match expected value when mode is 3'b001"");
+    endmodule;",OK,3.600299835205078
 "module nested_case_3(input logic [1:0] a,b,c, output logic y);
 always_comb begin
   case(a)
@@ -2208,16 +2139,16 @@ always_comb begin
 end
 endmodule
 "," module nested_case_3_assertions (input logic [1:0] a,b,c, output logic y);
-    property p_nested_case_3_a00_b00;
+    property p_nested_case_3_00;
   @(posedge clk) (a == 2'b00 && b == 2'b00) |-> (y == c[0]);
 endproperty
-assert property (p_nested_case_3_a00_b00);
+assert property (p_nested_case_3_00);
 
 property p_nested_case_3_default;
   @(posedge clk) (a != 2'b00) |-> (y == 1);
 endproperty
 assert property (p_nested_case_3_default);
-    endmodule;",OK,1.9050288200378418
+    endmodule;",OK,1.7867202758789062
 "module nested_case_4(input logic [3:0] op, input logic [1:0] sub, output logic [3:0] y);
 always_comb begin
   case(op)
@@ -2240,15 +2171,20 @@ endproperty
 assert property (p_y_specific);
 
 property p_y_default;
-  @(posedge clk) ((op != 4'h0 && op != 4'h1) || (op == 4'h0 && sub != 2'b00)) |-> (y == 4'h0);
+  @(posedge clk) (op != 4'h0 && op != 4'h1) |-> (y == 4'h0);
 endproperty
 assert property (p_y_default);
 
-property p_y_special;
+property p_y_constant;
   @(posedge clk) (op == 4'h1) |-> (y == 4'hF);
 endproperty
-assert property (p_y_special);
-    endmodule;",OK,2.5728495121002197
+assert property (p_y_constant);
+
+property p_y_zero_default;
+  @(posedge clk) ((op == 4'h0 && sub != 2'b00 && sub != 2'b01) || op != 4'h0 && op != 4'h1) |-> (y == 0);
+endproperty
+assert property (p_y_zero_default);
+    endmodule;",OK,3.4105122089385986
 "module nested_case_5(input logic [1:0] s1,s2, output logic y);
 always_comb begin
   case(s1)
@@ -2265,7 +2201,23 @@ always_comb begin
 end
 endmodule
 "," module nested_case_5_assertions (input logic [1:0] s1,s2, output logic y);
-    property p_y_s1_00_s2_00;
+    module nested_case_5(input logic [1:0] s1, s2, output logic y);
+always_comb begin
+  case(s1)
+    2'b00: begin
+      case(s2)
+        2'b00: y = 1;
+        2'b01: y = 0;
+        default: y = 0;
+      endcase
+    end
+    2'b01: y = 1;
+    default: y = 0;
+  endcase
+end
+endmodule
+
+property p_y_s1_00_s2_00;
   @(posedge clk) (s1 == 2'b00 && s2 == 2'b00) |-> (y == 1);
 endproperty
 assert property (p_y_s1_00_s2_00);
@@ -2279,7 +2231,7 @@ property p_y_default;
   @(posedge clk) (s1 != 2'b00 && s1 != 2'b01) |-> (y == 0);
 endproperty
 assert property (p_y_default);
-    endmodule;",OK,2.664647340774536
+    endmodule;",OK,4.285983324050903
 "module nested_case_6(input logic [2:0] a,b, output logic [2:0] y);
 always_comb begin
   case(a)
@@ -2295,16 +2247,11 @@ always_comb begin
 end
 endmodule
 "," module nested_case_6_assertions (input logic [2:0] a,b, output logic [2:0] y);
-    property p_y_specific;
-  @(posedge clk) (a == 3'b001 && b == 3'b001) |-> (y == 3'b111);
+    property p_nested_case_6;
+  @(posedge clk) (a == 3'b001) |-> ((b == 3'b001) |-> (y == 3'b111)) && ((b == 3'b010) |-> (y == 3'b000)) && (a != 3'b001) |-> (y == 3'b001);
 endproperty
-assert property (p_y_specific);
-
-property p_y_default;
-  @(posedge clk) (a != 3'b001) |-> (y == 3'b001);
-endproperty
-assert property (p_y_default);
-    endmodule;",OK,1.7218692302703857
+assert property (p_nested_case_6);
+    endmodule;",OK,1.7748794555664062
 "module nested_case_7(input logic [1:0] a,b,c, output logic [1:0] y);
 always_comb begin
   case(a)
@@ -2319,16 +2266,16 @@ always_comb begin
 end
 endmodule
 "," module nested_case_7_assertions (input logic [1:0] a,b,c, output logic [1:0] y);
-    property p_nested_y_c;
+    property p_nested_case_y;
   @(posedge clk) (a == 2'b00 && b == 2'b00) |-> (y == c);
 endproperty
-assert property (p_nested_y_c);
+assert property (p_nested_case_y);
 
-property p_nested_default_y;
+property p_default_y;
   @(posedge clk) (a != 2'b00) |-> (y == 2'b11);
 endproperty
-assert property (p_nested_default_y);
-    endmodule;",OK,1.6754984855651855
+assert property (p_default_y);
+    endmodule;",OK,1.6416857242584229
 "module nested_case_8(input logic [3:0] a, input logic [1:0] b, output logic y);
 always_comb begin
   case(a)
@@ -2343,16 +2290,16 @@ always_comb begin
 end
 endmodule
 "," module nested_case_8_assertions (input logic [3:0] a, input logic [1:0] b, output logic y);
-    property p_y_A;
+    property p_y_a;
   @(posedge clk) (a == 4'hA && b == 2'b00) |-> (y == 1);
 endproperty
-assert property (p_y_A);
+assert property (p_y_a);
 
 property p_y_default;
   @(posedge clk) (a != 4'hA) |-> (y == 0);
 endproperty
 assert property (p_y_default);
-    endmodule;",OK,1.5064198970794678
+    endmodule;",OK,1.5114617347717285
 "module nested_case_9(input logic [1:0] x,y, output logic z);
 always_comb begin
   case(x)
@@ -2367,16 +2314,16 @@ always_comb begin
 end
 endmodule
 "," module nested_case_9_assertions (input logic [1:0] x,y, output logic z);
-    property p_z_high;
+    property p_nested_z_1;
   @(posedge clk) (x == 2'b01 && y == 2'b10) |-> (z == 1);
 endproperty
-assert property (p_z_high);
+assert property (p_nested_z_1);
 
-property p_default_low;
+property p_nested_z_default;
   @(posedge clk) ((x != 2'b01) || (y != 2'b10)) |-> (z == 0);
 endproperty
-assert property (p_default_low);
-    endmodule;",OK,1.6634681224822998
+assert property (p_nested_z_default);
+    endmodule;",OK,1.7817893028259277
 "module nested_case_10(input logic [2:0] a,b, output logic y);
 always_comb begin
   case(a)
@@ -2392,29 +2339,29 @@ end
 endmodule
 "," module nested_case_10_assertions (input logic [2:0] a,b, output logic y);
     module nested_case_10(input logic [2:0] a, b, output logic y);
-always_comb begin
-  case(a)
-    3'b100: begin
-      case(b)
-        3'b001: y = 1;
-        default: y = 0;
-      endcase
-    end
-    default: y = 0;
-  endcase
-end
+  always_comb begin : case_block
+    case (a)
+      3'b100: begin
+        case (b)
+          3'b001: y = 1;
+          default: y = 0;
+        endcase
+      end
+      default: y = 0;
+    endcase
+  end
 endmodule
 
-property p_y_100_001;
+property p_y_specific;
   @(posedge clk) (a == 3'b100 && b == 3'b001) |-> (y == 1);
 endproperty
-assert property (p_y_100_001);
+assert property (p_y_specific);
 
 property p_y_default;
-  @(posedge clk) !(a == 3'b100 && b != 3'b001) |-> (y == 0);
+  @(posedge clk) (a != 3'b100) |-> (y == 0);
 endproperty
 assert property (p_y_default);
-    endmodule;",OK,3.0974137783050537
+    endmodule;",OK,2.9035942554473877
 "module ff_case_1(input logic clk, rst, toggle, output logic state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 0;
@@ -2431,9 +2378,14 @@ endmodule
   @(posedge clk) (!rst && ((state == 1'b0 && toggle) |-> (state == 1'b1)) || (state == 1'b1 && toggle) |-> (state == 1'b0)));
 endproperty
 assert property (p_state_toggle);
+
+property p_state_reset;
+  @(posedge clk or posedge rst) (rst |-> (state == 1'b0));
+endproperty
+assert property (p_state_reset);
     endmodule;","sv_file.sv:3:124: syntax error at token "")""
 sv_file.sv:4:1-11: syntax error at token ""endproperty""
-",1.2123239040374756
+",1.8030734062194824
 "module ff_case_2(input logic clk, rst, start, done, output logic [1:0] state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 2'b00;
@@ -2447,21 +2399,21 @@ always_ff @(posedge clk or posedge rst) begin
 end
 endmodule
 "," module ff_case_2_assertions (input logic clk, rst, start, done, output logic [1:0] state);
-    property p_state_start;
+    property p_state_start_to_next;
   @(posedge clk) (rst == 1'b0 && state == 2'b00 && start == 1'b1) |-> ##[1:2] (state == 2'b01);
 endproperty
-assert property (p_state_start) else $error(""Assertion p_state_start failed"");
+assert property (p_state_start_to_next);
 
-property p_state_done;
+property p_state_done_to_reset;
   @(posedge clk) (rst == 1'b0 && state == 2'b01 && done == 1'b1) |-> ##[1:2] (state == 2'b00);
 endproperty
-assert property (p_state_done) else $error(""Assertion p_state_done failed"");
+assert property (p_state_done_to_reset);
 
-property p_default;
+property p_default_stay;
   @(posedge clk) (rst == 1'b0 && state != 2'b00 && state != 2'b01) |-> ##[1:2] (state == 2'b00);
 endproperty
-assert property (p_default) else $error(""Assertion p_default failed"");
-    endmodule;",OK,3.414670705795288
+assert property (p_default_stay);
+    endmodule;",OK,3.2483065128326416
 "module ff_case_3(input logic clk, rst, err, output logic bad);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) bad <= 0;
@@ -2475,20 +2427,20 @@ end
 endmodule
 "," module ff_case_3_assertions (input logic clk, rst, err, output logic bad);
     property p_reset;
-  @(posedge clk or posedge rst) (rst |-> ##1 bad == 0);
+  @(posedge clk or posedge rst) ((rst && $past(bad, 1)) |-> (bad == 1));
 endproperty
 assert property (p_reset);
 
 property p_err_to_bad;
-  @(posedge clk) ((bad == 1'b0) && err |-> ##1 bad == 1);
+  @(posedge clk) (err && ($past(bad, 1) == 1'b0)) |-> (bad == 1);
 endproperty
 assert property (p_err_to_bad);
 
 property p_keep_bad;
-  @(posedge clk) (bad == 1'b1) |-> (##[1:2] bad == 1);
+  @(posedge clk) ($past(bad, 1) == 1'b1) |-> (bad == 1);
 endproperty
 assert property (p_keep_bad);
-    endmodule;",OK,2.0655229091644287
+    endmodule;",OK,2.2630507946014404
 "module ff_case_4(input logic clk, rst, input logic [1:0] mode, output logic [3:0] cnt);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) cnt <= 0;
@@ -2503,26 +2455,26 @@ always_ff @(posedge clk or posedge rst) begin
 end
 endmodule
 "," module ff_case_4_assertions (input logic clk, rst, input logic [1:0] mode, output logic [3:0] cnt);
-    property p_hold;
-  @(posedge clk or posedge rst) ((rst) |-> (cnt == 0));
+    property p_cnt_hold;
+  @(posedge clk) (mode == 2'b00) |-> (cnt == $past(cnt));
 endproperty
-assert property (p_hold) else $error(""Assertion failed at reset condition"");
+assert property (p_cnt_hold);
 
-property p_increment;
-  @(posedge clk) (mode == 2'b01) |-> ($past(mode, 1) == 2'b00 && cnt == $past(cnt, 1) + 1);
+property p_cnt_inc;
+  @(posedge clk) (mode == 2'b01) |-> (cnt == $past(cnt) + 1);
 endproperty
-assert property (p_increment) else $error(""Assertion failed at increment mode"");
+assert property (p_cnt_inc);
 
-property p_decrement;
-  @(posedge clk) (mode == 2'b10) |-> ($past(mode, 1) == 2'b00 && cnt == $past(cnt, 1) - 1);
+property p_cnt_dec;
+  @(posedge clk) (mode == 2'b10) |-> (cnt == $past(cnt) - 1);
 endproperty
-assert property (p_decrement) else $error(""Assertion failed at decrement mode"");
+assert property (p_cnt_dec);
 
-property p_default;
-  @(posedge clk or posedge rst) ((rst || (mode != 2'b00 && mode != 2'b01 && mode != 2'b10)) |-> (cnt == 0));
+property p_cnt_reset;
+  @(posedge clk or posedge rst) if (rst) cnt <= 4'b0;
 endproperty
-assert property (p_default) else $error(""Assertion failed at default case"");
-    endmodule;",OK,6.332117080688477
+assert property (p_cnt_reset);
+    endmodule;",OK,2.8070502281188965
 "module ff_case_5(input logic clk, rst, load, input logic [7:0] d, output logic [7:0] q);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) q <= 0;
@@ -2544,7 +2496,7 @@ property p_q_update;
   @(posedge clk or posedge rst) (load == 1'b1) |-> (q == d);
 endproperty
 assert property (p_q_update);
-    endmodule;",OK,1.535426378250122
+    endmodule;",OK,1.5456218719482422
 "module ff_case_6(input logic clk, rst, timer, output logic [1:0] light);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) light <= 2'b00;
@@ -2559,26 +2511,26 @@ always_ff @(posedge clk or posedge rst) begin
 end
 endmodule
 "," module ff_case_6_assertions (input logic clk, rst, timer, output logic [1:0] light);
-    property p_light_default;
-  @(posedge clk or posedge rst) (rst || (light == 2'b00 && !timer)) |-> (light == 2'b00);
+    property p_light_00_to_01;
+  @(posedge clk) (light == 2'b00 && timer) |-> ##1 (light == 2'b01);
 endproperty
-assert property (p_light_default);
-
-property p_light_00_to_01;
-  @(posedge clk or posedge rst) (rst || ((light == 2'b00 && timer))) |-> (light == 2'b01);
-endproperty
-assert property (p_light_00_to_01);
+assert property (p_light_00_to_01) else $error(""Assertion failed: light did not transition from 2'b00 to 2'b01 when timer is active."");
 
 property p_light_01_to_10;
-  @(posedge clk or posedge rst) (rst || ((light == 2'b01 && timer))) |-> (light == 2'b10);
+  @(posedge clk) (light == 2'b01 && timer) |-> ##1 (light == 2'b10);
 endproperty
-assert property (p_light_01_to_10);
+assert property (p_light_01_to_10) else $error(""Assertion failed: light did not transition from 2'b01 to 2'b10 when timer is active."");
 
 property p_light_10_to_00;
-  @(posedge clk or posedge rst) (rst || ((light == 2'b10 && timer))) |-> (light == 2'b00);
+  @(posedge clk) (light == 2'b10 && timer) |-> ##1 (light == 2'b00);
 endproperty
-assert property (p_light_10_to_00);
-    endmodule;",OK,3.807870388031006
+assert property (p_light_10_to_00) else $error(""Assertion failed: light did not transition from 2'b10 to 2'b00 when timer is active."");
+
+property p_default_stay_00;
+  @(posedge clk) ((light != 2'b00 && light != 2'b01 && light != 2'b10) || rst) |-> (light == $past(light));
+endproperty
+assert property (p_default_stay_00) else $error(""Assertion failed: light did not stay at 2'b00 or default when conditions are not met and reset is not asserted."");
+    endmodule;",OK,5.339058876037598
 "module ff_case_7(input logic clk, rst, stall, output logic [1:0] state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 2'b00;
@@ -2604,10 +2556,10 @@ endproperty
 assert property (p_state_not_stall_01);
 
 property p_state_default;
-  @(posedge clk) (state != 2'b00 && state != 2'b01 && state != 2'b10) |-> (state == $past(state));
+  @(posedge clk) (!rst && state != 2'b00 && state != 2'b01 && state != 2'b10) |-> (state == $past(state));
 endproperty
 assert property (p_state_default);
-    endmodule;",OK,2.6446614265441895
+    endmodule;",OK,2.6808390617370605
 "module ff_case_8(input logic clk, rst, en, input logic [3:0] d, output logic [3:0] q);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) q <= 0;
@@ -2620,16 +2572,16 @@ always_ff @(posedge clk or posedge rst) begin
 end
 endmodule
 "," module ff_case_8_assertions (input logic clk, rst, en, input logic [3:0] d, output logic [3:0] q);
-    property p_q_assign;
-  @(posedge clk or posedge rst) (rst || (en == 1'b1)) |-> (q == d);
+    property p_q_d;
+  @(posedge clk) (en == 1'b1) |-> (q == d);
 endproperty
-assert property (p_q_assign);
+assert property (p_q_d);
 
-property p_hold;
-  @(posedge clk or posedge rst) (!rst && en == 1'b0) |-> (q == $past(q));
+property p_q_hold;
+  @(posedge clk) (en == 1'b0) |-> (q == $past(q));
 endproperty
-assert property (p_hold);
-    endmodule;",OK,1.5460643768310547
+assert property (p_q_hold);
+    endmodule;",OK,1.417313575744629
 "module ff_case_9(input logic clk, rst, inc, output logic [2:0] cnt);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) cnt <= 0;
@@ -2643,15 +2595,15 @@ end
 endmodule
 "," module ff_case_9_assertions (input logic clk, rst, inc, output logic [2:0] cnt);
     property p_cnt_hold;
-  @(posedge clk or posedge rst) ((cnt == 3'b111) || (inc && cnt != 3'b111)) |-> (cnt == $past(cnt));
+  @(posedge clk or posedge rst) (!rst && cnt == 3'b111) |-> (cnt == $past(cnt));
 endproperty
 assert property (p_cnt_hold);
 
-property p_cnt_increment;
-  @(posedge clk or posedge rst) ((cnt != 3'b111 && inc) |-> (cnt == $past(cnt) + 1));
+property p_cnt_inc;
+  @(posedge clk or posedge rst) (!rst && cnt != 3'b111 && inc) |-> (cnt == $past(cnt) + 1);
 endproperty
-assert property (p_cnt_increment);
-    endmodule;",OK,1.8654625415802002
+assert property (p_cnt_inc);
+    endmodule;",OK,1.764167308807373
 "module ff_case_10(input logic clk, rst, fail, output logic [1:0] state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 2'b00;
@@ -2669,18 +2621,18 @@ endmodule
     property p_state_00_to_01;
   @(posedge clk) (state == 2'b00) |-> ##[1:2] (state == 2'b01);
 endproperty
-assert property (p_state_00_to_01) else $error(""Assertion failed at state transition from 2'b00 to 2'b01"");
+assert property (p_state_00_to_01) else $error(""Failed at state transition from 2'b00 to 2'b01"");
 
 property p_state_01_fail;
   @(posedge clk) (state == 2'b01 && fail) |-> ##[1:2] (state == 2'b10);
 endproperty
-assert property (p_state_01_fail) else $error(""Assertion failed at state transition from 2'b01 to 2'b10 due to fail signal"");
+assert property (p_state_01_fail) else $error(""Failed at state transition from 2'b01 to 2'b10 due to fail signal"");
 
 property p_state_default;
-  @(posedge clk) ((state == 2'b10 || state == 2'b00) && !(fail)) |-> ##[1:2] (state == 2'b00);
+  @(posedge clk) ((state != 2'b00 && state != 2'b01 && state != 2'b10) |-> (state == 2'b00));
 endproperty
-assert property (p_state_default) else $error(""Assertion failed at default state transition"");
-    endmodule;",OK,3.6257569789886475
+assert property (p_state_default) else $error(""Failed at default case, expected state to revert back to 2'b00"");
+    endmodule;",OK,3.7560009956359863
 "module multi_case_1(input logic [1:0] sel, output logic en, valid);
 always_comb begin
   case(sel)
@@ -2706,11 +2658,11 @@ property p_en_valid_10;
 endproperty
 assert property (p_en_valid_10);
 
-property p_default_state;
+property p_default_case;
   @(posedge clk) (sel != 2'b00 && sel != 2'b01 && sel != 2'b10) |-> (en == 0 && valid == 0);
 endproperty
-assert property (p_default_state);
-    endmodule;",OK,3.3065855503082275
+assert property (p_default_case);
+    endmodule;",OK,3.340304136276245
 "module multi_case_2(input logic [1:0] op, output logic we, mode);
 always_comb begin
   case(op)
@@ -2722,41 +2674,16 @@ always_comb begin
 end
 endmodule
 "," module multi_case_2_assertions (input logic [1:0] op, output logic we, mode);
-    property p_we_0;
-  @(posedge clk) (op == 2'b00) |-> (we == 0);
+    property p_we_default;
+  @(posedge clk) (op == 2'b00 || op == 2'b01 || op == 2'b10) |-> (we == (op != 2'b00));
 endproperty
-assert property (p_we_0);
+assert property (p_we_default);
 
-property p_mode_0;
-  @(posedge clk) (op == 2'b00) |-> (mode == 0);
-endproperty
-assert property (p_mode_0);
-
-property p_we_1;
-  @(posedge clk) (op == 2'b01) |-> (we == 1);
-endproperty
-assert property (p_we_1);
-
-property p_mode_1;
-  @(posedge clk) (op == 2'b01) |-> (mode == 0);
-endproperty
-assert property (p_mode_1);
-
-property p_we_2;
-  @(posedge clk) (op == 2'b10) |-> (we == 1);
-endproperty
-assert property (p_we_2);
-
-property p_mode_2;
+property p_mode_update;
   @(posedge clk) (op == 2'b10) |-> (mode == 1);
 endproperty
-assert property (p_mode_2);
-
-property p_default;
-  @(posedge clk) ((op != 2'b00) && (op != 2'b01) && (op != 2'b10)) |-> (we == 0 && mode == 0);
-endproperty
-assert property (p_default);
-    endmodule;",OK,4.661567687988281
+assert property (p_mode_update);
+    endmodule;",OK,1.758141040802002
 "module multi_case_3(input logic [1:0] state, output logic ready, valid);
 always_comb begin
   case(state)
@@ -2781,7 +2708,7 @@ property p_default_ready_valid;
   @(posedge clk) (state != 2'b00 && state != 2'b01) |-> (ready == 0 && valid == 0);
 endproperty
 assert property (p_default_ready_valid);
-    endmodule;",OK,2.37469482421875
+    endmodule;",OK,2.3898372650146484
 "module multi_case_4(input logic [1:0] code, output logic err, halt);
 always_comb begin
   case(code)
@@ -2794,15 +2721,15 @@ end
 endmodule
 "," module multi_case_4_assertions (input logic [1:0] code, output logic err, halt);
     property p_err_default;
-  @(posedge clk) (code != 2'b00 && code != 2'b01 && code != 2'b10) |-> (err == 0);
+  @(posedge clk) (code == 2'b00 || code == 2'b01 || code == 2'b10) |-> (err == $past(err));
 endproperty
 assert property (p_err_default);
 
 property p_halt_default;
-  @(posedge clk) (code != 2'b00 && code != 2'b01 && code != 2'b10) |-> (halt == 0);
+  @(posedge clk) (code == 2'b00 || code == 2'b01 || code == 2'b10) |-> (halt == $past(halt));
 endproperty
 assert property (p_halt_default);
-    endmodule;",OK,1.8778622150421143
+    endmodule;",OK,1.9369115829467773
 "module multi_case_5(input logic [2:0] cmd, output logic rd, wr, busy);
 always_comb begin
   case(cmd)
@@ -2833,7 +2760,7 @@ property p_default;
   @(posedge clk) (cmd != 3'b000 && cmd != 3'b001 && cmd != 3'b010) |-> (rd == 0 && wr == 0 && busy == 0);
 endproperty
 assert property (p_default) else $error(""Property p_default failed"");
-    endmodule;",OK,4.174352645874023
+    endmodule;",OK,4.204592704772949
 "module multi_case_6(input logic [1:0] pwr, output logic core_on, io_on);
 always_comb begin
   case(pwr)
@@ -2845,26 +2772,26 @@ always_comb begin
 end
 endmodule
 "," module multi_case_6_assertions (input logic [1:0] pwr, output logic core_on, io_on);
-    property p_core_off_pwr00;
+    property p_core_off;
   @(posedge clk) (pwr == 2'b00) |-> (core_on == 0);
 endproperty
-assert property (p_core_off_pwr00) else $error(""Assertion failed: core_on should be 0 when pwr is 2'b00"");
+assert property (p_core_off);
 
-property p_core_on_pwr01;
-  @(posedge clk) (pwr == 2'b01) |-> (core_on == 1);
+property p_io_off;
+  @(posedge clk) (pwr != 2'b00 && pwr != 2'b01 && pwr != 2'b10) |-> (io_on == 0);
 endproperty
-assert property (p_core_on_pwr01) else $error(""Assertion failed: core_on should be 1 when pwr is 2'b01"");
+assert property (p_io_off);
 
-property p_io_on_pwr10;
+property p_core_on;
+  @(posedge clk) (pwr == 2'b01 || pwr == 2'b10) |-> (core_on == 1);
+endproperty
+assert property (p_core_on);
+
+property p_io_on;
   @(posedge clk) (pwr == 2'b10) |-> (io_on == 1);
 endproperty
-assert property (p_io_on_pwr10) else $error(""Assertion failed: io_on should be 1 when pwr is 2'b10"");
-
-property p_default;
-  @(posedge clk) (pwr != 2'b00 && pwr != 2'b01 && pwr != 2'b10) |-> (core_on == 0 && io_on == 0);
-endproperty
-assert property (p_default) else $error(""Assertion failed: core_on and io_on should both be 0 for any other value of pwr"");
-    endmodule;",OK,4.724842548370361
+assert property (p_io_on);
+    endmodule;",OK,3.1657493114471436
 "module multi_case_7(input logic [1:0] level, output logic full, empty);
 always_comb begin
   case(level)
@@ -2889,7 +2816,7 @@ property p_default;
   @(posedge clk) (level != 2'b00 && level != 2'b11) |-> (empty == 0 && full == 0);
 endproperty
 assert property (p_default);
-    endmodule;",OK,2.118135452270508
+    endmodule;",OK,2.130366802215576
 "module multi_case_8(input logic [1:0] resp, output logic ok, retry, fail);
 always_comb begin
   case(resp)
@@ -2906,16 +2833,21 @@ endmodule
 endproperty
 assert property (p_ok_set) else $error(""Property p_ok_set failed"");
 
-property p_retry_clear;
-  @(posedge clk) (resp == 2'b01) |-> (retry == 0);
+property p_retry_reset;
+  @(posedge clk) (resp == 2'b01) |-> (retry == 1);
 endproperty
-assert property (p_retry_clear) else $error(""Property p_retry_clear failed"");
+assert property (p_retry_reset) else $error(""Property p_retry_reset failed"");
 
 property p_fail_set;
   @(posedge clk) (resp == 2'b10) |-> (fail == 1);
 endproperty
 assert property (p_fail_set) else $error(""Property p_fail_set failed"");
-    endmodule;",OK,2.480841636657715
+
+property p_default_state;
+  @(posedge clk) (resp != 2'b00 && resp != 2'b01 && resp != 2'b10) |-> (ok == 0 && retry == 0 && fail == 0);
+endproperty
+assert property (p_default_state) else $error(""Property p_default_state failed"");
+    endmodule;",OK,3.5905232429504395
 "module multi_case_9(input logic [1:0] st, output logic valid, dirty);
 always_comb begin
   case(st)
@@ -2927,26 +2859,26 @@ always_comb begin
 end
 endmodule
 "," module multi_case_9_assertions (input logic [1:0] st, output logic valid, dirty);
-    property p_st_00;
+    property p_valid_dirty;
   @(posedge clk) (st == 2'b00) |-> (valid == 0 && dirty == 0);
 endproperty
-assert property (p_st_00);
+assert property (p_valid_dirty);
 
-property p_st_01;
+property p_valid_1;
   @(posedge clk) (st == 2'b01) |-> (valid == 1 && dirty == 0);
 endproperty
-assert property (p_st_01);
+assert property (p_valid_1);
 
-property p_st_10;
+property p_valid_dirty_1;
   @(posedge clk) (st == 2'b10) |-> (valid == 1 && dirty == 1);
 endproperty
-assert property (p_st_10);
+assert property (p_valid_dirty_1);
 
 property p_default;
   @(posedge clk) (st != 2'b00 && st != 2'b01 && st != 2'b10) |-> (valid == 0 && dirty == 0);
 endproperty
 assert property (p_default);
-    endmodule;",OK,3.1016156673431396
+    endmodule;",OK,3.0880661010742188
 "module multi_case_10(input logic [1:0] g, output logic gnt0, gnt1);
 always_comb begin
   case(g)
@@ -2957,21 +2889,21 @@ always_comb begin
 end
 endmodule
 "," module multi_case_10_assertions (input logic [1:0] g, output logic gnt0, gnt1);
-    property p_gnt0_high;
+    property p_gnt0_01;
   @(posedge clk) (g == 2'b01) |-> (gnt0 == 1);
 endproperty
-assert property (p_gnt0_high) else $error(""gnt0 assertion failed"");
+assert property (p_gnt0_01);
 
-property p_gnt1_high;
+property p_gnt1_10;
   @(posedge clk) (g == 2'b10) |-> (gnt1 == 1);
 endproperty
-assert property (p_gnt1_high) else $error(""gnt1 assertion failed"");
+assert property (p_gnt1_10);
 
 property p_default;
   @(posedge clk) (g != 2'b01 && g != 2'b10) |-> (gnt0 == 0 && gnt1 == 0);
 endproperty
-assert property (p_default) else $error(""Default case assertion failed"");
-    endmodule;",OK,2.700469732284546
+assert property (p_default);
+    endmodule;",OK,2.4089269638061523
 "module slice_case_1(input logic [1:0] a, input logic b, output logic y);
 always_comb begin
   case({a,b})
@@ -2982,21 +2914,16 @@ always_comb begin
 end
 endmodule
 "," module slice_case_1_assertions (input logic [1:0] a, input logic b, output logic y);
-    property p_y_zero;
-  @(posedge clk) (a == 2'b00 && b == 1'b0) |-> (y == 1'b0);
+    property p_y_000;
+  @(posedge clk) ({a, b} == 3'b000) |-> (y == 0);
 endproperty
-assert property (p_y_zero);
+assert property (p_y_000);
 
-property p_y_one;
-  @(posedge clk) (a == 2'b10 && b == 1'b1) |-> (y == 1'b1);
+property p_y_101;
+  @(posedge clk) ({a, b} == 3'b101) |-> (y == 1);
 endproperty
-assert property (p_y_one);
-
-property p_default;
-  @(posedge clk) ((a != 2'b00 || b != 1'b0) && (a != 2'b10 || b != 1'b1)) |-> (y == 1'b0);
-endproperty
-assert property (p_default);
-    endmodule;",OK,2.593571186065674
+assert property (p_y_101);
+    endmodule;",OK,1.6210722923278809
 "module slice_case_2(input logic [3:0] x, output logic y);
 always_comb begin
   case({x[3:2],x[0]})
@@ -3008,20 +2935,20 @@ end
 endmodule
 "," module slice_case_2_assertions (input logic [3:0] x, output logic y);
     property p_y_100;
-  @(posedge clk) (x[3:2] == 2'b10 && x[0] == 1'b0) |-> (y == 1);
+  @(posedge clk) ({x[3:2], x[0]} == 3'b100) |-> (y == 1);
 endproperty
 assert property (p_y_100);
 
 property p_y_011;
-  @(posedge clk) (x[3:2] == 2'b01 && x[0] == 1'b1) |-> (y == 0);
+  @(posedge clk) ({x[3:2], x[0]} == 3'b011) |-> (y == 0);
 endproperty
 assert property (p_y_011);
 
 property p_default;
-  @(posedge clk) !(x[3:2] == 2'b10 && x[0] == 1'b0 || x[3:2] == 2'b01 && x[0] == 1'b1) |-> (y == 0);
+  @(posedge clk) (!({x[3:2], x[0]} == 3'b100 && {x[3:2], x[0]} == 3'b011)) |-> (y == 0);
 endproperty
 assert property (p_default);
-    endmodule;",OK,2.95658278465271
+    endmodule;",OK,2.6989941596984863
 "module slice_case_3(input logic [1:0] a,b, output logic y);
 always_comb begin
   case({a[1],b})
@@ -3031,16 +2958,16 @@ always_comb begin
 end
 endmodule
 "," module slice_case_3_assertions (input logic [1:0] a,b, output logic y);
-    property p_y_default;
-  @(posedge clk) (a[1] == 1 && b == 3'b101) |-> (y == 1);
+    property p_default;
+  @(posedge clk) (sel != 2'b10 && sel != 2'b01) |-> (y == 0);
 endproperty
-assert property (p_y_default);
+assert property (p_default);
 
-property p_y_other;
-  @(posedge clk) !(a[1] == 1 && b == 3'b101) |-> (y == 0);
+property p_specific;
+  @(posedge clk) ({a[1], b} == 3'b101) |-> (y == 1);
 endproperty
-assert property (p_y_other);
-    endmodule;",OK,1.6170060634613037
+assert property (p_specific);
+    endmodule;",OK,1.4911975860595703
 "module slice_case_4(input logic [2:0] op, input logic z, output logic go);
 always_comb begin
   case({op[1:0],z})
@@ -3051,21 +2978,16 @@ always_comb begin
 end
 endmodule
 "," module slice_case_4_assertions (input logic [2:0] op, input logic z, output logic go);
-    property p_go_high_op0z0;
-  @(posedge clk) ({op[1:0], z} == 3'b001) |-> (go == 1);
+    property p_go_opz;
+  @(posedge clk) ({op[1:0], z} == 3'b001 || {op[1:0], z} == 3'b111) |-> (go == 1);
 endproperty
-assert property (p_go_high_op0z0);
+assert property (p_go_opz);
 
-property p_go_high_op1z1;
-  @(posedge clk) ({op[1:0], z} == 3'b111) |-> (go == 1);
-endproperty
-assert property (p_go_high_op1z1);
-
-property p_default_state;
+property p_default;
   @(posedge clk) ({op[1:0], z} != 3'b001 && {op[1:0], z} != 3'b111) |-> (go == 0);
 endproperty
-assert property (p_default_state);
-    endmodule;",OK,2.7699217796325684
+assert property (p_default);
+    endmodule;",OK,2.048572063446045
 "module slice_case_5(input logic [7:0] addr, output logic hit);
 always_comb begin
   case({addr[7],addr[2:0]})
@@ -3081,11 +3003,11 @@ endmodule
 endproperty
 assert property (p_hit_high);
 
-property p_hit_default;
+property p_default;
   @(posedge clk) ({addr[7], addr[2:0]} != 4'b1001 && {addr[7], addr[2:0]} != 4'b1010) |-> (hit == 0);
 endproperty
-assert property (p_hit_default);
-    endmodule;",OK,2.2077081203460693
+assert property (p_default);
+    endmodule;",OK,2.17443585395813
 "module slice_case_6(input logic [3:0] ctrl, input logic en, output logic ok);
 always_comb begin
   case({ctrl[3:2],en})
@@ -3097,15 +3019,15 @@ end
 endmodule
 "," module slice_case_6_assertions (input logic [3:0] ctrl, input logic en, output logic ok);
     property p_ok_ctrl_en;
-  @(posedge clk) ({ctrl[3:2], en} == 3'b101 || {ctrl[3:2], en} == 3'b011) |-> (ok == 1);
+  @(posedge clk) (ctrl[3:2] == 2'b10 && en == 1'b1) |-> (ok == 1);
 endproperty
 assert property (p_ok_ctrl_en);
 
-property p_default;
-  @(posedge clk) ({ctrl[3:2], en} != 3'b101 && {ctrl[3:2], en} != 3'b011) |-> (ok == 0);
+property p_default_ok;
+  @(posedge clk) ((ctrl[3:2] != 2'b10 || en != 1'b1)) |-> (ok == 0);
 endproperty
-assert property (p_default);
-    endmodule;",OK,2.0544261932373047
+assert property (p_default_ok);
+    endmodule;",OK,1.792820692062378
 "module slice_case_7(input logic [1:0] flags, input logic mode, output logic y);
 always_comb begin
   case({flags,mode})
@@ -3121,11 +3043,16 @@ endmodule
 endproperty
 assert property (p_y_110);
 
-property p_y_default;
+property p_y_001;
+  @(posedge clk) ({flags, mode} == 3'b001) |-> (y == 1);
+endproperty
+assert property (p_y_001);
+
+property p_default;
   @(posedge clk) ({flags, mode} != 3'b110 && {flags, mode} != 3'b001) |-> (y == 0);
 endproperty
-assert property (p_y_default);
-    endmodule;",OK,1.729837417602539
+assert property (p_default);
+    endmodule;",OK,2.4011459350585938
 "module slice_case_8(input logic [4:0] x, output logic y);
 always_comb begin
   case({x[4],x[1:0]})
@@ -3145,7 +3072,7 @@ property p_y_default;
   @(posedge clk) ({x[4], x[1:0]} != 3'b101 && {x[4], x[1:0]} != 3'b000) |-> (y == 0);
 endproperty
 assert property (p_y_default);
-    endmodule;",OK,1.9533367156982422
+    endmodule;",OK,1.9618923664093018
 "module slice_case_9(input logic [2:0] bus, input logic err, output logic stop);
 always_comb begin
   case({bus[2],err})
@@ -3157,15 +3084,15 @@ end
 endmodule
 "," module slice_case_9_assertions (input logic [2:0] bus, input logic err, output logic stop);
     property p_stop_high;
-  @(posedge clk) (bus[2] == 1'b1 && err == 1'b1) |-> (stop == 1);
+  @(posedge clk) (bus[2] && err) |-> (stop == 1);
 endproperty
 assert property (p_stop_high);
 
 property p_stop_low;
-  @(posedge clk) (bus[2] == 1'b0 && err == 1'b1) |-> (stop == 0);
+  @(posedge clk) (!bus[2] && err) |-> (stop == 0);
 endproperty
 assert property (p_stop_low);
-    endmodule;",OK,1.6525111198425293
+    endmodule;",OK,1.3585841655731201
 "module slice_case_10(input logic [3:0] mode, output logic y);
 always_comb begin
   case({mode[3],mode[0]})
@@ -3176,21 +3103,21 @@ always_comb begin
 end
 endmodule
 "," module slice_case_10_assertions (input logic [3:0] mode, output logic y);
-    property p_y_10;
-  @(posedge clk) ({mode[3], mode[0]} == 2'b10) |-> (y == 1);
+    property p_y_mode_10;
+  @(posedge clk) (mode[3] == 1'b1 && mode[0] == 1'b0) |-> (y == 1);
 endproperty
-assert property (p_y_10);
+assert property (p_y_mode_10);
 
-property p_y_01;
-  @(posedge clk) ({mode[3], mode[0]} == 2'b01) |-> (y == 1);
+property p_y_mode_01;
+  @(posedge clk) (mode[3] == 1'b0 && mode[0] == 1'b1) |-> (y == 1);
 endproperty
-assert property (p_y_01);
+assert property (p_y_mode_01);
 
-property p_default;
-  @(posedge clk) ({mode[3], mode[0]} != 2'b10 && {mode[3], mode[0]} != 2'b01) |-> (y == 0);
+property p_y_default;
+  @(posedge clk) (mode[3:1] != 2'b10 && mode[0:0] != 2'b01) |-> (y == 0);
 endproperty
-assert property (p_default);
-    endmodule;",OK,2.4644572734832764
+assert property (p_y_default);
+    endmodule;",OK,2.725029706954956
 "module proto_case_1(input logic clk, rst, req, output logic gnt);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) gnt <= 0;
@@ -3203,21 +3130,16 @@ always_ff @(posedge clk or posedge rst) begin
 end
 endmodule
 "," module proto_case_1_assertions (input logic clk, rst, req, output logic gnt);
-    property p_rst;
-  @(posedge clk or posedge rst) (rst == 1) |-> (gnt == 0);
+    property p_gnt_reset;
+  @(posedge clk or posedge rst) (rst |-> gnt == 0);
 endproperty
-assert property (p_rst);
+assert property (p_gnt_reset) else $error(""gnt not reset correctly"");
 
-property p_req_grant;
-  @(posedge clk) (req == 1 && gnt == 0) |-> ##1 (gnt == 1);
+property p_req_implies_grant;
+  @(posedge clk) req |-> (gnt == 1);
 endproperty
-assert property (p_req_grant);
-
-property p_hold_after_grant;
-  @(posedge clk) ((req == 0 || gnt == 1) && gnt == 1) |-> ##1 (gnt == $past(gnt));
-endproperty
-assert property (p_hold_after_grant);
-    endmodule;",OK,2.283900260925293
+assert property (p_req_implies_grant) else $error(""gnt does not grant on request when rst is de-asserted"");
+    endmodule;",OK,1.74888014793396
 "module proto_case_2(input logic clk, rst, valid, output logic ready);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) ready <= 1;
@@ -3231,20 +3153,15 @@ end
 endmodule
 "," module proto_case_2_assertions (input logic clk, rst, valid, output logic ready);
     property p_ready_reset;
-  @(posedge clk or posedge rst) if (rst) ready |-> ##1 $stable(ready);
+  @(posedge clk or posedge rst) (rst == 1) |-> (ready == 1);
 endproperty
-assert property (p_ready_reset) else $error(""Property p_ready_reset failed"");
+assert property (p_ready_reset);
 
-property p_ready_valid;
-  @(posedge clk) (ready == 1'b1 && valid) |-> ##1 ready == 1'b0;
+property p_valid_ready;
+  @(posedge clk) (ready == 1'b0 && valid == 1) |-> (ready == 1'b0);
 endproperty
-assert property (p_ready_valid) else $error(""Property p_ready_valid failed"");
-
-property p_ready_not_reset;
-  @(posedge clk) disable iff (rst) (ready == 1'b0) |-> ##1 ready == 1'b1;
-endproperty
-assert property (p_ready_not_reset) else $error(""Property p_ready_not_reset failed"");
-    endmodule;",OK,2.705305576324463
+assert property (p_valid_ready);
+    endmodule;",OK,1.537966012954712
 "module proto_case_3(input logic clk, rst, send, ack, output logic busy);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) busy <= 0;
@@ -3257,10 +3174,10 @@ always_ff @(posedge clk or posedge rst) begin
 end
 endmodule
 "," module proto_case_3_assertions (input logic clk, rst, send, ack, output logic busy);
-    property p_busy_init;
-  @(posedge clk or posedge rst) (rst |-> busy == 0);
+    property p_busy_reset;
+  @(posedge clk or posedge rst) (rst) |-> (busy == 0);
 endproperty
-assert property (p_busy_init);
+assert property (p_busy_reset);
 
 property p_send_to_busy;
   @(posedge clk) (busy == 1'b0 && send) |-> ##1 busy == 1;
@@ -3271,7 +3188,7 @@ property p_ack_to_idle;
   @(posedge clk) (busy == 1'b1 && ack) |-> ##1 busy == 0;
 endproperty
 assert property (p_ack_to_idle);
-    endmodule;",OK,2.1051156520843506
+    endmodule;",OK,2.1643877029418945
 "module proto_case_4(input logic clk, rst, give, take, output logic [1:0] credit);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) credit <= 2;
@@ -3285,21 +3202,21 @@ always_ff @(posedge clk or posedge rst) begin
 end
 endmodule
 "," module proto_case_4_assertions (input logic clk, rst, give, take, output logic [1:0] credit);
-    property p_credit_inc;
+    property p_credit_add;
   @(posedge clk) (rst == 0 && {give, take} == 2'b10) |-> (credit == $past(credit) + 1);
 endproperty
-assert property (p_credit_inc);
+assert property (p_credit_add);
 
-property p_credit_dec;
+property p_credit_sub;
   @(posedge clk) (rst == 0 && {give, take} == 2'b01) |-> (credit == $past(credit) - 1);
 endproperty
-assert property (p_credit_dec);
+assert property (p_credit_sub);
 
 property p_credit_hold;
   @(posedge clk) (rst == 0 && ({give, take} != 2'b10 && {give, take} != 2'b01)) |-> (credit == $past(credit));
 endproperty
 assert property (p_credit_hold);
-    endmodule;",OK,2.694977283477783
+    endmodule;",OK,2.734224319458008
 "module proto_case_5(input logic clk, rst, sop, eop, output logic in_pkt);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) in_pkt <= 0;
@@ -3312,21 +3229,16 @@ always_ff @(posedge clk or posedge rst) begin
 end
 endmodule
 "," module proto_case_5_assertions (input logic clk, rst, sop, eop, output logic in_pkt);
-    property p_in_pkt_init;
-  @(posedge clk or posedge rst) (rst) |-> (in_pkt == 0);
+    property p_in_pkt_start;
+  @(posedge clk or posedge rst) (sop && in_pkt == 1'b0) |-> ##[1:2] (in_pkt == 1);
 endproperty
-assert property (p_in_pkt_init);
+assert property (p_in_pkt_start) else $error(""Assertion p_in_pkt_start failed"");
 
-property p_sop_to_one;
-  @(posedge clk) sop && (in_pkt == 1'b0) |-> ##1 (in_pkt == 1);
+property p_in_pkt_stop;
+  @(posedge clk or posedge rst) (eop && in_pkt == 1'b1) |-> ##[1:2] (in_pkt == 0);
 endproperty
-assert property (p_sop_to_one);
-
-property p_eop_to_zero;
-  @(posedge clk) eop && (in_pkt == 1'b1) |-> ##1 (in_pkt == 0);
-endproperty
-assert property (p_eop_to_zero);
-    endmodule;",OK,2.493870258331299
+assert property (p_in_pkt_stop) else $error(""Assertion p_in_pkt_stop failed"");
+    endmodule;",OK,2.457040786743164
 "module proto_case_6(input logic clk, rst, fail, output logic retry);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) retry <= 0;
@@ -3339,16 +3251,16 @@ always_ff @(posedge clk or posedge rst) begin
 end
 endmodule
 "," module proto_case_6_assertions (input logic clk, rst, fail, output logic retry);
-    property p_retry_init;
-  @(posedge clk or posedge rst) (!rst && (retry == 1'b0)) |-> ##1 (fail |-> retry == 1'b1);
+    property p_retry_on_fail;
+  @(posedge clk or posedge rst) (rst || (retry == 1'b0 && fail)) |-> ##1 retry == 1'b1;
 endproperty
-assert property (p_retry_init) else $error(""Retry initialization failed"");
+assert property (p_retry_on_fail);
 
-property p_retry_reset;
-  @(posedge clk or posedge rst) (!rst && (retry == 1'b1)) |-> ##1 (retry == 1'b0);
+property p_hold_retry_after_set;
+  @(posedge clk or posedge rst) (rst || (retry == 1'b1)) |-> ##1 retry == $past(retry);
 endproperty
-assert property (p_retry_reset) else $error(""Retry reset failed"");
-    endmodule;",OK,1.9553983211517334
+assert property (p_hold_retry_after_set);
+    endmodule;",OK,1.8762598037719727
 "module proto_case_7(input logic clk, rst, lock_req, unlock, output logic locked);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) locked <= 0;
@@ -3362,15 +3274,20 @@ end
 endmodule
 "," module proto_case_7_assertions (input logic clk, rst, lock_req, unlock, output logic locked);
     property p_init;
-  @(posedge clk or posedge rst) (!rst && locked == 1'b0 && lock_req |-> locked == 1);
+  @(posedge clk or posedge rst) (!rst) |-> (!locked);
 endproperty
 assert property (p_init);
 
 property p_lock;
-  @(posedge clk or posedge rst) (!rst && locked == 1'b1 && unlock |-> locked == 0);
+  @(posedge clk or posedge rst) (locked == 1'b0 && lock_req) |-> (locked == 1'b1);
 endproperty
 assert property (p_lock);
-    endmodule;",OK,1.497612476348877
+
+property p_unlock;
+  @(posedge clk or posedge rst) (locked == 1'b1 && unlock) |-> (locked == 1'b0);
+endproperty
+assert property (p_unlock);
+    endmodule;",OK,2.069807767868042
 "module proto_case_8(input logic clk, rst, start, finish, output logic busy);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) busy <= 0;
@@ -3384,15 +3301,15 @@ end
 endmodule
 "," module proto_case_8_assertions (input logic clk, rst, start, finish, output logic busy);
     property p_busy_start;
-  @(posedge clk or posedge rst) (busy == 1'b0 && start) |-> ##1 (busy == 1'b1);
+  @(posedge clk or posedge rst) ((busy == 1'b0) && start) |-> (busy == 1'b1);
 endproperty
-assert property (p_busy_start) else $error(""Assertion failed: busy does not transition to 1 when start is asserted"");
+assert property (p_busy_start) else $error(""Property p_busy_start failed"");
 
 property p_busy_finish;
-  @(posedge clk or posedge rst) (busy == 1'b1 && finish) |-> ##1 (busy == 1'b0);
+  @(posedge clk or posedge rst) ((busy == 1'b1) && finish) |-> (busy == 1'b0);
 endproperty
-assert property (p_busy_finish) else $error(""Assertion failed: busy does not transition to 0 when finish is asserted"");
-    endmodule;",OK,2.17084002494812
+assert property (p_busy_finish) else $error(""Property p_busy_finish failed"");
+    endmodule;",OK,1.9884979724884033
 "module proto_case_9(input logic clk, rst, go, done, output logic active);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) active <= 0;
@@ -3405,18 +3322,386 @@ always_ff @(posedge clk or posedge rst) begin
 end
 endmodule
 "," module proto_case_9_assertions (input logic clk, rst, go, done, output logic active);
-    property p_reset;
-  @(posedge clk or posedge rst) (!rst && (active == 1)) |-> (active == 1);
+    property p_rst;
+  @(posedge clk or posedge rst) ((rst && !$past(rst)) |-> (active == 0));
 endproperty
-assert property (p_reset);
+assert property (p_rst);
 
 property p_go_to_active;
-  @(posedge clk) rst |-> (active == 0);
+  @(posedge clk) (active == 1'b0 && go) |-> ##[1:2] (active == 1);
 endproperty
 assert property (p_go_to_active);
 
 property p_done_to_inactive;
-  @(posedge clk) (!rst && active && done) |-> (active == 0);
+  @(posedge clk) (active == 1'b1 && done) |-> ##[1:2] (active == 0);
 endproperty
 assert property (p_done_to_inactive);
-    endmodule;",OK,1.9690613746643066
+    endmodule;",OK,2.302900552749634
+"module router_fsm (
+    input  logic clk,
+    input  logic rst_n,
+    input  logic [3:0] req,
+    output logic [1:0] selected,
+    output logic grant
+);
+    typedef enum logic [1:0] {IDLE, LOOKUP, FORWARD, DROP} state_t;
+    state_t state;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            state <= IDLE;
+            selected <= 2'b00;
+            grant <= 1'b0;
+        end else begin
+            case (state)
+                IDLE: begin
+                    grant <= 1'b0;
+                    if (req != 4'b0000)
+                        state <= LOOKUP;
+                end
+
+                LOOKUP: begin
+                    casez (req)
+                        4'b1???: selected <= 2'd3;
+                        4'b01??: selected <= 2'd2;
+                        4'b001?: selected <= 2'd1;
+                        4'b0001: selected <= 2'd0;
+                        default: selected <= 2'd0;
+                    endcase
+                    state <= (req == 4'b0000) ? IDLE : FORWARD;
+                end
+
+                FORWARD: begin
+                    grant <= 1'b1;
+                    if (req[selected] == 1'b0)
+                        state <= IDLE;
+                end
+
+                DROP: state <= IDLE;
+            endcase
+        end
+    end
+endmodule
+"," module router_fsm_assertions (input  logic clk,
+    input  logic rst_n,
+    input  logic [3:0] req,
+    output logic [1:0] selected,
+    output logic grant);
+    property p_grant_when_forward;
+  @(posedge clk) (state == FORWARD) |-> ##1 (grant == 1'b1);
+endproperty
+assert property (p_grant_when_forward) else $error(""Assertion failed: grant should be high when state is FORWARD"");
+
+property p_selected_lookup;
+  @(posedge clk) (state == LOOKUP) |-> ##1 ((req[3] & req[2] & ~req[1] & ~req[0]) -> (selected == 2'd3));
+endproperty
+assert property (p_selected_lookup) else $error(""Assertion failed: selected should be 2'd3 when LOOKUP and req matches 4'b1???"");
+
+property p_selected_default_lookup;
+  @(posedge clk) (state == LOOKUP && (req != 4'b1??? && req != 4'b01?? && req != 4'b001? && req != 4'b0001)) |-> ##1 (selected == 2'd0);
+endproperty
+assert property (p_selected_default_lookup) else $error(""Assertion failed: selected should default to 2'd0 when LOOKUP and no specific req matches"");
+
+property p_state_idle;
+  @(posedge clk or negedge rst_n) if (!rst_n) disable iff (!rst_n) (state == IDLE);
+endproperty
+assert property (p_state_idle) else $error(""Assertion failed: state should be IDLE when reset is active"");
+    endmodule;","sv_file.sv:22:47-53: syntax error at token ""disable""
+sv_file.sv:23:1-11: syntax error at token ""endproperty""
+",5.089353561401367
+"module router_fsm (
+    input  logic clk,
+    input  logic rst_n,
+    input  logic [3:0] req,
+    output logic [1:0] selected,
+    output logic grant
+);
+    typedef enum logic [1:0] {IDLE, LOOKUP, FORWARD, DROP} state_t;
+    state_t state;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            state <= IDLE;
+            selected <= 2'b00;
+            grant <= 1'b0;
+        end else begin
+            case (state)
+                IDLE: begin
+                    grant <= 1'b0;
+                    if (req != 4'b0000)
+                        state <= LOOKUP;
+                end
+
+                LOOKUP: begin
+                    casez (req)
+                        4'b1???: selected <= 2'd3;
+                        4'b01??: selected <= 2'd2;
+                        4'b001?: selected <= 2'd1;
+                        4'b0001: selected <= 2'd0;
+                        default: selected <= 2'd0;
+                    endcase
+                    state <= (req == 4'b0000) ? IDLE : FORWARD;
+                end
+
+                FORWARD: begin
+                    grant <= 1'b1;
+                    if (req[selected] == 1'b0)
+                        state <= IDLE;
+                end
+
+                DROP: state <= IDLE;
+            endcase
+        end
+    end
+endmodule
+"," module router_fsm_assertions (input  logic clk,
+    input  logic rst_n,
+    input  logic [3:0] req,
+    output logic [1:0] selected,
+    output logic grant);
+    property p_grant_lookup;
+  @(posedge clk or negedge rst_n) (state == LOOKUP) |-> ##1 (req != 4'b0000 && grant == 1'b0);
+endproperty
+assert property (p_grant_lookup) else $error(""Grant assertion failed at lookup state"");
+
+property p_selected_forward;
+  @(posedge clk or negedge rst_n) (state == FORWARD) |-> ##1 (req[selected] == 1'b1);
+endproperty
+assert property (p_selected_forward) else $error(""Selected assertion failed at forward state"");
+
+property p_grant_forward;
+  @(posedge clk or negedge rst_n) (state == FORWARD && req != 4'b0000) |-> ##1 grant;
+endproperty
+assert property (p_grant_forward) else $error(""Grant assertion failed at forward state"");
+
+property p_state_drop;
+  @(posedge clk or negedge rst_n) (state == DROP) |-> ##1 (state == IDLE);
+endproperty
+assert property (p_state_drop) else $error(""State transition assertion failed at drop state"");
+    endmodule;",OK,3.702037811279297
+"module instr_decoder (
+    input  logic [31:0] instr,
+    output logic [3:0] alu_op,
+    output logic writeback,
+    output logic [2:0] opcode
+);
+    typedef enum logic [2:0] {ALU, LOAD, STORE, BRANCH, SYS} op_t;
+    always_comb begin
+        writeback = 0;
+        alu_op = 0;
+        opcode = instr[31:29];
+
+        unique case (opcode)
+            ALU: begin
+                writeback = 1;
+                case (instr[28:25])
+                    4'h0: alu_op = 4'h1; // ADD
+                    4'h1: alu_op = 4'h2; // SUB
+                    4'h2: alu_op = 4'h3; // AND
+                    default: alu_op = 4'hF; // illegal
+                endcase
+            end
+
+            LOAD:  writeback = 1;
+            STORE: writeback = 0;
+            BRANCH: writeback = 0;
+            SYS: writeback = 0;
+        endcase
+    end
+endmodule
+"," module instr_decoder_assertions (input  logic [31:0] instr,
+    output logic [3:0] alu_op,
+    output logic writeback,
+    output logic [2:0] opcode);
+    property p_writeback_alu;
+  @(posedge clk) (opcode == ALU) |-> (writeback == 1);
+endproperty
+assert property (p_writeback_alu) else $error(""ALU operation failed to set writeback"");
+
+property p_alu_op_add;
+  @(posedge clk) (opcode == ALU && instr[28:25] == 4'h0) |-> (alu_op == 4'h1);
+endproperty
+assert property (p_alu_op_add) else $error(""ALU ADD operation failed"");
+
+property p_alu_op_sub;
+  @(posedge clk) (opcode == ALU && instr[28:25] == 4'h1) |-> (alu_op == 4'h2);
+endproperty
+assert property (p_alu_op_sub) else $error(""ALU SUB operation failed"");
+
+property p_alu_op_and;
+  @(posedge clk) (opcode == ALU && instr[28:25] == 4'h2) |-> (alu_op == 4'h3);
+endproperty
+assert property (p_alu_op_and) else $error(""ALU AND operation failed"");
+
+property p_illegal_alu_op;
+  @(posedge clk) (opcode == ALU && (instr[28:25] != 4'h0 && instr[28:25] != 4'h1 && instr[28:25] != 4'h2)) |-> (alu_op == 4'hF);
+endproperty
+assert property (p_illegal_alu_op) else $error(""Illegal ALU operation not set to F"");
+    endmodule;",OK,5.554835796356201
+"module phy_link (
+    input logic clk,
+    input logic [3:0] mode,
+    output logic [1:0] speed,
+    output logic training
+);
+    always_ff @(posedge clk) begin
+        casez (mode)
+            4'b1???: speed <= 2'b11;   // Gen3
+            4'b01??: speed <= 2'b10;   // Gen2
+            4'b001?: speed <= 2'b01;   // Gen1
+            4'b0001: speed <= 2'b00;   // Safe
+        endcase
+    end
+
+    always_ff @(posedge clk)
+        training <= (speed != 2'b00);
+endmodule
+"," module phy_link_assertions (input logic clk,
+    input logic [3:0] mode,
+    output logic [1:0] speed,
+    output logic training);
+    property p_gen3;
+  @(posedge clk) (mode[3:2] == 2'b11) |-> (speed == 2'b11);
+endproperty
+assert property (p_gen3);
+
+property p_gen2;
+  @(posedge clk) (mode[3:1] == 3'b01?) |-> (speed == 2'b10);
+endproperty
+assert property (p_gen2);
+
+property p_gen1;
+  @(posedge clk) (mode[3:0] == 4'b001?) |-> (speed == 2'b01);
+endproperty
+assert property (p_gen1);
+
+property p_safe;
+  @(posedge clk) (mode == 4'b0001) |-> (speed == 2'b00);
+endproperty
+assert property (p_safe);
+
+property p_training_not_zero;
+  @(posedge clk) (speed != 2'b00) |-> (training == 1);
+endproperty
+assert property (p_training_not_zero);
+    endmodule;",OK,3.617710828781128
+"module mem_ctrl (
+    input logic clk,
+    input logic [1:0] cmd,
+    input logic [1:0] burst,
+    output logic ack,
+    output logic err
+);
+    always_ff @(posedge clk) begin
+        ack <= 0;
+        err <= 0;
+        case (cmd)
+            2'b00: begin // READ
+                case (burst)
+                    2'b00, 2'b01: ack <= 1;
+                    default: err <= 1;
+                endcase
+            end
+
+            2'b01: begin // WRITE
+                case (burst)
+                    2'b00, 2'b10: ack <= 1;
+                    default: err <= 1;
+                endcase
+            end
+
+            default: err <= 1;
+        endcase
+    end
+endmodule
+"," module mem_ctrl_assertions (input logic clk,
+    input logic [1:0] cmd,
+    input logic [1:0] burst,
+    output logic ack,
+    output logic err);
+    property p_ack_read_low;
+  @(posedge clk) (cmd == 2'b00 && (burst == 2'b00 || burst == 2'b01)) |-> (ack == 1);
+endproperty
+assert property (p_ack_read_low) else $error(""Assertion p_ack_read_low failed"");
+
+property p_err_read_high;
+  @(posedge clk) (cmd == 2'b00 && !(burst == 2'b00 || burst == 2'b01)) |-> (err == 1);
+endproperty
+assert property (p_err_read_high) else $error(""Assertion p_err_read_high failed"");
+
+property p_ack_write_low;
+  @(posedge clk) (cmd == 2'b01 && (burst == 2'b00 || burst == 2'b10)) |-> (ack == 1);
+endproperty
+assert property (p_ack_write_low) else $error(""Assertion p_ack_write_low failed"");
+
+property p_err_write_high;
+  @(posedge clk) (cmd == 2'b01 && !(burst == 2'b00 || burst == 2'b10)) |-> (err == 1);
+endproperty
+assert property (p_err_write_high) else $error(""Assertion p_err_write_high failed"");
+
+property p_err_default;
+  @(posedge clk) ((cmd != 2'b00 && cmd != 2'b01) || (burst == 2'b00 || burst == 2'b01 || burst == 2'b10)) |-> (err == 1);
+endproperty
+assert property (p_err_default) else $error(""Assertion p_err_default failed"");
+    endmodule;",OK,5.8417792320251465
+"module dma_engine (
+    input logic clk,
+    input logic [1:0] size,
+    output logic busy,
+    output logic done
+);
+    typedef enum logic [1:0] {SMALL, MEDIUM, LARGE} size_t;
+
+    always_ff @(posedge clk) begin
+        case (size)
+            SMALL: begin
+                busy <= 1;
+                done <= ##1 1;
+            end
+
+            MEDIUM: begin
+                busy <= 1;
+                done <= ##2 1;
+            end
+
+            LARGE: begin
+                busy <= 1;
+                done <= ##4 1;
+            end
+        endcase
+    end
+endmodule
+"," module dma_engine_assertions (input logic clk,
+    input logic [1:0] size,
+    output logic busy,
+    output logic done);
+    property p_busy_small;
+  @(posedge clk) (size == SMALL) |-> (busy == 1);
+endproperty
+assert property (p_busy_small);
+
+property p_done_delay_small;
+  @(posedge clk) (size == SMALL) |-> ##[1:1] (done == 1);
+endproperty
+assert property (p_done_delay_small);
+
+property p_busy_medium;
+  @(posedge clk) (size == MEDIUM) |-> (busy == 1);
+endproperty
+assert property (p_busy_medium);
+
+property p_done_delay_medium;
+  @(posedge clk) (size == MEDIUM) |-> ##[2:2] (done == 1);
+endproperty
+assert property (p_done_delay_medium);
+
+property p_busy_large;
+  @(posedge clk) (size == LARGE) |-> (busy == 1);
+endproperty
+assert property (p_busy_large);
+
+property p_done_delay_large;
+  @(posedge clk) (size == LARGE) |-> ##[4:4] (done == 1);
+endproperty
+assert property (p_done_delay_large);
+    endmodule;",OK,3.89410662651062
