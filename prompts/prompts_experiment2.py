@@ -9,6 +9,7 @@ def experiment2_simple_call(code: str) -> str:
     Assertions must verify functional behavior, not mirror control logic.
     Generate one distinct property and one corresponding assert property for each observable functional effect (signal assignment, state update, output value). 
     Do not group multiple functional checks in a single property. 
+    Always include in your output the internal variables and auxiliar functions used inside the code. 
     If a property references a function from the original code, include it as well in the output code.
     Assertions must observe RTL signals only. Do not use $display, $write, $finish, $stop, or any system task with side effects. All assertion expressions must be pure boolean logic.
     Assertions must not re-encode decode or control logic (e.g., case, case inside, if/else, ranges, or complex boolean expressions). If the RTL provides a decoded signal (enum, one-hot, flag, or state variable), assertions must be written against that signal.
@@ -21,7 +22,7 @@ def experiment2_simple_call(code: str) -> str:
     Assertions must be compatible with both simulation and formal verification tools.
     Output only valid SystemVerilog code. Do not include explanations, comments, markdown, or non-SystemVerilog text.
     When a functional assignment depends on the previous value of a signal (e.g., result = result + opcode or enable = ~enable), the property may reference the prior value using $past(signal) to accurately capture the observable functional effect while respecting RTL semantics (e.g., result == $past(result) or enable == ~$past(enable))
-
+    
     Few-Shot Examples: The following examples illustrate the expected transformation from RTL code to properties and assertions. Use them strictly as behavioral and structural reference. 
 
     Example 1

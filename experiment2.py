@@ -1,5 +1,5 @@
 import csv, os, time
-import utils
+from utils import regex, utils
 from prompts.prompts_experiment2 import experiment2_simple_call as generate_prompt
 
 
@@ -22,13 +22,15 @@ if __name__ == "__main__":
         for code in codes:
             print("########################################")
             time1 = time.time()
+
             prompt = generate_prompt(code=code)
-            module_name, parameters = utils.extract_module_ports(code=code)
+            module_name, parameters = regex.extract_module_ports(code=code)
+            aux_vars = regex.extract_func_var_assign(code=code)
             generated_asserts = utils.query_ollama(prompt=prompt, model=MODEL)
+            final_assertion_content = utils.generate_final_assertion_content(module_name = module_name, parameters = parameters, aux_vars= aux_vars, assertions = generated_asserts)
+            compiler_output = utils.check_code_syntax(code=final_assertion_content)
 
             time2 = time.time()
-            final_assertion_content = utils.generate_final_assertion_content(module_name = module_name, parameters = parameters, assertions = generated_asserts)
-            compiler_output = utils.check_code_syntax(code=final_assertion_content)
             writer.writerow([
                 code,
                 final_assertion_content,
