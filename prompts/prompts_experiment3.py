@@ -1,0 +1,199 @@
+def experiment3_sv_to_tgts(code: str) -> str:
+    TEMPLATE = f"""
+    You are a hardware-semantics extraction engine.
+    
+    Your job is to read a SystemVerilog module and rewrite it as a
+    Typed Guarded Transition System.
+    
+    A Typed Guarded Transition System is a formal description of:
+      • signals and their types
+      • clocks and resets
+      • how state and registers evolve over time
+      • how case statements and if statements control transitions
+    
+    You must extract the exact behavior of the RTL without guessing
+    or simplifying.
+    
+    1) WHAT YOU MUST OUTPUT
+    
+    You must output only the Typed Guarded Transition System.
+    
+    The output must be structured using only these sections:
+    
+    SIGNALS
+    EVENTS
+    FUNCTIONS
+    RULE
+    
+    Do not output any natural language explanation.
+    
+    2) TIME MODEL
+    
+    All sequential logic is expressed using explicit time indices.
+    
+    Use:
+      x[t]   = value of x in the current clock cycle
+      x[t+1] = value of x in the next clock cycle
+    
+    Never use x', next(x), or temporal operators.
+    Always use [t] and [t+1].
+    
+    3) CLOCKS AND RESETS
+    
+    If the RTL has:
+    
+      always_ff @(posedge clk)
+    
+    Then every rule for that block must include:
+      EVENT(posedge(clk))
+    
+    If the RTL has an asynchronous reset:
+    
+      always_ff @(posedge clk or negedge rst)
+    
+    Then you must create a rule:
+    
+      RULE RST
+        WHEN EVENT(negedge(rst))
+        THEN <reset assignments>
+    
+    If the reset is synchronous, it must appear as:
+      WHEN EVENT(posedge(clk)) AND rst == 0
+    
+    4) SIGNAL DECLARATION
+    
+    Every signal must be declared in SIGNALS.
+    
+    Use these types:
+      bit
+      bit[N:M]
+      enum {{A, B, C, ...}}
+    
+    State variables and registers must be marked:
+      clocked(clk)
+      reset(rst, async|sync, value=V)
+    
+    Example:
+      state : enum {{IDLE, RUN}} clocked(clk) reset(rst_n, async, value=IDLE)
+    
+    5) CASE AND IF LOGIC
+    
+    Every branch of every if and case statement must become a RULE.
+    
+    Each RULE has:
+      WHEN <guard>
+      THEN <assignments>
+    
+    Rules must be:
+      • mutually exclusive
+      • collectively exhaustive for each state
+    
+    6) HOLD BEHAVIOR
+    
+    If a register is not assigned in a branch,
+    it must hold its previous value.
+    
+    This must be written explicitly:
+      x[t+1] == x[t]
+    
+    Never leave a register without an assignment.
+    
+    7) case, casez, casex
+    
+    Normal case:
+      use equality (==)
+    
+    casez:
+      use pattern matching:
+        MATCH(signal[t], "pattern", CASEZ)
+    
+    casex:
+      use:
+        MATCH(signal[t], "pattern", CASEX)
+    
+    Use '?' for wildcards.
+    
+    Example:
+      4'b01??  →  MATCH(req[t], "01??", CASEZ)
+    
+    Default must be written as:
+      NOT (pattern1 OR pattern2 OR ...)
+    
+    8) BIT SELECTS
+    
+    For expressions like:
+      req[selected]
+    
+    Write:
+      req[t][ selected[t] ]
+    
+    9) FUNCTIONS
+    
+    If the RTL calls a function, declare it:
+    
+    FUNCTION name(arg1, arg2) : return_type
+    
+    Then use it symbolically:
+      name(x[t], y[t]) == value
+    
+    Do NOT expand or rewrite the function.
+    
+    10) ILLEGAL STATE HANDLING
+    
+    For every enum state, you must add a rule:
+    
+      RULE ILLEGAL
+        WHEN EVENT(posedge(clk)) AND state[t] ∉ {{all valid states}}
+        THEN state[t+1] == <reset or recovery state>
+    
+    11) INPUT
+    
+    The SystemVerilog module will be provided below.
+    
+    {code}
+    
+    
+    12) OUTPUT
+    
+    Produce the complete Typed Guarded Transition System.
+    
+    Do not explain.
+    Do not summarize.
+    Do not use abbreviations.
+    Only emit SIGNALS, EVENTS, FUNCTIONS, and RULE blocks.
+    """
+
+    return TEMPLATE
+
+def experiment3_tgts_to_assertions(tgts: str) -> str:
+
+    TEMPLATE = f"""
+    You are a formal verification assistant.
+    You generate SystemVerilog Assertions (SVA) from a Typed Guarded Transition System (TGTS).
+    The TGTS is a complete formal model of an RTL design.
+    You must not guess, not simplify, and not reinterpret the TGTS.
+    
+    The TGTS uses discrete time steps:
+    x[t] = value of signal x at current clock edge
+    x[t+1] = value of signal x at next clock edge
+    
+    EVENT(posedge(clk)) corresponds to @(posedge clk)
+    EVENT(negedge(rst_n)) corresponds to @(negedge rst_n)
+    
+    You must:
+    Use only information in the TGTS
+    Not infer missing behavior
+    Not simplify pattern matches
+    Not merge rules
+    Not skip default behavior
+    Not introduce new logic
+    Every TGTS rule must produce at least one SVA.
+    ALWAYS OUTPUT ONLY THE FINAL SYSTEMVERILOG WITHOUT EXPLANATIONS 
+    
+    The following is the complete Typed Guarded Transition System of the design:
+    
+    {tgts}
+    
+    """
+
+    return TEMPLATE
