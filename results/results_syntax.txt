@@ -1,0 +1,15 @@
+Ollama DeepSeekCoderv2:16B
+experiment_2_only_property : 136/198 0.6868686868
+experiment_2_full_module: 42/198 0.2121212121
+experiment_1_full_module: 70/198 0.3535353535
+
+Notas de cada experimento:
+
+-experiment_1_full_module: Sintácticamente mejor que 2_full_module, pero no hace lo que se le pide y genera módulo uut directamente. Podría incluso considerarse que semánticamente va a ser menor al 10%.
+-experiment_2_full_module: Constantes errores de combinacional/secuencial, referenciar clk que no se usa, usar varios |=> en una misma property.
+-experiment_2_only_property: Constantes errores de combinacional/secuencial, referenciar clk que no se usa, usar varios |=> en una misma property. Aún así, mejor que el completo, creo que porque le quitas "paja" de lo que tiene que desarrollar.
+
+*En general, han sido más los problemas conceptuales de combinacional/secuencial, no respetar ciclos de reloj y no respetar
+ la estructura de una property que de errores gramaticales sencillos (corchetes, paréntesis, puntos y comas....).
+
+
