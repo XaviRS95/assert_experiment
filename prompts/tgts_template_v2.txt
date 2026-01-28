@@ -1,0 +1,82 @@
+# ROLE & TASK
+You are an expert SystemVerilog analyzer specialized in extracting Typed Guarded Transition System (TGTS) rules from hardware description code.
+Your task is to analyze the provided SystemVerilog module and generate a complete set of TGTS rules that capture all the module's behavior for verification purposes.
+
+[Rules]
+Follow this template for each rule:
+[Rule <unique_name>]
+Type: <combinational|sequential|async>
+Priority: <integer>  # Lower number = higher priority (1 = highest)
+Delay: <cycles>      # 0 for combinational/async, ≥1 for sequential
+Loop: <index:var range:start:end step:step> or "none"
+When: @<event> <condition_expression>
+Then: <signal>@<time> = <expression>
+
+# TIME NOTATION GUIDE
+- @t: Current evaluation time
+- @t+1: Next clock cycle (for sequential)
+- @t+n: n cycles after current
+- @t-1: Previous cycle
+- @level for combinational, @posedge(clk) or @negedge(clk) for sequential
+
+# EVENT TYPES
+- @level: Combinational logic (evaluates on any input change)
+- @posedge(clk): At positive clock edge
+- @negedge(clk): At negative clock edge
+- @posedge(rst): At reset assertion edge
+
+# RULE TYPES
+- combinational: No clock, immediate evaluation (use @level)
+- sequential: Clock-triggered (use @posedge/negedge)
+- async: Asynchronous reset/control (no clock, immediate)
+
+# PRIORITY GUIDELINES
+- Priority 1: Reset/clear conditions
+- Priority 2: Main operational conditions
+- Priority 3: Default/fallback conditions
+- Lower number = higher priority
+
+# CRITICAL ANALYSIS STEPS
+1. Identify ALL always blocks and assign processes
+2. Determine clock/reset signals and edges
+3. Analyze condition hierarchies (if-else, case, nested)
+4. Extract explicit and implicit assignments
+5. Identify loops and generate indexed rules
+6. Determine default behaviors for uncovered cases
+7. Check for signal dependencies and timing
+
+# CRITICAL RULES FOR ACCURACY:
+1. Reset rules must use Type: "async" and @posedge(reset) or @negedge(reset)
+2. NEVER use "state@t-1" - always use current time "@t" in conditions
+3. ALWAYS expand case statements into separate rules
+4. Sequential rules update "@t+1", combinational update "@t"
+5. When @posedge(clk) means evaluate AT the clock edge, use state@t (current value)
+
+# STRICT CONSTRAINTS (DO NOT VIOLATE):
+1. A rule can ONLY have ONE @event: @level, @posedge(X), or @negedge(X)
+2. NEVER combine multiple @events like "@posedge(clk) and @posedge(reset)"
+3. Reset ALWAYS has Priority: 1 and Type: async
+4. Sequential rules ALWAYS have Delay: 1 (not 0)
+5. Use count@t+1 (not count@t) for sequential assignments
+6. When @posedge(clk), conditions use @t (current values)
+7. Expand ALL case statement branches into separate rules
+8. Include default case for uncovered values (X, Z)
+
+# INPUT CODE
+Here is the SystemVerilog module to analyze:
+
+module seq_case75(
+    input logic clk, reset, enable,
+    output logic [3:0] count
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            count <= 4'b0000;
+        else
+            case(enable)
+                1'b0: count <= count;      // hold
+                1'b1: count <= count + 1;  // increment
+                default: count <= 4'b0000;
+            endcase
+    end
+endmodule

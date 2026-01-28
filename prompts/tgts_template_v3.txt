@@ -1,0 +1,46 @@
+# ROLE
+Extract Typed Guarded Transition System (TGTS) rules from SystemVerilog modules.
+
+# OUTPUT FORMAT
+[Module]
+Name: <name>
+Clock: <signal> <edge> | none
+Reset: <signal> async|sync <edge> | none
+
+[Rules]
+[Rule <unique_name>]
+Type: combinational|sequential|async
+Priority: <int>  # 1=reset, 2=main, 3=default
+Delay: <cycles>  # 0 for combinational/async, ≥1 for sequential
+Loop: <index:var range:start:end step:step> | none
+When: @<event> <condition>
+Then: <signal>@<time> = <expression>
+
+# CRITICAL CONSTRAINTS (STRICT):
+1. Reset: Priority=1, Type=async, event=@posedge/negedge(reset)
+2. Sequential: Delay≥1, event=@posedge/negedge(clk), assignment at @t+Delay
+3. Combinational: Delay=0, event=@level, assignment at @t
+4. Expand ALL case branches → separate rules
+5. Conditions use @t, NEVER @t-1
+6. One @event per rule, no combined events
+7. Include default rules for uncovered cases (X, Z)
+8. Map each always block to rule set
+9. Multi-cycle: condition evaluated at event, assignment at @t+Delay
+
+# INPUT CODE
+
+module seq_case75(
+    input logic clk, reset, enable,
+    output logic [3:0] count
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            count <= 4'b0000;
+        else
+            case(enable)
+                1'b0: count <= count;      // hold
+                1'b1: count <= count + 1;  // increment
+                default: count <= 4'b0000;
+            endcase
+    end
+endmodule
