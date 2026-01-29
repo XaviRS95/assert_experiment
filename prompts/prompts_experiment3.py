@@ -197,3 +197,100 @@ def experiment3_tgts_to_assertions(tgts: str) -> str:
     """
 
     return TEMPLATE
+
+
+
+def comb_to_tgts(parameters: str, ports: str, inner_vars:str, block: str):
+    """
+
+    :param parameters:
+    :param ports:
+    :param block:
+    :param inner_vars:
+    :return:
+    """
+
+    TEMPLATE = f"""
+
+    ROLE: SystemVerilog → TGTS translator (COMBINATIONAL ONLY).
+    
+    IMPORTANT:
+    - This module is PURELY COMBINATIONAL.
+    - Do NOT introduce clocks, events, or t/t+1.
+    - Use ONLY same-cycle assignments: x == expr
+    - Do NOT invent signals.
+    - Do NOT explain.
+    - Output TGTS only.
+    
+    TASK:
+    Convert the SystemVerilog block below into TGTS rules.
+    
+    Follow this TGTS format:
+    
+    SIGNALS
+      name : type [width] combinational
+    
+    RULE <name>
+      WHEN <boolean guard>
+      THEN <assignments>
+    
+    Use:
+    - RULE per assignment or conditional branch
+    - WHEN true for unconditional assignments
+    - Explicit guards for if statements
+    - FUNCTION(...) for function calls
+    - Explicit default rules if a signal is conditionally assigned
+    
+    MODULE PARAMETERS:
+    {parameters}
+    
+    PORTS:
+    {ports}
+    
+    AUXILIARY VARIABLES:
+    {inner_vars}
+    
+    COMBINATIONAL BLOCK:
+    {block}
+    
+    OUTPUT:
+    TGTS only.
+
+    """
+
+    return TEMPLATE
+
+def tgts_to_comb(tgts: str)-> str:
+    TEMPLATE = f"""
+
+    ROLE: TGTS → SystemVerilog Assertion translator (COMBINATIONAL ONLY).
+
+    IMPORTANT:
+    - This is PURELY COMBINATIONAL.
+    - Do NOT use clocks.
+    - Do NOT use posedge/negedge.
+    - Do NOT use t or t+1.
+    - Do NOT invent signals.
+    - Do NOT explain.
+
+    TASK:
+    Convert the TGTS rule below into ONE SystemVerilog assertion.
+
+    Rules:
+    - WHEN becomes the antecedent.
+    - THEN becomes the consequent.
+    - Use immediate assertion: assert(...)
+    - Use |-> only if WHEN is not "true".
+    - If WHEN is "true", assert the assignment directly.
+
+    Format:
+
+    assert ( <condition> );
+
+    TGTS RULES:
+    {tgts}
+
+    OUTPUT:
+    SystemVerilog assertion only.
+
+    """
