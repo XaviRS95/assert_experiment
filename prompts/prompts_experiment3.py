@@ -260,37 +260,46 @@ def comb_to_tgts(parameters: str, ports: str, inner_vars:str, block: str):
 
     return TEMPLATE
 
-def tgts_to_comb(tgts: str)-> str:
+def tgts_to_comb_rules(tgts: str)-> str:
     TEMPLATE = f"""
 
-    ROLE: TGTS → SystemVerilog Assertion translator (COMBINATIONAL ONLY).
-
+    ROLE: TGTS → SystemVerilog Assertion generator (COMBINATIONAL).
+    
     IMPORTANT:
-    - This is PURELY COMBINATIONAL.
+    - Design is PURELY COMBINATIONAL.
     - Do NOT use clocks.
-    - Do NOT use posedge/negedge.
-    - Do NOT use t or t+1.
+    - Use @(*) for assertions.
     - Do NOT invent signals.
     - Do NOT explain.
-
+    - Output PROPERTIES only.
+    
     TASK:
-    Convert the TGTS rule below into ONE SystemVerilog assertion.
+    For EACH TGTS RULE below, generate one named property.
+    
+    The TGTS rule format example:
+    
+    RULE rule_tl_i_a_valid_true
+        WHEN condition1 && (condition2 == 3'b000) || (condition3 == 3'b000)
+        THEN value_check = 1'b0;
 
+    The property format must be:
+    
+    property rule_tl_i_a_valid_true_property;
+      @(*) condition1 && (condition2 == 3'b000) || (condition3 == 3'b000) |-> value_check == 1'b0;
+    endproperty
+    
     Rules:
-    - WHEN becomes the antecedent.
-    - THEN becomes the consequent.
-    - Use immediate assertion: assert(...)
-    - Use |-> only if WHEN is not "true".
-    - If WHEN is "true", assert the assignment directly.
-
-    Format:
-
-    assert ( <condition> );
-
-    TGTS RULES:
+    - One property per TGTS RULE
+    - Property name must be derived from RULE name
+    - Boolean expression must directly reflect the RULE guard and assignment
+    - Use |-> implication
+    
+    TGTS INPUT:
     {tgts}
-
+    
     OUTPUT:
-    SystemVerilog assertion only.
-
+    SystemVerilog properties only.
+    
     """
+
+    return TEMPLATE
