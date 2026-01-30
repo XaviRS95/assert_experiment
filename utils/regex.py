@@ -166,3 +166,29 @@ def extract_code(output: str)-> str:
     match = re.search(r"```systemverilog\s*([\s\S]*?)\s*```", output)
     sv_code = match.group(1) if match else ""
     return sv_code
+
+def extract_tgts_rules(model_response: str)-> list:
+    '''
+    Auxiliar function to extract the systemverilog code from the LLM output.
+    This is just a safeguard in case the model decides to putput something else than SystemVerilog code.
+    '''
+    # Regex breakdown:
+    # RULE + name
+    # WHEN + everything until the THEN keyword (non-greedy)
+    # THEN + the full assignment logic
+    pattern = r"RULE\s+(?P<name>\w+)\s+WHEN\s+(?P<clauses>[\s\S]+?)\s+THEN\s+(?P<check>.+)"
+
+    matches = []
+
+    # re.MULTILINE is used to handle the start/end of the string correctly
+    for match in re.finditer(pattern, model_response):
+        # .groupdict() maps the (?P<name>) syntax directly to keys
+        rule_dict = match.groupdict()
+
+        # Clean up whitespace/newlines from the captured clauses
+        rule_dict['clauses'] = rule_dict['clauses'].strip()
+        rule_dict['check'] = rule_dict['check'].strip()
+
+        matches.append(rule_dict)
+
+    return matches

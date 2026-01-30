@@ -7,7 +7,7 @@ if __name__ == "__main__":
     #result = query_ollama(prompt)
     #print(result)
     MODEL = "deepseek-coder-v2:16b"
-    OUTPUT_CSV_FILENAME = f"sv_results_2_{MODEL}.csv"
+    OUTPUT_CSV_FILENAME = f"sv_results_1_{MODEL}.csv"
     ok_number = 0
 
     if os.path.exists(OUTPUT_CSV_FILENAME):

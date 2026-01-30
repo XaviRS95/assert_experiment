@@ -217,10 +217,10 @@ def comb_to_tgts(parameters: str, ports: str, inner_vars:str, block: str):
     IMPORTANT:
     - This module is PURELY COMBINATIONAL.
     - Do NOT introduce clocks, events, or t/t+1.
-    - Use ONLY same-cycle assignments: x == expr
-    - Do NOT invent signals.
+    - Use ONLY same-cycle assignments respecting the original variable names:  == 
+    - Do NOT invent signals or use dummy variables
     - Do NOT explain.
-    - Output TGTS only.
+    - ONLY output TGTS rules only.
     
     TASK:
     Convert the SystemVerilog block below into TGTS rules.
@@ -231,8 +231,7 @@ def comb_to_tgts(parameters: str, ports: str, inner_vars:str, block: str):
       name : type [width] combinational
     
     RULE <name>
-      WHEN <boolean guard>
-      THEN <assignments>
+      WHEN <boolean guard> && <assignments>
     
     Use:
     - RULE per assignment or conditional branch

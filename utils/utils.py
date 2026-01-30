@@ -1,5 +1,5 @@
 import re, requests, csv, json
-from .regex import extract_code
+from .regex import extract_code, extract_tgts_rules
 
 def read_code_files(csv_path: str) -> list:
     code_list = []
@@ -27,8 +27,9 @@ def generate_final_assertion_content(module_name:str, parameters: str, aux_vars:
 def query_ollama(
     prompt: str,
     model: str,
+    code_call: bool,
     host: str = "http://localhost:11434"
-) -> str:
+):
     url = f"{host}/api/generate"
 
     payload = {
@@ -41,8 +42,12 @@ def query_ollama(
     response.raise_for_status()
 
     data = response.json()
-    sv_code = extract_code(output=data["response"])
-    return sv_code
+    if code_call:
+        sv_code = extract_code(output=data["response"])
+        return sv_code
+    else:
+        tgts_rules = extract_tgts_rules(model_response=data['response'])
+        return tgts_rules
 
 
 def check_code_syntax(code: str):
@@ -54,7 +59,3 @@ def check_code_syntax(code: str):
     response = requests.post(url=endpoint, json=payload)
     result = json.loads(response.content.decode("utf-8"))
     return result['result']
-
-
-
-
