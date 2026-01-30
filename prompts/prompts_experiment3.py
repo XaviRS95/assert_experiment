@@ -212,33 +212,37 @@ def comb_to_tgts(parameters: str, ports: str, inner_vars:str, block: str):
 
     TEMPLATE = f"""
 
-    ROLE: SystemVerilog → TGTS translator (COMBINATIONAL ONLY).
+ROLE: SystemVerilog → TGTS translator (COMBINATIONAL ONLY).
     
-    IMPORTANT:
-    - This module is PURELY COMBINATIONAL.
-    - Do NOT introduce clocks, events, or t/t+1.
-    - Use ONLY same-cycle assignments respecting the original variable names:  == 
-    - Do NOT invent signals or use dummy variables
-    - Do NOT explain.
-    - ONLY output TGTS rules only.
+IMPORTANT:
+- This module is PURELY COMBINATIONAL.
+- Do NOT introduce clocks, events, or t/t+1.
+- Use ONLY same-cycle assignments respecting the original variable names:  == 
+- Do NOT invent signals or use dummy variables
+- Do NOT explain.
+- ONLY output TGTS rules only.
+
+TASK:
+Convert the SystemVerilog block below into TGTS rules.
     
-    TASK:
-    Convert the SystemVerilog block below into TGTS rules.
+Follow this TGTS format EXACTLY:
+
+RULE <signal_name>_<index>
+  WHEN <boolean_expression>
+  THEN <signal_name> == <literal_value>
+
+CONSTRAINTS:
+1. The <signal_name> in the THEN clause MUST match the original SystemVerilog variable name (e.g., tl_o_d_valid).
+2. NEVER use 'x' or placeholder variables.
+3. Every RULE must be self-contained.
     
-    Follow this TGTS format:
-    
-    SIGNALS
-      name : type [width] combinational
-    
-    RULE <name>
-      WHEN <boolean guard> && <assignments>
-    
-    Use:
-    - RULE per assignment or conditional branch
-    - WHEN true for unconditional assignments
-    - Explicit guards for if statements
-    - FUNCTION(...) for function calls
-    - Explicit default rules if a signal is conditionally assigned
+Use:
+- RULE per assignment or conditional branch
+- DO NOT use ELSE statements
+- WHEN true for unconditional assignments
+- Explicit guards for if statements
+- FUNCTION(...) for function calls
+- Explicit default rules if a signal is conditionally assigned
     
     MODULE PARAMETERS:
     {parameters}
