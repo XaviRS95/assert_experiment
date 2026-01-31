@@ -75,38 +75,32 @@ def extract_tgts_rules(text):
     return matches
 
 
-def generate_sva_properties(rules_list):
+def immediate_asserts_from_tgts(rules_list: list):
     sva_lines = []
 
     sva_lines.append("// Automatically generated SystemVerilog Assertions from TGTS")
 
     for rule in rules_list:
         # 1. Clean up the name for the property label
-        prop_name = f"prop_{rule['name']}"
-
-        # 2. Extract clauses and checks
-        # If 'true', the rule is discarded.
+        assert_label = f"assert_label_{rule['name']}"
 
         if rule['clauses'] != 'true':
 
-            antecedent = rule['clauses']
+            assert_body = f'{rule["clauses"]} && {rule["check"]}'
 
-            # 3. Handle multiple checks by joining them with '&&' for the SVA consequent
-            # We use the 'individual_checks' list if you used the previous split logic,
-            # otherwise we use 'check'
-            consequent = " && ".join(rule.get('individual_checks', [rule['check']]))
-
-            # 4. Construct the SVA string
-            # Format: assert property (@(posedge clk) disable iff (rst) antecedent |-> consequent);
-            # Note: Since your block is combinational, we use 'always_comb' style assertions
-            # or immediate assertions, but concurrent ones are better for formal tools.
-
+            #Immediate assertions
             sva_block = (
-                f"// Rule: {prop_name}\n"
-                f"assert_property_{rule['name']}: assert property (\n"
-                f"  {antecedent} |-> {consequent}\n"
-                f") else $error(\"TGTS Violation: {rule['name']} failed\");\n"
+                f'{assert_label}: assert({assert_body}) '
+                f'else $error("Error in immediate assert {assert_label}");'
             )
+
+            #Concurrent construction block
+            # sva_block = (
+            #     f"// Rule: {prop_name}\n"
+            #     f"assert {rule['name']}: assert property (\n"
+            #     f"  {antecedent} |-> {consequent}\n"
+            #     f") else $error(\"TGTS Violation: {rule['name']} failed\");\n"
+            # )
 
             sva_lines.append(sva_block)
 
@@ -114,6 +108,6 @@ def generate_sva_properties(rules_list):
 
 # Execution
 rules_list = extract_tgts_rules(raw_text)
-properties_list = generate_sva_properties(rules_list)
+properties_list = immediate_asserts_from_tgts(rules_list=rules_list)
 
 print(properties_list)

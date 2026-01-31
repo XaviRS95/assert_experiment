@@ -192,3 +192,24 @@ def extract_tgts_rules(model_response: str)-> list:
         matches.append(rule_dict)
 
     return matches
+
+
+def immediate_asserts_from_tgts(tgts_rules: list):
+    sva_lines = []
+
+    sva_lines.append("// Automatically generated SystemVerilog Assertions from TGTS")
+
+    for rule in tgts_rules:
+        # 1. Clean up the name for the property label
+        assert_label = f"assert_label_{rule['name']}"
+
+        if rule['clauses'] != 'true':
+
+            sva_block = (
+                f'{assert_label}: assert( ({rule["clauses"]}) ? ({rule["check"]}) : 1 ) '
+                f'else $error("Error in immediate assert {assert_label}");'
+            )
+
+            sva_lines.append(sva_block)
+
+    return "\n".join(sva_lines)

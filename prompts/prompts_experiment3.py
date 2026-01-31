@@ -221,6 +221,7 @@ IMPORTANT:
 - Do NOT invent signals or use dummy variables
 - Do NOT explain.
 - ONLY output TGTS rules only.
+- INCLUDE ALL assignations in the rules list. 
 
 TASK:
 Convert the SystemVerilog block below into TGTS rules.

@@ -2,54 +2,16 @@ import re
 
 # Example usage:
 sv_code = """
-module tlul_access_ctrl (
-    input  logic        tl_i_a_valid,
-    input  logic [2:0]  tl_i_a_opcode,
-    input  logic [2:0]  tl_i_a_param,
-    input  logic [2:0]  tl_i_a_size,
-    output logic        tl_o_d_error,
-    output logic        tl_o_d_valid
-);
-
+module case4(input logic [3:0] in, output logic out);
     always_comb begin
-        tl_o_d_valid = 1'b0;
-        tl_o_d_error = 1'b0;
-
-        if (tl_i_a_valid) begin
-            tl_o_d_valid = 1'b1;
-
-            unique case (tl_i_a_opcode)
-                3'b000: begin // Get
-                    case (tl_i_a_size)
-                        3'b000, 3'b001, 3'b010: ;
-                        default: tl_o_d_error = 1'b1;
-                    endcase
-                end
-
-                3'b001: begin // PutFullData
-                    case (tl_i_a_param)
-                        3'b000: begin
-                            case (tl_i_a_size)
-                                3'b001, 3'b010: ;
-                                default: tl_o_d_error = 1'b1;
-                            endcase
-                        end
-                        default: tl_o_d_error = 1'b1;
-                    endcase
-                end
-
-                3'b010: begin // PutPartialData
-                    case (tl_i_a_param)
-                        3'b001: ;
-                        default: tl_o_d_error = 1'b1;
-                    endcase
-                end
-
-                default: tl_o_d_error = 1'b1;
-            endcase
-        end
+        case(in)
+            4'b0001: out = 1;
+            4'b0010: out = 0;
+            4'b0100: out = 1;
+            4'b1000: out = 0;
+            default: out = 0;
+        endcase
     end
-
 endmodule
 
 """
