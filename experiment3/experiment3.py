@@ -1,4 +1,4 @@
-from prompts.prompts_experiment3 import comb_to_tgts
+from prompts.prompts_experiment3 import comb_to_tgts, seq_to_tgts
 from utils import utils, regex
 from prompts import prompts_experiment3
 
@@ -9,16 +9,35 @@ def experiment3(model_name:str, file_path:str):
 
     sv_modules = ["""
     
-    module case4(input logic [3:0] in, output logic out);
-        always_comb begin
-            case(in)
-                4'b0001: out = 1;
-                4'b0010: out = 0;
-                4'b0100: out = 1;
-                4'b1000: out = 0;
-                default: out = 0;
-            endcase
+    module test_seq_engine (
+    input  logic       clk_i,
+    input  logic       rst_ni,
+    input  logic       en_i,
+    input  logic [3:0] data_i,
+    output logic [3:0] count_o,
+    output logic       valid_o
+);
+
+    // Internal state
+    logic [3:0] next_count;
+
+    // Sequential Block to translate
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if (!rst_ni) begin
+            count_o <= 4'h0;
+            valid_o <= 1'b0;
+        end else begin
+            if (en_i) begin
+                count_o <= data_i + 1'b1;
+                #5 valid_o <= 1'b1; // Explicit time delay test
+            end else begin
+                // Note: valid_o is explicitly cleared here
+                valid_o <= 1'b0;
+                // Note: count_o is NOT mentioned here (Implicit Hold Test)
+            end
         end
+    end
+
     endmodule
     """]
 
@@ -45,9 +64,9 @@ def experiment3(model_name:str, file_path:str):
             assertions.append(immediate_asserts)
 
         #Sequential blocks
-        # for block in clean_comb_blocks:
-        #     comb_to_tgts_prompt = comb_to_tgts(parameters=parameters, ports=ports, inner_vars=inner_vars, block=block)
-        #     tgts_rules = utils.query_ollama(prompt=comb_to_tgts_prompt, model=model_name, code_call=False)
+        for block in clean_seq_blocks:
+            seq_to_tgts_prompt = seq_to_tgts(parameters=parameters, ports=ports, inner_vars=inner_vars, block=block)
+            tgts_rules = utils.query_ollama(prompt=seq_to_tgts_prompt, model=model_name, code_call=False)
         #     immediate_asserts = regex.immediate_asserts_from_tgts(tgts_rules=tgts_rules)
         #     assertions.append(immediate_asserts)
 

@@ -27,7 +27,7 @@ def generate_final_assertion_content(module_name:str, parameters: str, aux_vars:
 def query_ollama(
     prompt: str,
     model: str,
-    code_call: bool,
+    code_call: bool, #This parameter is to identify if what's needed to be extracted from the response is SystemVerilog code or TGTS rules.
     host: str = "http://localhost:11434"
 ):
     url = f"{host}/api/generate"

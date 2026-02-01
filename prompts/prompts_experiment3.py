@@ -307,3 +307,66 @@ def tgts_to_comb_rules(tgts: str)-> str:
     """
 
     return TEMPLATE
+
+
+def seq_to_tgts(parameters: str, ports: str, inner_vars: str, block: str):
+    """
+
+    :param parameters:
+    :param ports:
+    :param block:
+    :param inner_vars:
+    :return:
+    """
+
+    TEMPLATE = f"""
+
+ROLE: SystemVerilog → TGTS translator (SEQUENTIAL ONLY).
+
+IMPORTANT:
+-This module is PURELY SEQUENTIAL.
+-TEMPORAL NOTATION: Use [t] for current and [t+1] for the next cycle
+-IGNORE all the pos/negedge clk triggering events.
+-DELAYS: Represent #N as [t + N units].
+-NO ELSE: Every branch must be its own RULE with a unique, full guard.
+
+TASK:
+Convert the SystemVerilog block below into TGTS rules.
+
+Follow this TGTS format EXACTLY:
+
+RULE <signal_name>_<index>
+  WHEN <boolean_expression_at_t>
+  THEN <signal_name>[t+1] == <expression_at_t>
+
+CONSTRAINTS:
+1. The <signal_name> in the THEN clause MUST match the original SystemVerilog variable name (e.g., tl_o_d_valid).
+2. NEVER use 'x' or placeholder variables.
+3. Every RULE must be self-contained.
+
+Use:
+- RULE per assignment or conditional branch
+- DO NOT use ELSE statements
+- WHEN true for unconditional assignments
+- Explicit guards for if statements
+- FUNCTION(...) for function calls
+- Explicit default rules if a signal is conditionally assigned
+
+    MODULE PARAMETERS:
+    {parameters}
+
+    PORTS:
+    {ports}
+
+    AUXILIARY VARIABLES:
+    {inner_vars}
+
+    SEQUENTIAL BLOCK:
+    {block}
+
+    OUTPUT:
+    TGTS only.
+
+    """
+
+    return TEMPLATE
