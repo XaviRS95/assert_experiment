@@ -352,21 +352,25 @@ Use:
 - FUNCTION(...) for function calls
 - Explicit default rules if a signal is conditionally assigned
 
-    MODULE PARAMETERS:
-    {parameters}
+MODULE PARAMETERS:
 
-    PORTS:
-    {ports}
+{parameters}
 
-    AUXILIARY VARIABLES:
-    {inner_vars}
+PORTS:
 
-    SEQUENTIAL BLOCK:
-    {block}
+{ports}
 
-    OUTPUT:
-    TGTS only.
+AUXILIARY VARIABLES:
 
-    """
+{inner_vars}
+
+SEQUENTIAL BLOCK:
+
+{block}
+
+OUTPUT:
+TGTS only.
+
+"""
 
     return TEMPLATE

@@ -9,36 +9,20 @@ def experiment3(model_name:str, file_path:str):
 
     sv_modules = ["""
     
-    module test_seq_engine (
-    input  logic       clk_i,
-    input  logic       rst_ni,
-    input  logic       en_i,
-    input  logic [3:0] data_i,
-    output logic [3:0] count_o,
-    output logic       valid_o
-);
-
-    // Internal state
-    logic [3:0] next_count;
-
-    // Sequential Block to translate
-    always_ff @(posedge clk_i or negedge rst_ni) begin
-        if (!rst_ni) begin
-            count_o <= 4'h0;
-            valid_o <= 1'b0;
-        end else begin
-            if (en_i) begin
-                count_o <= data_i + 1'b1;
-                #5 valid_o <= 1'b1; // Explicit time delay test
-            end else begin
-                // Note: valid_o is explicitly cleared here
-                valid_o <= 1'b0;
-                // Note: count_o is NOT mentioned here (Implicit Hold Test)
-            end
+    module seq_case73(
+        input logic clk, reset, serial_in,
+        output logic [3:0] q
+    );
+        always_ff @(posedge clk or posedge reset) begin
+            if(reset)
+                q <= 4'b0000;
+            else
+                case(q)
+                    default: q <= {q[2:0], serial_in}; // shift left
+                endcase
         end
-    end
-
     endmodule
+
     """]
 
     for sv_code in sv_modules:
@@ -67,6 +51,7 @@ def experiment3(model_name:str, file_path:str):
         for block in clean_seq_blocks:
             seq_to_tgts_prompt = seq_to_tgts(parameters=parameters, ports=ports, inner_vars=inner_vars, block=block)
             tgts_rules = utils.query_ollama(prompt=seq_to_tgts_prompt, model=model_name, code_call=False)
+            print(tgts_rules)
         #     immediate_asserts = regex.immediate_asserts_from_tgts(tgts_rules=tgts_rules)
         #     assertions.append(immediate_asserts)
 
