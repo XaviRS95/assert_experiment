@@ -276,7 +276,7 @@ endmodule
             default: warning = 1; // out of range
         endcase
     end
-Endmodule"
+endmodule"
 "module case42(input int score, output logic [1:0] grade);
     always_comb begin
         case(score)
@@ -612,7 +612,7 @@ endmodule
             2'b10: result = a & b;
             2'b11: result = a | b;
         endcase
-    End
+    end
 endmodule
 "
 "module case64(
@@ -2999,7 +2999,7 @@ endmodule
                     2'b00, 2'b01: nmi_o = 1'b1;
                     default: reset_req_o = 1'b1;
                 endcase
-            End
+            end
 
             default: reset_req_o = 1'b1;
         endcase

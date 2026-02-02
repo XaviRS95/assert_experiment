@@ -1,4 +1,6 @@
 import re
+import uuid
+
 
 def clean_whitespace(raw_text:str) -> str:
     """
@@ -197,19 +199,92 @@ def extract_tgts_rules(model_response: str)-> list:
 def immediate_asserts_from_tgts(tgts_rules: list):
     sva_lines = []
 
-    sva_lines.append("// Automatically generated SystemVerilog Assertions from TGTS")
-
     for rule in tgts_rules:
         # 1. Clean up the name for the property label
-        assert_label = f"assert_label_{rule['name']}"
+        assert_label = get_alpha_uuid()
+        #assert_label = f"assert_label_{rule['name']}"
 
-        if rule['clauses'] != 'true':
-
+        if rule['clauses'] not in ['true', 'TRUE'] and rule['check'] not in ['true', 'TRUE']:
+            clauses = rule['clauses']
+            clauses = clauses.replace('AND', '&&').replace('NOT', '!').replace('OR','||')
+            check = rule['check']
+            check = check.replace('AND', '&&').replace('NOT', '!').replace('OR', '||')
+            error_message = f'$error("Error in immediate assert {assert_label}"'
             sva_block = (
-                f'{assert_label}: assert( ({rule["clauses"]}) ? ({rule["check"]}) : 1 ) '
-                f'else $error("Error in immediate assert {assert_label}");'
+                f"{assert_label}: assert( ({clauses}) ? ({check}) : 1 ) "
+                f"else {error_message});\n"
             )
 
             sva_lines.append(sva_block)
 
     return "\n".join(sva_lines)
+
+def extract_sequential_clock_trigger(block: str)-> list:
+    match = re.search(r'@\((.*?)\)', block)
+    if match:
+        block_triggers = match.group(1)
+        return block_triggers.split('or')[:-1]
+    else:
+        return []
+
+
+import re
+
+
+def sequential_properties_from_tgts(tgts_rules: list, block_triggers: list):
+    sva_lines = []
+
+    for rule in tgts_rules:
+        if rule['clauses'] not in ['true', 'TRUE'] and rule['check'] not in ['true', 'TRUE']:
+            property_label = get_alpha_uuid()
+            # property_label = f"property_label_{rule['name']}"
+
+            # 1. Clean up logical operators in clauses
+            clauses = rule['clauses'].replace('AND', '&&').replace('NOT', '!').replace('OR', '||')
+            checks = rule['check'].replace('AND', '&&').replace('NOT', '!').replace('OR', '||')
+            # 2. Extract variable and delay from rule['check']
+            # e.g., "count_reg[t + 1] == count_reg + 1"
+            match = re.search(r'(\w+)\s*\[\s*t\s*\+\s*(\d+)\s*\]', checks)
+            if match:
+                var_name = match.group(1)
+                delay_val = int(match.group(2))
+
+                # The part after the index, e.g., " == count_reg + 1"
+                val_part = checks.split(']')[-1]
+
+                # 3. Apply $past logic:
+                # If the variable name (e.g., count_reg) appears in val_part, wrap it in $past()
+                # This handles increments: count_reg == $past(count_reg) + 1
+                if var_name in val_part:
+                    # Regex replaces the standalone variable name with $past(name)
+                    val_part = re.sub(rf'\b{var_name}\b', f'$past({var_name})', val_part)
+
+                # 4. Determine SVA delay syntax
+                if delay_val == 1:
+                    check_sva = var_name
+                else:
+                    check_sva = f"##{delay_val - 1} {var_name}"
+
+                final_check = f"{check_sva}{val_part}"
+            else:
+                final_check = checks
+
+            # 5. Generate the SVA block with corrected parentheses
+            sva_block = (f"property {property_label};\n"
+                         f"    @({block_triggers[0]}) ({clauses}) |=> ({final_check});\n"
+                         f"endproperty\n"
+                         f"assert property ({property_label});\n")
+
+            sva_lines.append(sva_block)
+
+    return "\n".join(sva_lines)
+
+def get_alpha_uuid():
+    # Generate a standard UUID4
+    raw_uuid = uuid.uuid4().hex
+
+    # Create a mapping table: 0-9 -> g-p
+    # This ensures no overlap with the existing a-f letters
+    mapping = str.maketrans("0123456789", "ghijklmnop")
+
+    return raw_uuid.translate(mapping)

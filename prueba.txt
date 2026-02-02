@@ -1,0 +1,46 @@
+module fsm53_asserts  (input logic clk, reset,
+input logic [2:0] light);
+
+    typedef enum logic [1:0] {RED, GREEN, YELLOW} state_t;
+    state_t state, next_state;
+
+
+
+    always_comb begin
+    jlmgmjcjnjinkbgiokigjjneejlgjnee: assert( (state == RED) ? (light == 3'b100) : 1 ) else $error("Error in immediate assert jlmgmjcjnjinkbgiokigjjneejlgjnee");
+
+pdfpkbiobmgekignpoonfdiipmeijocd: assert( (state == GREEN) ? (light == 3'b010) : 1 ) else $error("Error in immediate assert pdfpkbiobmgekignpoonfdiipmeijocd");
+
+eadempgakjmkklmjajghcjgaclhhaafm: assert( (state == YELLOW) ? (light == 3'b001) : 1 ) else $error("Error in immediate assert eadempgakjmkklmjajghcjgaclhhaafm");
+
+
+
+    end
+
+    property ncakfibfmbbmkjjpoionancmkicpihpc;
+    @(posedge clk ) (true) |=> (light == 2'b00 // RED default state);
+endproperty
+assert property (ncakfibfmbbmkjjpoionancmkicpihpc);
+
+property gdmclpeiokfekdmbofepbimfnomllmli;
+    @(posedge clk ) (reset) |=> (light == 2'b00);
+endproperty
+assert property (gdmclpeiokfekdmbofepbimfnomllmli);
+
+property jjnobcbifgjhkjlbpjgjhfoblnohjpcn;
+    @(posedge clk ) (state == GREEN && clk) |=> (light == 2'b01);
+endproperty
+assert property (jjnobcbifgjhkjlbpjgjhfoblnohjpcn);
+
+property melicdpdhokbkfckacakjonckjfnahoe;
+    @(posedge clk ) (state == YELLOW && clk) |=> (light == 2'b10);
+endproperty
+assert property (melicdpdhokbkfckacakjonckjfnahoe);
+
+property andlcbpbhpibkkddacfmmamcphkgogmc;
+    @(posedge clk ) (state == RED && clk) |=> (light == 2'b00);
+endproperty
+assert property (andlcbpbhpibkkddacfmmamcphkgogmc);
+
+
+    endmodule

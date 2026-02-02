@@ -1,4 +1,4 @@
-import re, requests, csv, json
+import re, requests, csv, json, uuid
 from .regex import extract_code, extract_tgts_rules
 
 def read_code_files(csv_path: str) -> list:
@@ -11,7 +11,7 @@ def read_code_files(csv_path: str) -> list:
             if row:  # skip empty rows
                 code_list.append(row[0])
 
-    return code_list
+    return code_list[23:]
 
 def generate_final_assertion_content(module_name:str, parameters: str, aux_vars: str, assertions: str) -> str:
 
@@ -29,7 +29,7 @@ def query_ollama(
     model: str,
     code_call: bool, #This parameter is to identify if what's needed to be extracted from the response is SystemVerilog code or TGTS rules.
     host: str = "http://localhost:11434"
-):
+) -> dict:
     url = f"{host}/api/generate"
 
     payload = {
@@ -43,11 +43,17 @@ def query_ollama(
 
     data = response.json()
     if code_call:
-        sv_code = extract_code(output=data["response"])
-        return sv_code
+        return {
+            'sv_code' :  extract_code(output=data["response"]),
+            'prompt_tkns' : data['prompt_eval_count'],
+            'response_tkns' : data['eval_count']
+        }
     else:
-        tgts_rules = extract_tgts_rules(model_response=data['response'])
-        return tgts_rules
+        return {
+            'tgts_rules' : extract_tgts_rules(model_response=data['response']),
+            'prompt_tkns': data['prompt_eval_count'],
+            'response_tkns': data['eval_count']
+        }
 
 
 def check_code_syntax(code: str):
