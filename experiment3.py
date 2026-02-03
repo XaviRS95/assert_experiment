@@ -19,6 +19,8 @@ def experiment3(model_name: str, modules_path: str, output_filepath: str):
             used_prompt_tokens = 0
             generated_response_tokens = 0
 
+            print(f"Original code: \n{codes[i]}")
+            print('')
 
             time1 = time.time()
             clean_code = regex.commentless_code(code=codes[i])
@@ -53,7 +55,7 @@ def experiment3(model_name: str, modules_path: str, output_filepath: str):
                 used_prompt_tokens += model_response['prompt_tkns']
                 generated_response_tokens += model_response['response_tkns']
                 clock_trigger = regex.extract_sequential_clock_trigger(block=block)
-                sequential_properties.append(regex.sequential_properties_from_tgts(tgts_rules=model_response['tgts_rules'], block_triggers=clock_trigger))
+                sequential_properties.append(regex.sequential_properties_from_tgts(tgts_rules=model_response['tgts_rules'], clock_trigger=clock_trigger))
 
             final_module_parameters = f'# ({parameters})' if parameters else ''
             final_module_ports = ports.replace('output logic', 'input logic')
@@ -86,11 +88,9 @@ def experiment3(model_name: str, modules_path: str, output_filepath: str):
                 final_module,
                 compiler_output,
                 time2 - time1,
-                model_response['prompt_tkns'],
-                model_response['response_tkns']
+                used_prompt_tokens,
+                generated_response_tokens
             ])
-            print(f"Original code: \n{codes[i]}")
-            print('')
             print(f'Generated testing module: \n{final_module}')
             print('')
             print(compiler_output, time2 - time1)
@@ -110,5 +110,5 @@ if __name__ == "__main__":
 
     MODEL = "deepseek-coder-v2:16b"
     MODULES_PATH = "sv_cases.csv"
-    OUTPUT_CSV_FILENAME = f"sv_results_3_{MODEL}.csv"
+    OUTPUT_CSV_FILENAME = f"sv_results_3_{MODEL.replace(':', '_')}.csv"
     experiment3(model_name=MODEL, modules_path=MODULES_PATH, output_filepath=OUTPUT_CSV_FILENAME)

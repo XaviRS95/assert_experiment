@@ -219,19 +219,20 @@ def immediate_asserts_from_tgts(tgts_rules: list):
 
     return "\n".join(sva_lines)
 
-def extract_sequential_clock_trigger(block: str)-> list:
+def extract_sequential_clock_trigger(block: str):
     match = re.search(r'@\((.*?)\)', block)
     if match:
         block_triggers = match.group(1)
-        return block_triggers.split('or')[:-1]
-    else:
-        return []
+        if " or " in block_triggers:
+            return block_triggers.split('or')[0][:-1]
+        else:
+            return block_triggers
 
 
 import re
 
 
-def sequential_properties_from_tgts(tgts_rules: list, block_triggers: list):
+def sequential_properties_from_tgts(tgts_rules: list, clock_trigger: str):
     sva_lines = []
 
     for rule in tgts_rules:
@@ -271,7 +272,7 @@ def sequential_properties_from_tgts(tgts_rules: list, block_triggers: list):
 
             # 5. Generate the SVA block with corrected parentheses
             sva_block = (f"property {property_label};\n"
-                         f"    @({block_triggers[0]}) ({clauses}) |=> ({final_check});\n"
+                         f"    @({clock_trigger}) ({clauses}) |=> ({final_check});\n"
                          f"endproperty\n"
                          f"assert property ({property_label});\n")
 

@@ -1,0 +1,1243 @@
+Module #12 out of 175
+Original code: 
+module fsm57(
+    input logic clk, reset, start,
+    output logic a, b
+);
+    typedef enum logic [1:0] {IDLE, STATE1, STATE2} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            IDLE: next_state = start ? STATE1 : IDLE;
+            STATE1: next_state = STATE2;
+            STATE2: next_state = IDLE;
+            default: next_state = IDLE;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= IDLE;
+        else state <= next_state;
+    end
+
+    always_comb begin
+        case(state)
+            IDLE:   begin a=0; b=0; end
+            STATE1: begin a=1; b=0; end
+            STATE2: begin a=0; b=1; end
+            default: begin a=0; b=0; end
+        endcase
+    end
+endmodule
+
+
+Generated testing module: 
+module fsm57_asserts  (input logic clk, reset, start,
+input logic a, b);
+            
+    typedef enum logic [1:0] {IDLE, STATE1, STATE2} state_t;
+    state_t state, next_state;
+            
+    
+            
+    always_comb begin
+    mlgnlhnigokmknkjodkkccohadpcegim: assert( (state == IDLE && start) ? (state_next == STATE1) : 1 ) else $error("Error in immediate assert mlgnlhnigokmknkjodkkccohadpcegim");
+
+ohcdnjppcbbpkolmbaalocjfmpaelmpk: assert( (state == STATE1) ? (state_next == STATE2) : 1 ) else $error("Error in immediate assert ohcdnjppcbbpkolmbaalocjfmpaelmpk");
+
+fdkfmhpmndoakcikodeadkibhoamgcba: assert( (state == STATE2) ? (state_next == IDLE) : 1 ) else $error("Error in immediate assert fdkfmhpmndoakcikodeadkibhoamgcba");
+
+
+chpcgkgjbedokoeeoapnmbcngaeneegn: assert( (state == IDLE) ? (a == 0, b == 0) : 1 ) else $error("Error in immediate assert chpcgkgjbedokoeeoapnmbcngaeneegn");
+
+igccnogocemlkinbpfdhhcdcleogalcf: assert( (state == STATE1) ? (a == 1, b == 0) : 1 ) else $error("Error in immediate assert igccnogocemlkinbpfdhhcdcleogalcf");
+
+emjbjpeejccckdfhpbpcggdicneeoaig: assert( (state == STATE2) ? (a == 0, b == 1) : 1 ) else $error("Error in immediate assert emjbjpeejccckdfhpbpcggdicneeoaig");
+
+    end
+            
+    property dkpkkbgofnblklpnpekajolmmcbehnai;
+    @(posedge clk ) (state == STATE1 && start) |=> (a == 1'b1);
+endproperty
+assert property (dkpkkbgofnblklpnpekajolmmcbehnai);
+
+property gngjibbagfnbkjbebfnclkhehnmjcglm;
+    @(posedge clk ) (state == STATE2) |=> (b == 1'b1);
+endproperty
+assert property (gngjibbagfnbkjbebfnclkhehnmjcglm);
+
+    
+    endmodule
+
+** Error: (vlog-13069) prueba.sv(17): near ",": syntax error, unexpected ','.
+** Error: (vlog-13069) prueba.sv(19): near ",": syntax error, unexpected ','.
+** Error: (vlog-13069) prueba.sv(21): near ",": syntax error, unexpected ','. 25.38822031021118
+
+
+
+
+
+
+
+
+
+
+
+
+
+Original code: 
+module seq_case71(
+    input logic clk, reset,
+    output logic [1:0] count
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            count <= 2'b00;
+        else
+            case(count)
+                2'b00: count <= 2'b01;
+                2'b01: count <= 2'b10;
+                2'b10: count <= 2'b11;
+                2'b11: count <= 2'b00;
+                default: count <= 2'b00;
+            endcase
+    end
+endmodule
+
+
+Generated testing module: 
+module seq_case71_asserts  (input logic clk, reset,
+input logic [1:0] count);
+            
+    
+            
+    
+            
+    
+            
+    property acacegamefemknakabdjgjkejoeffpdn;
+    @(posedge clk ) (count[t] == 2'b00) |=> (count == 2'b10);
+endproperty
+assert property (acacegamefemknakabdjgjkejoeffpdn);
+
+property nemdkpmhnfmdkedmanipjaebepjomhie;
+    @(posedge clk ) (count[t] == 2'b01) |=> (count == 2'b11);
+endproperty
+assert property (nemdkpmhnfmdkedmanipjaebepjomhie);
+
+property klmjhdabaalpkbokphkhjgmhkpinhngc;
+    @(posedge clk ) (count[t] == 2'b10) |=> (count == 2'b00);
+endproperty
+assert property (klmjhdabaalpkbokphkhjgmhkpinhngc);
+
+    
+    endmodule
+
+** Error: prueba.sv(11): (vlog-2730) Undefined variable: 't'.
+** Error (suppressible): prueba.sv(13): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
+** Error: prueba.sv(16): (vlog-2730) Undefined variable: 't'.
+** Error (suppressible): prueba.sv(18): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
+** Error: prueba.sv(21): (vlog-2730) Undefined variable: 't'.
+** Error (suppressible): prueba.sv(23): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
+** Error: prueba.sv(11): (vlog-2730) Undefined variable: 't'. 12.451793193817139
+
+
+
+
+
+
+
+Original code: 
+module fsm53(
+    input logic clk, reset,
+    output logic [2:0] light
+);
+    typedef enum logic [1:0] {RED, GREEN, YELLOW} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            RED:    next_state = GREEN;
+            GREEN:  next_state = YELLOW;
+            YELLOW: next_state = RED;
+            default: next_state = RED;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= RED;
+        else state <= next_state;
+    end
+
+    always_comb begin
+        case(state)
+            RED: light = 3'b100;
+            GREEN: light = 3'b001;
+            YELLOW: light = 3'b010;
+            default: light = 3'b100;
+        endcase
+    end
+endmodule
+
+
+Generated testing module: 
+module fsm53_asserts  (input logic clk, reset,
+input logic [2:0] light);
+            
+    typedef enum logic [1:0] {RED, GREEN, YELLOW} state_t;
+    state_t state, next_state;
+            
+    
+            
+    always_comb begin
+    hplfingjicpjknhooljlmaooleheldhl: assert( (state == GREEN) ? (light == 3'b010) : 1 ) else $error("Error in immediate assert hplfingjicpjknhooljlmaooleheldhl");
+
+bgakmhflphfmknncoaaalkionnlgcacc: assert( (state == YELLOW) ? (light == 3'b001) : 1 ) else $error("Error in immediate assert bgakmhflphfmknncoaaalkionnlgcacc");
+
+
+edhiodbdcdmakjkcbamicfohehhgocid: assert( (state == RED) ? (light == 3'b100) : 1 ) else $error("Error in immediate assert edhiodbdcdmakjkcbamicfohehhgocid");
+
+ldepiakcblhnkaolbodbghigncbcddbg: assert( (state == GREEN) ? (light == 3'b001) : 1 ) else $error("Error in immediate assert ldepiakcblhnkaolbodbghigncbcddbg");
+
+paimjbnhlodckiimbkfjcelnhckobpmb: assert( (state == YELLOW) ? (light == 3'b010) : 1 ) else $error("Error in immediate assert paimjbnhlodckiimbkfjcelnhckobpmb");
+
+    end
+            
+    property mkkjbbgbfgdhkjbjbjngojpfdbogjfec;
+    @(posedge clk ) (state == RED && clk'event(posedge) && !reset) |=> (state == GREEN);
+endproperty
+assert property (mkkjbbgbfgdhkjbjbjngojpfdbogjfec);
+
+property dibeekepopbfkmedbmlpjcflleoigdan;
+    @(posedge clk ) (state == GREEN && clk'event(posedge) && !reset) |=> (state == YELLOW);
+endproperty
+assert property (dibeekepopbfkmedbmlpjcflleoigdan);
+
+property pnebbljpfbcgkncobinofijgpjadipph;
+    @(posedge clk ) (state == YELLOW && clk'event(posedge) && !reset) |=> (state == RED);
+endproperty
+assert property (pnebbljpfbcgkncobinofijgpjadipph);
+
+property baambbeepkcakiiibighooaelnnannhe;
+    @(posedge clk ) (reset || (state == GREEN && clk'event(posedge)) || (state == YELLOW && clk'event(posedge))) |=> (state == RED);
+endproperty
+assert property (baambbeepkcakiiibighooaelnnannhe);
+
+    
+    endmodule
+
+** Error: (vlog-13053) prueba.sv(24): near "'e": Illegal base specifier in numeric constant.
+** Error: (vlog-13069) prueba.sv(24): near "'e": syntax error, unexpected BASE.
+** Error: (vlog-13057) prueba.sv(24): near "[end of file]": Expecting numeric digits.
+** Error: (vlog-13053) prueba.sv(29): near "'e": Illegal base specifier in numeric constant.
+** Error: (vlog-13069) prueba.sv(29): near "'e": syntax error, unexpected BASE.
+** Error: (vlog-13057) prueba.sv(29): near "[end of file]": Expecting numeric digits.
+** Error: (vlog-13053) prueba.sv(34): near "'e": Illegal base specifier in numeric constant.
+** Error: (vlog-13069) prueba.sv(34): near "'e": syntax error, unexpected BASE.
+** Error: (vlog-13057) prueba.sv(34): near "[end of file]": Expecting numeric digits.
+** Error: (vlog-13053) prueba.sv(39): near "'e": Illegal base specifier in numeric constant.
+** Error: (vlog-13069) prueba.sv(39): near "'e": syntax error, unexpected BASE.
+** Error: (vlog-13057) prueba.sv(39): near "[end of file]": Expecting numeric digits.
+** Error: (vlog-13053) prueba.sv(39): near "'e": Illegal base specifier in numeric constant.
+** Error: (vlog-13057) prueba.sv(39): near "[end of file]": Expecting numeric digits. 32.60797095298767
+
+
+
+Module #2 out of 147
+module seq_case79(
+    input logic clk, reset, start,
+    output logic x, y
+);
+    typedef enum logic [1:0] {IDLE, S1, S2} state_t;
+    state_t state, next_state;
+
+    always_comb begin
+        case(state)
+            IDLE: next_state = start ? S1 : IDLE;
+            S1: next_state = S2;
+            S2: next_state = IDLE;
+            default: next_state = IDLE;
+        endcase
+    end
+
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset) state <= IDLE;
+        else state <= next_state;
+    end
+
+    always_ff @(posedge clk) begin
+        case(state)
+            IDLE: x<=0; y<=0;
+            S1: x<=1; y<=0;
+            S2: x<=0; y<=1;
+            default: x<=0; y<=0;
+        endcase
+    end
+endmodule
+
+
+Generated testing module: 
+module seq_case79_asserts  (input logic clk, reset, start,
+input logic x, y);
+            
+    typedef enum logic [1:0] {IDLE, S1, S2} state_t;
+    state_t state, next_state;
+            
+    
+            
+    always_comb begin
+    lpidgbhmbbkjklfoagoefmchdelglcep: assert( (state == IDLE && start) ? (x == 0; y == 1) : 1 ) else $error("Error in immediate assert lpidgbhmbbkjklfoagoefmchdelglcep");
+
+eeipcghnjmkjkjhdpaajhkalppfffbgi: assert( (state == S1) ? (x == 1; y == 0) : 1 ) else $error("Error in immediate assert eeipcghnjmkjkjhdpaajhkalppfffbgi");
+
+eeacfifoknfeknplpdeifkbbcanibhjc: assert( (state == S2) ? (x == 0; y == 0) : 1 ) else $error("Error in immediate assert eeacfifoknfeknplpdeifkbbcanibhjc");
+
+    end
+            
+    property fklgalipapgbkclepghmcjbmcipojkej;
+    @(posedge clk) (state == S1 && start) |=> (x == 1'b1);
+endproperty
+assert property (fklgalipapgbkclepghmcjbmcipojkej);
+
+property jomnpdalbdfbklchoipgcgepppghbomg;
+    @(posedge clk) (state == S2) |=> (y == 1'b1);
+endproperty
+assert property (jomnpdalbdfbklchoipgcgepppghbomg);
+
+property gokpdoneplbmkmjeodmphnfljcjgfhfa;
+    @(posedge clk) (state == IDLE) |=> (next_state == S1);
+endproperty
+assert property (gokpdoneplbmkmjeodmphnfljcjgfhfa);
+
+property fpdeahdplonjkhlaakpagoifccnbkhle;
+    @(posedge clk) (state == S1) |=> (next_state == S2);
+endproperty
+assert property (fpdeahdplonjkhlaakpagoifccnbkhle);
+
+property cbjdppepcbhnkbhjpjopcimolcjjaake;
+    @(posedge clk) (state == S2) |=> (next_state == IDLE);
+endproperty
+assert property (cbjdppepcbhnkbhjpjopcimolcjjaake);
+
+property ahkkdbbmlkelkccobabldhibgjincika;
+    @(posedge clk) (state == IDLE) |=> (x == 0);
+endproperty
+assert property (ahkkdbbmlkelkccobabldhibgjincika);
+
+property flfljchakmjikmknbgbohafnindajpac;
+    @(posedge clk) (state == IDLE) |=> (y == 0);
+endproperty
+assert property (flfljchakmjikmknbgbohafnindajpac);
+
+property jpogddlijkfckhjlokeogcifbmklfijh;
+    @(posedge clk) (state == S1) |=> (x == 1);
+endproperty
+assert property (jpogddlijkfckhjlokeogcifbmklfijh);
+
+property nandimdjoinokdehpkphongpklhbmckb;
+    @(posedge clk) (state == S1) |=> (y == 0);
+endproperty
+assert property (nandimdjoinokdehpkphongpklhbmckb);
+
+property hfflgepbniookkknbgkohnehidldemcb;
+    @(posedge clk) (state == S2) |=> (x == 0);
+endproperty
+assert property (hfflgepbniookkknbgkohnehidldemcb);
+
+property calnfclgmaoekhmlbicemjmamkdnaofe;
+    @(posedge clk) (state == S2) |=> (y == 1);
+endproperty
+assert property (calnfclgmaoekhmlbicemjmamkdnaofe);
+
+    
+    endmodule
+
+** Error: (vlog-13069) prueba.sv(10): near ";": syntax error, unexpected ';'.
+** Error: (vlog-13069) prueba.sv(12): near ";": syntax error, unexpected ';'.
+** Error: (vlog-13069) prueba.sv(14): near ";": syntax error, unexpected ';'. 41.447630167007446
+
+
+
+Module #47 out of 147
+Original code: 
+module proto_case_4(input logic clk, rst, give, take, output logic [1:0] credit);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) credit <= 2;
+  else begin
+    case({give,take})
+      2'b10: credit <= credit + 1;
+      2'b01: credit <= credit - 1;
+      default: credit <= credit;
+    endcase
+  end
+end
+endmodule
+
+Generated testing module: 
+module proto_case_4_asserts  (input logic clk, rst, give, take, input logic [1:0] credit);
+            
+    
+            
+    
+            
+    
+            
+    property pnmihoifioefkdfephfbceilnilbpjff;
+    @(posedge clk) (clk and not rst) |=> (credit == (give == 1'b1 && take == 1'b0) ? $past(credit) + 2 : ((give == 1'b0 && take == 1'b1) ? $past(credit) - 1 : $past(credit)););
+endproperty
+assert property (pnmihoifioefkdfephfbceilnilbpjff);
+
+    
+    endmodule
+
+** Error: (vlog-13069) prueba.sv(10): near "|=>": syntax error, unexpected |=> , expecting "SystemVerilog keyword 'endproperty'". 4.797925233840942
+
+
+
+Module #48 out of 147
+Original code: 
+module proto_case_5(input logic clk, rst, sop, eop, output logic in_pkt);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) in_pkt <= 0;
+  else begin
+    case(in_pkt)
+      1'b0: if (sop) in_pkt <= 1;
+      1'b1: if (eop) in_pkt <= 0;
+    endcase
+  end
+end
+endmodule
+
+
+Generated testing module: 
+module proto_case_5_asserts  (input logic clk, rst, sop, eop, input logic in_pkt);
+            
+    
+            
+    
+            
+    
+            
+    property pogbnimoanpakjakodikoejpngbegmgl;
+    @(posedge clk) (sop && ! rst) |=> (in_pkt == 1);
+endproperty
+assert property (pogbnimoanpakjakodikoejpngbegmgl);
+
+property pidmhffbgiigklelooeknhfcemppccdj;
+    @(posedge clk) (eop && in_pkt && ! rst) |=> (in_pkt == 0);
+endproperty
+assert property (pidmhffbgiigklelooeknhfcemppccdj);
+
+property cfmeloopilbekakjbpgbbllekgpajbbl;
+    @(posedge clk) (true && ! rst) |=> (in_pkt == $past(in_pkt));
+endproperty
+assert property (cfmeloopilbekakjbpgbbllekgpajbbl);
+
+    
+    endmodule
+
+** Error: prueba.sv(20): (vlog-2730) Undefined variable: 'true'.
+** Error (suppressible): prueba.sv(22): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
+
+
+
+
+
+
+
+Module #53 out of 147
+Original code:  
+module router_fsm (
+    input  logic clk,
+    input  logic rst_n,
+    input  logic [3:0] req,
+    output logic [1:0] selected,
+    output logic grant
+);
+    typedef enum logic [1:0] {IDLE, LOOKUP, FORWARD, DROP} state_t;
+    state_t state;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            state <= IDLE;
+            selected <= 2'b00;
+            grant <= 1'b0;
+        end else begin
+            case (state)
+                IDLE: begin
+                    grant <= 1'b0;
+                    if (req != 4'b0000)
+                        state <= LOOKUP;
+                end
+
+                LOOKUP: begin
+                    casez (req)
+                        4'b1???: selected <= 2'd3;
+                        4'b01??: selected <= 2'd2;
+                        4'b001?: selected <= 2'd1;
+                        4'b0001: selected <= 2'd0;
+                        default: selected <= 2'd0;
+                    endcase
+                    state <= (req == 4'b0000) ? IDLE : FORWARD;
+                end
+
+                FORWARD: begin
+                    grant <= 1'b1;
+                    if (req[selected] == 1'b0)
+                        state <= IDLE;
+                end
+
+                DROP: state <= IDLE;
+            endcase
+        end
+    end
+endmodule
+
+
+Generated testing module: 
+module router_fsm_asserts  (input logic clk,
+input logic rst_n,
+input logic [3:0] req,
+input logic [1:0] selected,
+input logic grant);
+            
+    typedef enum logic [1:0] {IDLE, LOOKUP, FORWARD, DROP} state_t;
+    state_t state;
+            
+    
+            
+    
+            
+    property cefaikijimljkhlibmhedgdnbamcfkml;
+    @(posedge clk) ((req != 4'b0000) && (state == IDLE)) |=> (state == LOOKUP);
+endproperty
+assert property (cefaikijimljkhlibmhedgdnbamcfkml);
+
+property hplecmmppnenkgpkbcofmnnaifmgnpoe;
+    @(posedge clk) ((rst_n == 1'b0) || (state == IDLE)) |=> (state == 1'b0);
+endproperty
+assert property (hplecmmppnenkgpkbcofmnnaifmgnpoe);
+
+property cdliblbfipdhkaboabbcmlgelhmbiadd;
+    @(posedge clk) ((req != 4'b0000) && (state == IDLE)) |=> (state == LOOKUP);
+endproperty
+assert property (cdliblbfipdhkaboabbcmlgelhmbiadd);
+
+property mbemafmemanpkjdpaddennacdiebeckb;
+    @(posedge clk) ((state == LOOKUP) && (req[selected] == 1'b0)) |=> (state == F||WARD);
+endproperty
+assert property (mbemafmemanpkjdpaddennacdiebeckb);
+
+property fopnoamaicnlklfdadagdekjibhhmajg;
+    @(posedge clk) ((state == F||WARD) && (req[selected] == 1'b0)) |=> (state == 1'b0);
+endproperty
+assert property (fopnoamaicnlklfdadagdekjibhhmajg);
+
+property konojghopplakpbaoljpijbnbbgnjepm;
+    @(posedge clk) ((state == LOOKUP) && ! (req != 4'b0000)) |=> (state == F||WARD);
+endproperty
+assert property (konojghopplakpbaoljpijbnbbgnjepm);
+
+property kkneognbgahdknakopcihlpjlhocjhid;
+    @(posedge clk) ((state == F||WARD)) |=> (grant == 1'b1);
+endproperty
+assert property (kkneognbgahdknakopcihlpjlhocjhid);
+
+property jaigooafmppmkddopdjkkploigcenffd;
+    @(posedge clk) (state == LOOKUP) |=> (CASEZ (req));
+endproperty
+assert property (jaigooafmppmkddopdjkkploigcenffd);
+
+    
+    endmodule
+
+** Error: prueba.sv(30): (vlog-2730) Undefined variable: 'WARD'.
+** Error: prueba.sv(30): (vlog-2730) Undefined variable: 'F'. 27.90268611907959
+
+
+
+
+
+Module #54 out of 147
+Original code: 
+module instr_decoder (
+    input  logic [31:0] instr,
+    output logic [3:0] alu_op,
+    output logic writeback,
+    output logic [2:0] opcode
+);
+    typedef enum logic [2:0] {ALU, LOAD, STORE, BRANCH, SYS} op_t;
+    always_comb begin
+        writeback = 0;
+        alu_op = 0;
+        opcode = instr[31:29];
+
+        unique case (opcode)
+            ALU: begin
+                writeback = 1;
+                case (instr[28:25])
+                    4'h0: alu_op = 4'h1; // ADD
+                    4'h1: alu_op = 4'h2; // SUB
+                    4'h2: alu_op = 4'h3; // AND
+                    default: alu_op = 4'hF; // illegal
+                endcase
+            end
+
+            LOAD:  writeback = 1;
+            STORE: writeback = 0;
+            BRANCH: writeback = 0;
+            SYS: writeback = 0;
+        endcase
+    end
+endmodule
+
+
+Generated testing module: 
+module instr_decoder_asserts  (input logic [31:0] instr,
+input logic [3:0] alu_op,
+input logic writeback,
+input logic [2:0] opcode);
+            
+    typedef enum logic [2:0] {ALU, LOAD, STORE, BRANCH, SYS} op_t;
+            
+    
+            
+    always_comb begin
+    mphhapblhjddkdbpoiaifaghfididofh: assert( ((instr[31:29] == ALU)) ? (writeback == 1) : 1 ) else $error("Error in immediate assert mphhapblhjddkdbpoiaifaghfididofh");
+
+gjoicnkdpcnckfggpjdjpfcjllemoffg: assert( ((instr[31:29] == ALU) && (instr[28:25] == 4'h0)) ? (alu_op == 4'h1) : 1 ) else $error("Error in immediate assert gjoicnkdpcnckfggpjdjpfcjllemoffg");
+
+iapefbgdkmofkgkopmjiaenpncfcndjc: assert( ((instr[31:29] == ALU) && (instr[28:25] == 4'h1)) ? (alu_op == 4'h2) : 1 ) else $error("Error in immediate assert iapefbgdkmofkgkopmjiaenpncfcndjc");
+
+ebhlcppgalhpkahjojnnjfnfejfacnec: assert( ((instr[31:29] == ALU) && (instr[28:25] == 4'h2)) ? (alu_op == 4'h3) : 1 ) else $error("Error in immediate assert ebhlcppgalhpkahjojnnjfnfejfacnec");
+
+ddbciipoogndkomkpdjheomghheijlll: assert( ((instr[31:29] == ALU) && (instr[28:25] == 4'hF)) ? (alu_op == 4'hF) : 1 ) else $error("Error in immediate assert ddbciipoogndkomkpdjheomghheijlll");
+
+jahgabhmlmhjkbdlppmdpaidgjclnhcl: assert( ((instr[31:29] == LOAD)) ? (writeback == 1) : 1 ) else $error("Error in immediate assert jahgabhmlmhjkbdlppmdpaidgjclnhcl");
+
+cjfkeanpjhmekpigbjmgbdfiiojlncop: assert( ((instr[31:29] == ST||E)) ? (writeback == 0) : 1 ) else $error("Error in immediate assert cjfkeanpjhmekpigbjmgbdfiiojlncop");
+
+hdcigngailifkbpcpjpmnnkogcldjcje: assert( ((instr[31:29] == BRANCH)) ? (writeback == 0) : 1 ) else $error("Error in immediate assert hdcigngailifkbpcpjpmnnkogcldjcje");
+
+amfmbbokoackkiofblhgliglcgnomnjh: assert( ((instr[31:29] == SYS)) ? (writeback == 0) : 1 ) else $error("Error in immediate assert amfmbbokoackkiofblhgliglcgnomnjh");
+
+    end
+            
+   
+    endmodule
+
+** Error: prueba.sv(23): (vlog-2730) Undefined variable: 'ST'. 28.639982223510742
+
+
+
+
+
+
+
+Module #62 out of 147
+Original code: 
+module scheduler_ctrl (
+    input  logic [7:0] ctrl_word,
+    output logic       high_prio,
+    output logic       drop_pkt
+);
+
+    logic [3:0] class;
+    logic [3:0] action;
+
+    assign class  = ctrl_word[7:4];
+    assign action = ctrl_word[3:0];
+
+    always_comb begin
+        high_prio = 1'b0;
+        drop_pkt  = 1'b0;
+
+        unique case (class)
+            4'h0, 4'h1: begin
+                case (action)
+                    4'h0: high_prio = 1'b0;
+                    4'h1: high_prio = 1'b1;
+                    4'hF: drop_pkt  = 1'b1;
+                    default: ;
+                endcase
+            end
+
+            4'hA, 4'hB: begin
+                casez (action)
+                    4'b1???: high_prio = 1'b1;
+                    4'b0???: drop_pkt  = 1'b1;
+                    default: ;
+                endcase
+            end
+
+            default: drop_pkt = 1'b1;
+        endcase
+    end
+
+endmodule
+
+
+Generated testing module: 
+module scheduler_ctrl_asserts  (input logic [7:0] ctrl_word,
+input logic high_prio,
+input logic drop_pkt);
+            
+    logic [3:0] class;
+    logic [3:0] action;
+    assign class  = ctrl_word[7:4];
+    assign action = ctrl_word[3:0];
+            
+    
+            
+    always_comb begin
+    hmjcgindblbakhedpelbejhjghhlcppn: assert( (class == 4'h0 && action == 4'h0) ? (high_prio == 1'b0) : 1 ) else $error("Error in immediate assert hmjcgindblbakhedpelbejhjghhlcppn");
+
+dicjpgpdgpdakgimokelbohcnhgkfmal: assert( (class == 4'h0 && action == 4'h1) ? (high_prio == 1'b1) : 1 ) else $error("Error in immediate assert dicjpgpdgpdakgimokelbohcnhgkfmal");
+
+keeaabgjajbbkpfmolbadjahgmmodcdn: assert( (class == 4'h0 && action == 4'hF) ? (drop_pkt == 1'b1) : 1 ) else $error("Error in immediate assert keeaabgjajbbkpfmolbadjahgmmodcdn");
+
+nobocefhlnmjknihofoneegjgldlncni: assert( (class == 4'hA && action == 4'b1???) ? (high_prio == 1'b1) : 1 ) else $error("Error in immediate assert nobocefhlnmjknihofoneegjgldlncni");
+
+egfojaaedicgkgmdagkbihgpbjfdbghf: assert( (class == 4'hA && action == 4'b0???) ? (drop_pkt == 1'b1) : 1 ) else $error("Error in immediate assert egfojaaedicgkgmdagkbihgpbjfdbghf");
+
+    end
+            
+    
+    
+    endmodule
+
+** Error: (vlog-13069) prueba.sv(5): near "class": syntax error, unexpected class, expecting IDENTIFIER or TYPE_IDENTIFIER or NETTYPE_IDENTIFIER or '='.
+** Error: (vlog-13069) prueba.sv(7): near "class": syntax error, unexpected class.
+** Error: (vlog-13069) prueba.sv(13): near "class": syntax error, unexpected class.
+** Error: (vlog-13069) prueba.sv(15): near "class": syntax error, unexpected class.
+** Error: (vlog-13069) prueba.sv(17): near "class": syntax error, unexpected class.
+** Error: (vlog-13069) prueba.sv(19): near "class": syntax error, unexpected class.
+** Error: (vlog-13069) prueba.sv(21): near "class": syntax error, unexpected class. 15.056878328323364
+
+
+
+
+Module #64 out of 147
+module coherence_cmd_decode (
+    input  logic [4:0] cmd,
+    output logic       req_shared,
+    output logic       req_exclusive,
+    output logic       invalidate,
+    output logic       illegal
+);
+
+    always_comb begin
+        req_shared    = 1'b0;
+        req_exclusive = 1'b0;
+        invalidate    = 1'b0;
+        illegal       = 1'b0;
+
+        unique case (cmd)
+            5'h00: req_shared    = 1'b1; // ReadShared
+            5'h01: req_exclusive = 1'b1; // ReadExclusive
+            5'h02: invalidate    = 1'b1; // Invalidate
+            5'h03: begin                  // Upgrade
+                req_exclusive = 1'b1;
+                invalidate    = 1'b1;
+            end
+            5'h10, 5'h11: begin            // Probe responses
+                // No action, metadata only
+            end
+            default: illegal = 1'b1;
+        endcase
+    end
+
+endmodule
+
+
+Generated testing module: 
+module coherence_cmd_decode_asserts  (input logic [4:0] cmd,
+input logic req_shared,
+input logic req_exclusive,
+input logic invalidate,
+input logic illegal);
+            
+    
+            
+    
+            
+    always_comb begin
+    apdhggnlkmipkbleaicjcdichkaabdbc: assert( (cmd == 5'h00) ? (req_shared == 1'b1) : 1 ) else $error("Error in immediate assert apdhggnlkmipkbleaicjcdichkaabdbc");
+
+eecbnacmfmlakfmopnfdjkmlpnhonijm: assert( (cmd == 5'h01) ? (req_exclusive == 1'b1) : 1 ) else $error("Error in immediate assert eecbnacmfmlakfmopnfdjkmlpnhonijm");
+
+kgmhcejoccidkmdjbdihehnfcknjhdha: assert( (cmd == 5'h02) ? (invalidate == 1'b1) : 1 ) else $error("Error in immediate assert kgmhcejoccidkmdjbdihehnfcknjhdha");
+
+cbeooceicjajkihkbglighgjaoboeedm: assert( (cmd == 5'h03) ? (begin) : 1 ) else $error("Error in immediate assert cbeooceicjajkihkbglighgjaoboeedm");
+
+ajepgnhmnciakpgfbcebcgbdofolhjch: assert( ((cmd == 5'h10) || (cmd == 5'h11)) ? (illegal == 1'b0) : 1 ) else $error("Error in immediate assert ajepgnhmnciakpgfbcebcgbdofolhjch");
+
+    end
+            
+    
+    
+    endmodule
+
+** Error: (vlog-13069) prueba.sv(18): near "begin": syntax error, unexpected begin. 12.856984615325928
+
+
+
+
+
+Original code: 
+module obi_txn_decoder (
+    input  logic        req,
+    input  logic        we,
+    input  logic [1:0]  prot,
+    input  logic [1:0]  burst,
+    output logic        allow,
+    output logic        fault
+);
+
+    // prot[1] = privileged
+    // prot[0] = secure
+
+    always_comb begin
+        allow = 1'b0;
+        fault = 1'b0;
+
+        if (req) begin
+            unique case (we)
+                1'b0: begin // READ
+                    case (prot)
+                        2'b00, 2'b01: begin
+                            case (burst)
+                                2'b00, 2'b01: allow = 1'b1;
+                                default: fault = 1'b1;
+                            endcase
+                        end
+                        default: fault = 1'b1;
+                    endcase
+                end
+
+                1'b1: begin // WRITE
+                    case (prot)
+                        2'b10: begin // privileged non-secure
+                            case (burst)
+                                2'b00: allow = 1'b1;
+                                default: fault = 1'b1;
+                            endcase
+                        end
+                        default: fault = 1'b1;
+                    endcase
+                end
+
+                default: fault = 1'b1;
+            endcase
+        end
+    end
+
+endmodule
+
+
+
+
+Module #75 out of 147
+Generated testing module: 
+module obi_txn_decoder_asserts  (input logic req,
+input logic we,
+input logic [1:0] prot,
+input logic [1:0] burst,
+input logic allow,
+input logic fault);
+            
+    
+            
+    
+            
+    always_comb begin
+    hfhhogoompkkklpkaelkjaeolgdajmmn: assert( (req == 1 && we == 0) ? (allow == 1'b0 : true) : 1 ) else $error("Error in immediate assert hfhhogoompkkklpkaelkjaeolgdajmmn");
+
+cgdbndheaodnkphhamljbilnmlngkdkf: assert( (req == 1 && we == 0 && (prot != 2'b00 || prot != 2'b01)) ? (fault == 1'b1 : true) : 1 ) else $error("Error in immediate assert cgdbndheaodnkphhamljbilnmlngkdkf");
+
+cjfphmiajglnkfbhajpnmbjaiacnodni: assert( (req == 1 && we == 1) ? (allow == 1'b0 : true) : 1 ) else $error("Error in immediate assert cjfphmiajglnkfbhajpnmbjaiacnodni");
+
+oheemoolhdaikcmfojidacinghengfcf: assert( (req == 1 && we == 1 && (prot != 2'b10)) ? (fault == 1'b1 : true) : 1 ) else $error("Error in immediate assert oheemoolhdaikcmfojidacinghengfcf");
+
+bkojfenmoefkklkdagnheokabalcfjpn: assert( (req == 1 && we == 1 && prot == 2'b10 && burst == 2'b00) ? (allow == 1'b1 : true) : 1 ) else $error("Error in immediate assert bkojfenmoefkklkdagnheokabalcfjpn");
+
+dhkmeioibphekamkakgmoeefidpjhmfd: assert( (req == 1 && (we != 0 || we != 1)) ? (fault == 1'b1 : true) : 1 ) else $error("Error in immediate assert dhkmeioibphekamkakgmoeefidpjhmfd");
+
+    end
+            
+    
+    
+    endmodule
+
+** Error: (vlog-13069) prueba.sv(13): near ")": syntax error, unexpected ')'.
+** Error: (vlog-13069) prueba.sv(15): near ")": syntax error, unexpected ')'.
+** Error: (vlog-13069) prueba.sv(17): near ")": syntax error, unexpected ')'.
+** Error: (vlog-13069) prueba.sv(19): near ")": syntax error, unexpected ')'.
+** Error: (vlog-13069) prueba.sv(21): near ")": syntax error, unexpected ')'.
+** Error: (vlog-13069) prueba.sv(23): near ")": syntax error, unexpected ')'. 15.5867440700531
+
+
+
+
+Module #79 out of 147
+Original code: 
+module reg_access_ctrl (
+    input  logic [7:0]  periph_id,
+    input  logic [7:0]  offset,
+    input  logic        we,
+    output logic        rd_en,
+    output logic        wr_en,
+    output logic        err
+);
+
+    always_comb begin
+        rd_en = 1'b0;
+        wr_en = 1'b0;
+        err   = 1'b0;
+
+        unique case (periph_id)
+            8'h10: begin // UART
+                case (offset)
+                    8'h00, 8'h04: begin
+                        case (we)
+                            1'b0: rd_en = 1'b1;
+                            1'b1: wr_en = 1'b1;
+                        endcase
+                    end
+                    default: err = 1'b1;
+                endcase
+            end
+
+            8'h20: begin // GPIO
+                case (offset)
+                    8'h00: wr_en = we;
+                    8'h04: rd_en = ~we;
+                    default: err = 1'b1;
+                endcase
+            end
+
+            default: err = 1'b1;
+        endcase
+    end
+
+endmodule
+
+
+Generated testing module: 
+module reg_access_ctrl_asserts  (input logic [7:0] periph_id,
+input logic [7:0] offset,
+input logic we,
+input logic rd_en,
+input logic wr_en,
+input logic err);
+            
+    
+            
+    
+            
+    always_comb begin
+    jokljnmlcfackhdapkpbnkdldhacgaba: assert( (periph_id == 8'h10) ? (case (offset)) : 1 ) else $error("Error in immediate assert jokljnmlcfackhdapkpbnkdldhacgaba");
+
+iidooooaopngkanbbcoddgidjnaajoml: assert( (periph_id == 8'h10) ? (case (offset)) : 1 ) else $error("Error in immediate assert iidooooaopngkanbbcoddgidjnaajoml");
+
+ldhkpaeglhjgkcjdbdhkjfmdcilefipl: assert( (periph_id == 8'h20) ? (case (offset)) : 1 ) else $error("Error in immediate assert ldhkpaeglhjgkcjdbdhkjfmdcilefipl");
+
+    end
+            
+    
+    
+    endmodule
+
+** Error: (vlog-13069) prueba.sv(13): near "case": syntax error, unexpected case.
+** Error: (vlog-13069) prueba.sv(15): near "case": syntax error, unexpected case.
+** Error: (vlog-13069) prueba.sv(17): near "case": syntax error, unexpected case. 26.790756225585938
+
+
+
+
+Module #103 out of 147
+Original code: 
+module piton_dir_state (
+    input  logic [1:0] state_i,
+    input  logic [2:0] event_i,
+    output logic [1:0] state_o,
+    output logic       error_o
+);
+
+    always_comb begin
+        state_o = state_i;
+        error_o = 1'b0;
+
+        unique case (state_i)
+            2'b00: begin // Invalid
+                case (event_i)
+                    3'b000: state_o = 2'b01; // ReadShared
+                    3'b001: state_o = 2'b10; // ReadExclusive
+                    default: error_o = 1'b1;
+                endcase
+            end
+
+            2'b01: begin // Shared
+                case (event_i)
+                    3'b001: state_o = 2'b10;
+                    3'b010: state_o = 2'b00; // Invalidate
+                    default: ;
+                endcase
+            end
+
+            2'b10: begin // Exclusive
+                case (event_i)
+                    3'b011: state_o = 2'b11; // Write
+                    default: ;
+                endcase
+            end
+
+            2'b11: begin // Modified
+                case (event_i)
+                    3'b100: state_o = 2'b00; // Writeback
+                    default: ;
+                endcase
+            end
+
+            default: error_o = 1'b1;
+        endcase
+    end
+
+endmodule
+
+
+Generated testing module: 
+module piton_dir_state_asserts  (input logic [1:0] state_i,
+input logic [2:0] event_i,
+input logic [1:0] state_o,
+input logic error_o);
+            
+    
+            
+    
+            
+    always_comb begin
+    elofpgfdglkbknjganfkejdimmallodn: assert( (state_i == 2'b00 && event_i == 3'b000) ? (state_o == 2'b01) : 1 ) else $error("Error in immediate assert elofpgfdglkbknjganfkejdimmallodn");
+
+iclklomamhbakbjioghnhhfegidmilli: assert( (state_i == 2'b00 && event_i == 3'b001) ? (state_o == 2'b10) : 1 ) else $error("Error in immediate assert iclklomamhbakbjioghnhhfegidmilli");
+
+mkkkjoogkodekaajoifbhclmicclfdnd: assert( (state_i == 2'b00 && !(event_i == 3'b000 || event_i == 3'b001)) ? (error_o == 1'b1) : 1 ) else $error("Error in immediate assert mkkkjoogkodekaajoifbhclmicclfdnd");
+
+ibhhdipdncaikaahohoohaalkcibgcck: assert( (state_i == 2'b01 && event_i == 3'b001) ? (state_o == 2'b10) : 1 ) else $error("Error in immediate assert ibhhdipdncaikaahohoohaalkcibgcck");
+
+kdiodnghgkmekekeajmojpdnekggijch: assert( (state_i == 2'b01 && event_i == 3'b010) ? (state_o == 2'b00) : 1 ) else $error("Error in immediate assert kdiodnghgkmekekeajmojpdnekggijch");
+
+joiobiegbpipkoceopgaidkmfbckhdip: assert( (state_i == 2'b01 && !(event_i == 3'b001 || event_i == 3'b010)) ? (error_o == 1'b0) : 1 ) else $error("Error in immediate assert joiobiegbpipkoceopgaidkmfbckhdip");
+
+gdanjhmaidepkdghojklojgdgidihpii: assert( (state_i == 2'b10 && event_i == 3'b011) ? (state_o == 2'b11) : 1 ) else $error("Error in immediate assert gdanjhmaidepkdghojklojgdgidihpii");
+
+eajglbdbhkjmkffaamilbmcfbfpaicip: assert( (state_i == 2'b10 && !(event_i == 3'b011)) ? (error_o == 1'b0) : 1 ) else $error("Error in immediate assert eajglbdbhkjmkffaamilbmcfbfpaicip");
+
+blpcpkjfdklbkmchomdfamlcdefdmnjb: assert( (state_i == 2'b11 && event_i == 3'b100) ? (state_o == 2'b00) : 1 ) else $error("Error in immediate assert blpcpkjfdklbkmchomdfamlcdefdmnjb");
+
+ncbldlbocfickdidbaaohijmjekdjmko: assert( (state_i == 2'b11 && !(event_i == 3'b100)) ? (error_o == 1'b0) : 1 ) else $error("Error in immediate assert ncbldlbocfickdidbaaohijmjekdjmko");
+
+jkakbdejehegkicdapkidekkndabehmk: assert( (default) ? (error_o == 1'b1) : 1 ) else $error("Error in immediate assert jkakbdejehegkicdapkidekkndabehmk");
+
+    end
+            
+    
+    
+    endmodule
+
+** Error: (vlog-13069) prueba.sv(31): near "default": syntax error, unexpected default. 32.56383466720581
+
+
+
+
+Module #62 out of 147
+Original code: 
+module scheduler_ctrl (
+    input  logic [7:0] ctrl_word,
+    output logic       high_prio,
+    output logic       drop_pkt
+);
+
+    logic [3:0] class;
+    logic [3:0] action;
+
+    assign class  = ctrl_word[7:4];
+    assign action = ctrl_word[3:0];
+
+    always_comb begin
+        high_prio = 1'b0;
+        drop_pkt  = 1'b0;
+
+        unique case (class)
+            4'h0, 4'h1: begin
+                case (action)
+                    4'h0: high_prio = 1'b0;
+                    4'h1: high_prio = 1'b1;
+                    4'hF: drop_pkt  = 1'b1;
+                    default: ;
+                endcase
+            end
+
+            4'hA, 4'hB: begin
+                casez (action)
+                    4'b1???: high_prio = 1'b1;
+                    4'b0???: drop_pkt  = 1'b1;
+                    default: ;
+                endcase
+            end
+
+            default: drop_pkt = 1'b1;
+        endcase
+    end
+
+endmodule
+
+
+Generated testing module: 
+module scheduler_ctrl_asserts  (input logic [7:0] ctrl_word,
+input logic high_prio,
+input logic drop_pkt);
+            
+    logic [3:0] class;
+    logic [3:0] action;
+    assign class  = ctrl_word[7:4];
+    assign action = ctrl_word[3:0];
+            
+    
+            
+    always_comb begin
+    hmjcgindblbakhedpelbejhjghhlcppn: assert( (class == 4'h0 && action == 4'h0) ? (high_prio == 1'b0) : 1 ) else $error("Error in immediate assert hmjcgindblbakhedpelbejhjghhlcppn");
+
+dicjpgpdgpdakgimokelbohcnhgkfmal: assert( (class == 4'h0 && action == 4'h1) ? (high_prio == 1'b1) : 1 ) else $error("Error in immediate assert dicjpgpdgpdakgimokelbohcnhgkfmal");
+
+keeaabgjajbbkpfmolbadjahgmmodcdn: assert( (class == 4'h0 && action == 4'hF) ? (drop_pkt == 1'b1) : 1 ) else $error("Error in immediate assert keeaabgjajbbkpfmolbadjahgmmodcdn");
+
+nobocefhlnmjknihofoneegjgldlncni: assert( (class == 4'hA && action == 4'b1???) ? (high_prio == 1'b1) : 1 ) else $error("Error in immediate assert nobocefhlnmjknihofoneegjgldlncni");
+
+egfojaaedicgkgmdagkbihgpbjfdbghf: assert( (class == 4'hA && action == 4'b0???) ? (drop_pkt == 1'b1) : 1 ) else $error("Error in immediate assert egfojaaedicgkgmdagkbihgpbjfdbghf");
+
+    end
+            
+    
+    
+    endmodule
+
+** Error: (vlog-13069) prueba.sv(5): near "class": syntax error, unexpected class, expecting IDENTIFIER or TYPE_IDENTIFIER or NETTYPE_IDENTIFIER or '='.
+** Error: (vlog-13069) prueba.sv(7): near "class": syntax error, unexpected class.
+** Error: (vlog-13069) prueba.sv(13): near "class": syntax error, unexpected class.
+** Error: (vlog-13069) prueba.sv(15): near "class": syntax error, unexpected class.
+** Error: (vlog-13069) prueba.sv(17): near "class": syntax error, unexpected class.
+** Error: (vlog-13069) prueba.sv(19): near "class": syntax error, unexpected class.
+** Error: (vlog-13069) prueba.sv(21): near "class": syntax error, unexpected class. 15.056878328323364
+
+
+
+Module #117 out of 147
+Original code: 
+module multi_core_cache_arb (
+    input  logic [3:0] req_i,
+    input  logic [1:0] line_state_i [3:0],
+    input  logic [2:0] msg_type_i [3:0],
+    input  logic priv_i [3:0],
+    output logic [3:0] grant_o,
+    output logic [3:0] nack_o
+);
+
+    always_comb begin
+        grant_o = 4'b0000;
+        nack_o  = 4'b0000;
+
+        for (int i=0; i<4; i++) begin
+            if (req_i[i]) begin
+                unique case (line_state_i[i])
+                    2'b00: begin
+                        unique case (msg_type_i[i])
+                            3'b000: begin
+                                unique case (priv_i[i])
+                                    1'b1: grant_o[i] = 1'b1;
+                                    default: nack_o[i] = 1'b1;
+                                endcase
+                            end
+                            3'b001: grant_o[i] = 1'b1;
+                            default: nack_o[i] = 1'b1;
+                        endcase
+                    end
+                    2'b01: begin
+                        unique case (msg_type_i[i])
+                            3'b010: grant_o[i] = 1'b1;
+                            default: nack_o[i] = 1'b1;
+                        endcase
+                    end
+                    2'b10, 2'b11: nack_o[i] = 1'b1;
+                    default: nack_o[i] = 1'b1;
+                endcase
+            end
+        end
+    end
+endmodule
+
+
+Generated testing module: 
+module multi_core_cache_arb_asserts  (input logic [3:0] req_i,
+input logic [1:0] line_state_i [3:0],
+input logic [2:0] msg_type_i [3:0],
+input logic priv_i [3:0],
+input logic [3:0] grant_o,
+input logic [3:0] nack_o);
+            
+    
+            
+    
+            
+    always_comb begin
+    diafonghdlbgkndhaappbeeiilejgdgg: assert( (req_i[0] == 1'b1) ? (grant_o[0] == 1'b0, nack_o[0] == 1'b0) : 1 ) else $error("Error in immediate assert diafonghdlbgkndhaappbeeiilejgdgg");
+
+cjhmipphmkebkikbaccphodgjphhdojm: assert( (line_state_i[0] == 2'b00) ? (case (msg_type_i[0])) : 1 ) else $error("Error in immediate assert cjhmipphmkebkikbaccphodgjphhdojm");
+
+gnajajiclbimkadnaccjfmkjgelhbbng: assert( (line_state_i[0] == 2'b01) ? (case (msg_type_i[0])) : 1 ) else $error("Error in immediate assert gnajajiclbimkadnaccjfmkjgelhbbng");
+
+mceinplofnbokdglbfllnlegdllgcpip: assert( (line_state_i[0] != 2'b00 && line_state_i[0] != 2'b01) ? (nack_o[0] == 1'b1) : 1 ) else $error("Error in immediate assert mceinplofnbokdglbfllnlegdllgcpip");
+
+pndpldodlfmbkponpdflmilpekaokmeg: assert( (req_i[1] == 1'b1) ? (grant_o[1] == 1'b0, nack_o[1] == 1'b0) : 1 ) else $error("Error in immediate assert pndpldodlfmbkponpdflmilpekaokmeg");
+
+gdpbhjjipmcdkfehbdmaakihiighdjkp: assert( (line_state_i[1] == 2'b00) ? (case (msg_type_i[1])) : 1 ) else $error("Error in immediate assert gdpbhjjipmcdkfehbdmaakihiighdjkp");
+
+lahbfjdipjjokgaeoddbedlolpnofdjh: assert( (line_state_i[1] == 2'b01) ? (case (msg_type_i[1])) : 1 ) else $error("Error in immediate assert lahbfjdipjjokgaeoddbedlolpnofdjh");
+
+odnbbdlpaichkmckomdimiilkljieoik: assert( (line_state_i[1] != 2'b00 && line_state_i[1] != 2'b01) ? (nack_o[1] == 1'b1) : 1 ) else $error("Error in immediate assert odnbbdlpaichkmckomdimiilkljieoik");
+
+bjbkhaoanlifkjafbobhemkkaffpakob: assert( (req_i[2] == 1'b1) ? (grant_o[2] == 1'b0, nack_o[2] == 1'b0) : 1 ) else $error("Error in immediate assert bjbkhaoanlifkjafbobhemkkaffpakob");
+
+jeocelmenedakladbiaobjcfllgoloce: assert( (line_state_i[2] == 2'b00) ? (case (msg_type_i[2])) : 1 ) else $error("Error in immediate assert jeocelmenedakladbiaobjcfllgoloce");
+
+iibfffmhpjmfkmgbagkgoainhfkeoeei: assert( (line_state_i[2] == 2'b01) ? (case (msg_type_i[2])) : 1 ) else $error("Error in immediate assert iibfffmhpjmfkmgbagkgoainhfkeoeei");
+
+ikjhkcjokdajkadcanckhdobkppncdme: assert( (line_state_i[2] != 2'b00 && line_state_i[2] != 2'b01) ? (nack_o[2] == 1'b1) : 1 ) else $error("Error in immediate assert ikjhkcjokdajkadcanckhdobkppncdme");
+
+nahphekbphomkbmkpmdkedkplmeaocfb: assert( (req_i[3] == 1'b1) ? (grant_o[3] == 1'b0, nack_o[3] == 1'b0) : 1 ) else $error("Error in immediate assert nahphekbphomkbmkpmdkedkplmeaocfb");
+
+gbmnjcfmbdjfkmckocfcnompiminfldp: assert( (line_state_i[3] == 2'b00) ? (case (msg_type_i[3])) : 1 ) else $error("Error in immediate assert gbmnjcfmbdjfkmckocfcnompiminfldp");
+
+lmcmgogfljehkebnpahlonagbkphbilb: assert( (line_state_i[3] == 2'b01) ? (case (msg_type_i[3])) : 1 ) else $error("Error in immediate assert lmcmgogfljehkebnpahlonagbkphbilb");
+
+peecagnepjllkobmoloeogboieaembol: assert( (line_state_i[3] != 2'b00 && line_state_i[3] != 2'b01) ? (nack_o[3] == 1'b1) : 1 ) else $error("Error in immediate assert peecagnepjllkobmoloeogboieaembol");
+
+    end
+            
+    
+    
+    endmodule
+
+** Error: (vlog-13069) prueba.sv(13): near ",": syntax error, unexpected ','.
+** Error: (vlog-13069) prueba.sv(15): near "case": syntax error, unexpected case.
+** Error: (vlog-13069) prueba.sv(17): near "case": syntax error, unexpected case.
+** Error: (vlog-13069) prueba.sv(21): near ",": syntax error, unexpected ','.
+** Error: (vlog-13069) prueba.sv(23): near "case": syntax error, unexpected case.
+** Error: (vlog-13069) prueba.sv(25): near "case": syntax error, unexpected case.
+** Error: (vlog-13069) prueba.sv(29): near ",": syntax error, unexpected ','.
+** Error: (vlog-13069) prueba.sv(31): near "case": syntax error, unexpected case.
+** Error: (vlog-13069) prueba.sv(33): near "case": syntax error, unexpected case.
+** Error: (vlog-13069) prueba.sv(37): near ",": syntax error, unexpected ','.
+** Error: (vlog-13069) prueba.sv(39): near "case": syntax error, unexpected case.
+** Error: (vlog-13069) prueba.sv(41): near "case": syntax error, unexpected case. 89.75141644477844

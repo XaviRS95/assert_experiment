@@ -127,7 +127,7 @@ if __name__ == "__main__":
     EXPERIMENT_MODE = 'REGEX_AIDED'
     MODEL = "deepseek-coder-v2:16b"
     MODULES_PATH = "sv_cases.csv"
-    OUTPUT_CSV_FILENAME = f"sv_results_2_{EXPERIMENT_MODE}_{MODEL}.csv"
+    OUTPUT_CSV_FILENAME = f"sv_results_2_{EXPERIMENT_MODE}_{MODEL.replace(':', '_')}.csv"
     if EXPERIMENT_MODE == 'FULL_AI':
         experiment2_full_ai(model_name=MODEL, modules_path=MODULES_PATH, output_filepath=OUTPUT_CSV_FILENAME)
     else:
