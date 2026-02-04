@@ -206,13 +206,13 @@ def immediate_asserts_from_tgts(tgts_rules: list):
 
         if rule['clauses'] not in ['true', 'TRUE'] and rule['check'] not in ['true', 'TRUE']:
             clauses = rule['clauses']
-            clauses = clauses.replace('AND', '&&').replace('NOT', '!').replace('OR','||')
+            clauses = clauses.replace(' AND ', '&&').replace(' and ', '').replace(' NOT ', '!').replace(' not ','').replace(' OR ','||').replace(' or ','')
             check = rule['check']
-            check = check.replace('AND', '&&').replace('NOT', '!').replace('OR', '||')
+            check = check.replace(' AND ', '&&').replace(' and ', '').replace(' NOT ', '!').replace(' not ','').replace(' OR ','||').replace(' or ','')
             error_message = f'$error("Error in immediate assert {assert_label}"'
             sva_block = (
-                f"{assert_label}: assert( ({clauses}) ? ({check}) : 1 ) "
-                f"else {error_message});\n"
+                f"{assert_label}: assert( ({clauses}) ? ({check}) : 1 )"
+                f"  else {error_message});\n"
             )
 
             sva_lines.append(sva_block)
@@ -239,12 +239,15 @@ def sequential_properties_from_tgts(tgts_rules: list, clock_trigger: str):
         if rule['clauses'] not in ['true', 'TRUE'] and rule['check'] not in ['true', 'TRUE']:
             property_label = get_alpha_uuid()
             # property_label = f"property_label_{rule['name']}"
-
             # 1. Clean up logical operators in clauses
-            clauses = rule['clauses'].replace('AND', '&&').replace('NOT', '!').replace('OR', '||')
-            checks = rule['check'].replace('AND', '&&').replace('NOT', '!').replace('OR', '||')
+            clauses = rule['clauses'].replace(' AND ', '&&').replace(' and ', '').replace(' NOT ', '!').replace(' not ','').replace(' OR ','||').replace(' or ','')
+            checks = rule['check'].replace(' AND ', '&&').replace(' and ', '').replace(' NOT ', '!').replace(' not ','').replace(' OR ','||').replace(' or ','')
+
+            #Eliminate same-cycle notations
+            clauses = clauses.replace('[t]', '').replace('[ t ]', '')
+            checks = checks.replace('[t]', '').replace('[ t ]', '')
+
             # 2. Extract variable and delay from rule['check']
-            # e.g., "count_reg[t + 1] == count_reg + 1"
             match = re.search(r'(\w+)\s*\[\s*t\s*\+\s*(\d+)\s*\]', checks)
             if match:
                 var_name = match.group(1)

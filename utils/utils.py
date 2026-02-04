@@ -11,7 +11,7 @@ def read_code_files(csv_path: str) -> list:
             if row:  # skip empty rows
                 code_list.append(row[0])
 
-    return code_list[51:]
+    return code_list[53:]
 
 def generate_final_assertion_content(module_name:str, parameters: str, aux_vars: str, assertions: str) -> str:
 
