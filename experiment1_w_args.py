@@ -77,7 +77,7 @@ if __name__ == "__main__":
         final_output_path = args.output
     else:
         # Replicates your original dynamic naming logic
-        final_output_path = f"sv_results_1_{args.model.replace(':', '_')}.csv"
+        final_output_path = f"sv_results_{args.model.replace(':', '_')}_1.csv"
 
     # Execute the experiment
     experiment1(

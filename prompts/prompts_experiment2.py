@@ -298,6 +298,14 @@ def experiment2_simple_call(code: str) -> str:
     All signals referenced are assumed to be in scope 
 
     Output Format: 
+    
+    SystemVerilog code only inside of this code block markdown: 
+    
+    ```systemverilog  
+        
+    ```
+
+    Template for a generated module:
 
     module_name_assertions(**parameters**);
         **inner_variables**
@@ -535,7 +543,11 @@ def experiment2_only_properties_call(code: str):
 
     Output Format: 
 
-    SystemVerilog code only 
+    SystemVerilog code only inside of this code block markdown: 
+    
+    ```systemverilog  
+        
+    ```
     Each property must be immediately followed by its assert property 
 
     Task: Transform the following SystemVerilog case statement into assertion properties according to the rules above: 

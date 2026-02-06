@@ -1,15 +1,32 @@
+import sys
+import os
 import pandas as pd
 
-df = pd.read_csv("sv_combined_results.csv")
+# -----------------------------
+# CLI argument
+# -----------------------------
+if len(sys.argv) != 2:
+    print("Usage: python summarize_results.py <experiment_folder>")
+    sys.exit(1)
+
+folder = sys.argv[1]
+
+combined_path = os.path.join(folder, "sv_combined_results.csv")
+output_path = os.path.join(folder, "sv_experiment_summary.csv")
+
+# -----------------------------
+# Load combined dataset
+# -----------------------------
+df = pd.read_csv(combined_path)
 
 # -----------------------------
 # Helper function
 # -----------------------------
-def compute_stats(prefix):
+def compute_stats(prefix, resp_suffix):
     result_col = f"{prefix}_result"
     time_col = f"{prefix}_time(s)"
     prompt_col = f"{prefix}_prmpt_tkns"
-    resp_col = f"expr{prefix[3:]}_resp_tkns"  # handles exp1 / exp2_ai / exp2_regex
+    resp_col = resp_suffix
 
     total = len(df)
 
@@ -24,24 +41,34 @@ def compute_stats(prefix):
     }
 
 # -----------------------------
+# Experiments registry
+# -----------------------------
+experiments = [
+    ("exp1", "exp1_resp_tkns"),
+    ("exp2_ai", "exp2_ai_resp_tkns"),
+    ("exp2_regex", "exp2_regex_resp_tkns"),
+    ("exp3", "exp3_resp_tkns"),
+]
+
+# -----------------------------
 # Compute stats
 # -----------------------------
 stats = []
 
-stats.append(compute_stats("exp1"))
-stats.append(compute_stats("exp2_ai"))
-stats.append(compute_stats("exp2_regex"))
+for prefix, resp_col in experiments:
+    stats.append(compute_stats(prefix, resp_col))
 
 summary_df = pd.DataFrame(stats)
 
-# Optional: nicer experiment names
+# Friendly names
 summary_df["experiment"] = summary_df["experiment"].map({
     "exp1": "Experiment 1",
     "exp2_ai": "Experiment 2 Full AI",
     "exp2_regex": "Experiment 2 Regex Aided",
+    "exp3": "Experiment 3",
 })
 
-# Round numeric columns for presentation
+# Round numeric columns
 summary_df = summary_df.round({
     "mean_prompt_tokens": 2,
     "mean_output_tokens": 2,
@@ -49,9 +76,9 @@ summary_df = summary_df.round({
 })
 
 # -----------------------------
-# Save CSV
+# Save
 # -----------------------------
-summary_df.to_csv("sv_experiment_summary.csv", index=False)
+summary_df.to_csv(output_path, index=False)
 
-print("✅ Summary written to sv_experiment_summary.csv")
+print(f"✅ Summary written to {output_path}")
 print(summary_df)

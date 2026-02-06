@@ -145,7 +145,7 @@ if __name__ == "__main__":
     if args.output:
         final_csv_path = args.output
     else:
-        final_csv_path = f"sv_results_3_{args.model.replace(':', '_')}.csv"
+        final_csv_path = f"sv_results_{args.model.replace(':', '_')}_3.csv"
 
     experiment3(
         model_name=args.model,

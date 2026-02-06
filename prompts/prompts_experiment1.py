@@ -3,6 +3,13 @@ def experiment1_simple_call(code:str) -> str:
     Using this SystemVerilog code, generate a module with the same signals that includes the properties and asserts given the original module:
     
     {code}
+    
+    Generate the output inside of this code block markdown : 
+    
+    ```systemverilog  
+        
+    ```
+    
     """
 
     return EXPERIMENT_1_SIMPLE_CALL

@@ -124,8 +124,8 @@ def experiment2_regex_aided(model_name: str, modules_path: str, output_filepath:
 
 if __name__ == "__main__":
 
-    EXPERIMENT_MODE = 'REGEX_AIDED'
-    MODEL = "deepseek-coder-v2:16b"
+    EXPERIMENT_MODE = 'FULL_AI'
+    MODEL = "qwen3-coder:30b"
     MODULES_PATH = "sv_cases.csv"
     OUTPUT_CSV_FILENAME = f"sv_results_2_{EXPERIMENT_MODE}_{MODEL.replace(':', '_')}.csv"
     if EXPERIMENT_MODE == 'FULL_AI':

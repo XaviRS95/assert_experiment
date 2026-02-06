@@ -57,11 +57,13 @@ def query_ollama(
 
 
 def check_code_syntax(code: str):
-    endpoint = 'http://localhost:8002/api/syntax_checker'
+    endpoint = 'http://localhost:8003/api/syntax_checker'
     payload = {
         'code': code
     }
-
-    response = requests.post(url=endpoint, json=payload)
-    result = json.loads(response.content.decode("utf-8"))
-    return result['result']
+    if code:
+        response = requests.post(url=endpoint, json=payload)
+        result = json.loads(response.content.decode("utf-8"))
+        return result['result']
+    else:
+        return 'CODE BLOCK NOT FOUND'

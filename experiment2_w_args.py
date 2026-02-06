@@ -156,7 +156,7 @@ if __name__ == "__main__":
     if args.output:
         output_filename = args.output
     else:
-        output_filename = f"sv_results_2_{args.mode}_{args.model.replace(':', '_')}.csv"
+        output_filename = f"sv_results_{args.model.replace(':', '_')}_{args.mode}_2.csv"
 
     # Execution routing
     if args.mode == 'FULL_AI':
