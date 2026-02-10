@@ -17,10 +17,10 @@ model_name = os.path.basename(folder.rstrip("/"))
 # -----------------------------
 cases_path = "sv_cases.csv"
 
-exp1_path = os.path.join(folder, f"sv_results_1_{model_name}.csv")
-exp2_ai_path = os.path.join(folder, f"sv_results_2_FULL_AI_{model_name}.csv")
-exp2_regex_path = os.path.join(folder, f"sv_results_2_REGEX_AIDED_{model_name}.csv")
-exp3_path = os.path.join(folder, f"sv_results_3_{model_name}.csv")
+exp1_path = os.path.join(folder, f"sv_results_{model_name}_1.csv")
+exp2_ai_path = os.path.join(folder, f"sv_results_{model_name}_FULL_AI_2.csv")
+exp2_regex_path = os.path.join(folder, f"sv_results_{model_name}_REGEX_AIDED_2.csv")
+exp3_path = os.path.join(folder, f"sv_results_{model_name}_3.csv")
 
 output_path = os.path.join(folder, "sv_combined_results.csv")
 
@@ -37,6 +37,10 @@ exp3 = pd.read_csv(exp3_path)
 # -----------------------------
 # Safety: row alignment
 # -----------------------------
+print(len(exp1), len(cases))
+print(len(exp2_ai), len(cases))
+print(len(exp2_regex), len(cases))
+print(len(exp3), len(cases))
 assert len(exp1) == len(cases)
 assert len(exp2_ai) == len(cases)
 assert len(exp2_regex) == len(cases)

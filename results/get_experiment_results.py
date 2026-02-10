@@ -34,7 +34,7 @@ def compute_stats(prefix, resp_suffix):
 
     return {
         "experiment": prefix,
-        "ok_percent": ok_pct,
+        "syntax_correct(%)": ok_pct,
         "mean_prompt_tokens": df[prompt_col].mean(),
         "mean_output_tokens": df[resp_col].mean(),
         "avg_time_seconds": df[time_col].mean(),

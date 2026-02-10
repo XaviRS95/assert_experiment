@@ -1,0 +1,5 @@
+experiment,ok_percent,mean_prompt_tokens,mean_output_tokens,avg_time_seconds
+Experiment 1,33.33,322.21,679.21,9.5
+Experiment 2 Full AI,41.41,3197.21,408.41,8.7
+Experiment 2 Regex Aided,18.18,2631.87,333.26,5.95
+Experiment 3,93.43,668.83,299.64,4.91
