@@ -1,0 +1,1525 @@
+modules
+"module seq_case71(
+    input logic clk, reset,
+    output logic [1:0] count
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            count <= 2'b00;
+        else
+            case(count)
+                2'b00: count <= 2'b01;
+                2'b01: count <= 2'b10;
+                2'b10: count <= 2'b11;
+                2'b11: count <= 2'b00;
+                default: count <= 2'b00;
+            endcase
+    end
+endmodule
+"
+"module seq_case72(
+    input logic clk, reset,
+    output logic [1:0] state
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            state <= 2'b00;
+        else
+            case(state)
+                2'b00: state <= 2'b01;
+                2'b01: state <= 2'b10;
+                2'b10: state <= 2'b00;
+                default: state <= 2'b00;
+            endcase
+    end
+endmodule
+"
+"module seq_case73(
+    input logic clk, reset, serial_in,
+    output logic [3:0] q
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            q <= 4'b0000;
+        else
+            case(q)
+                default: q <= {q[2:0], serial_in}; // shift left
+            endcase
+    end
+endmodule
+"
+"module seq_case75(
+    input logic clk, reset, enable,
+    output logic [3:0] count
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            count <= 4'b0000;
+        else
+            case(enable)
+                1'b0: count <= count;      // hold
+                1'b1: count <= count + 1;  // increment
+                default: count <= 4'b0000;
+            endcase
+    end
+endmodule
+"
+"module ff_case_1(input logic clk, rst, toggle, output logic state);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) state <= 0;
+  else begin
+    case(state)
+      1'b0: if (toggle) state <= 1;
+      1'b1: if (toggle) state <= 0;
+    endcase
+  end
+end
+endmodule
+"
+"module ff_case_2(input logic clk, rst, start, done, output logic [1:0] state);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) state <= 2'b00;
+  else begin
+    case(state)
+      2'b00: if (start) state <= 2'b01;
+      2'b01: if (done)  state <= 2'b00;
+      default: state <= 2'b00;
+    endcase
+  end
+end
+endmodule
+"
+"module ff_case_3(input logic clk, rst, err, output logic bad);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) bad <= 0;
+  else begin
+    case(bad)
+      1'b0: if (err) bad <= 1;
+      1'b1: bad <= 1;
+    endcase
+  end
+end
+endmodule
+"
+"module ff_case_4(input logic clk, rst, input logic [1:0] mode, output logic [3:0] cnt);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) cnt <= 0;
+  else begin
+    case(mode)
+      2'b00: cnt <= cnt;
+      2'b01: cnt <= cnt + 1;
+      2'b10: cnt <= cnt - 1;
+      default: cnt <= 0;
+    endcase
+  end
+end
+endmodule
+"
+"module ff_case_5(input logic clk, rst, load, input logic [7:0] d, output logic [7:0] q);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) q <= 0;
+  else begin
+    case(load)
+      1'b0: q <= q;
+      1'b1: q <= d;
+    endcase
+  end
+end
+endmodule
+"
+"module ff_case_6(input logic clk, rst, timer, output logic [1:0] light);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) light <= 2'b00;
+  else begin
+    case(light)
+      2'b00: if (timer) light <= 2'b01;
+      2'b01: if (timer) light <= 2'b10;
+      2'b10: if (timer) light <= 2'b00;
+      default: light <= 2'b00;
+    endcase
+  end
+end
+endmodule
+"
+"module ff_case_7(input logic clk, rst, stall, output logic [1:0] state);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) state <= 2'b00;
+  else begin
+    case(state)
+      2'b00: state <= stall ? 2'b00 : 2'b01;
+      2'b01: state <= stall ? 2'b01 : 2'b10;
+      2'b10: state <= 2'b00;
+      default: state <= 2'b00;
+    endcase
+  end
+end
+endmodule
+"
+"module ff_case_8(input logic clk, rst, en, input logic [3:0] d, output logic [3:0] q);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) q <= 0;
+  else begin
+    case(en)
+      1'b1: q <= d;
+      1'b0: q <= q;
+    endcase
+  end
+end
+endmodule
+"
+"module ff_case_9(input logic clk, rst, inc, output logic [2:0] cnt);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) cnt <= 0;
+  else begin
+    case(cnt)
+      3'b111: cnt <= cnt;
+      default: if (inc) cnt <= cnt + 1;
+    endcase
+  end
+end
+endmodule
+"
+"module ff_case_10(input logic clk, rst, fail, output logic [1:0] state);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) state <= 2'b00;
+  else begin
+    case(state)
+      2'b00: state <= 2'b01;
+      2'b01: state <= fail ? 2'b10 : 2'b00;
+      2'b10: state <= 2'b01;
+      default: state <= 2'b00;
+    endcase
+  end
+end
+endmodule
+"
+"module proto_case_1(input logic clk, rst, req, output logic gnt);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) gnt <= 0;
+  else begin
+    case(gnt)
+      1'b0: if (req) gnt <= 1;
+      1'b1: gnt <= 0;
+    endcase
+  end
+end
+endmodule
+"
+"module proto_case_2(input logic clk, rst, valid, output logic ready);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) ready <= 1;
+  else begin
+    case(ready)
+      1'b1: if (valid) ready <= 0;
+      1'b0: ready <= 1;
+    endcase
+  end
+end
+endmodule
+"
+"module proto_case_3(input logic clk, rst, send, ack, output logic busy);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) busy <= 0;
+  else begin
+    case(busy)
+      1'b0: if (send) busy <= 1;
+      1'b1: if (ack) busy <= 0;
+    endcase
+  end
+end
+endmodule
+"
+"module proto_case_4(input logic clk, rst, give, take, output logic [1:0] credit);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) credit <= 2;
+  else begin
+    case({give,take})
+      2'b10: credit <= credit + 1;
+      2'b01: credit <= credit - 1;
+      default: credit <= credit;
+    endcase
+  end
+end
+endmodule
+"
+"module proto_case_5(input logic clk, rst, sop, eop, output logic in_pkt);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) in_pkt <= 0;
+  else begin
+    case(in_pkt)
+      1'b0: if (sop) in_pkt <= 1;
+      1'b1: if (eop) in_pkt <= 0;
+    endcase
+  end
+end
+endmodule
+"
+"module proto_case_6(input logic clk, rst, fail, output logic retry);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) retry <= 0;
+  else begin
+    case(retry)
+      1'b0: if (fail) retry <= 1;
+      1'b1: retry <= 0;
+    endcase
+  end
+end
+endmodule
+"
+"module proto_case_7(input logic clk, rst, lock_req, unlock, output logic locked);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) locked <= 0;
+  else begin
+    case(locked)
+      1'b0: if (lock_req) locked <= 1;
+      1'b1: if (unlock) locked <= 0;
+    endcase
+  end
+end
+endmodule
+"
+"module proto_case_8(input logic clk, rst, start, finish, output logic busy);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) busy <= 0;
+  else begin
+    case(busy)
+      1'b0: if (start) busy <= 1;
+      1'b1: if (finish) busy <= 0;
+    endcase
+  end
+end
+endmodule
+"
+"module proto_case_9(input logic clk, rst, go, done, output logic active);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) active <= 0;
+  else begin
+    case(active)
+      1'b0: if (go) active <= 1;
+      1'b1: if (done) active <= 0;
+    endcase
+  end
+end
+endmodule
+"
+"module phy_link (
+    input logic clk,
+    input logic [3:0] mode,
+    output logic [1:0] speed,
+    output logic training
+);
+    always_ff @(posedge clk) begin
+        casez (mode)
+            4'b1???: speed <= 2'b11;   // Gen3
+            4'b01??: speed <= 2'b10;   // Gen2
+            4'b001?: speed <= 2'b01;   // Gen1
+            4'b0001: speed <= 2'b00;   // Safe
+        endcase
+    end
+
+    always_ff @(posedge clk)
+        training <= (speed != 2'b00);
+endmodule
+"
+"module mem_ctrl (
+    input logic clk,
+    input logic [1:0] cmd,
+    input logic [1:0] burst,
+    output logic ack,
+    output logic err
+);
+    always_ff @(posedge clk) begin
+        ack <= 0;
+        err <= 0;
+        case (cmd)
+            2'b00: begin // READ
+                case (burst)
+                    2'b00, 2'b01: ack <= 1;
+                    default: err <= 1;
+                endcase
+            end
+
+            2'b01: begin // WRITE
+                case (burst)
+                    2'b00, 2'b10: ack <= 1;
+                    default: err <= 1;
+                endcase
+            end
+
+            default: err <= 1;
+        endcase
+    end
+endmodule
+"
+"module dma_engine (
+    input logic clk,
+    input logic [1:0] size,
+    output logic busy,
+    output logic done
+);
+    typedef enum logic [1:0] {SMALL, MEDIUM, LARGE} size_t;
+
+    always_ff @(posedge clk) begin
+        case (size)
+            SMALL: begin
+                busy <= 1;
+                done <= ##1 1;
+            end
+
+            MEDIUM: begin
+                busy <= 1;
+                done <= ##2 1;
+            end
+
+            LARGE: begin
+                busy <= 1;
+                done <= ##4 1;
+            end
+        endcase
+    end
+endmodule
+"
+"module ff_case_11(input logic clk, rst, dec, output logic [2:0] cnt);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) cnt <= 3'b111;
+  else begin
+    case(cnt)
+      3'b000: cnt <= cnt;
+      default: if (dec) cnt <= cnt - 1;
+    endcase
+  end
+end
+endmodule"
+"module ff_case_12(input logic clk, rst, error, output logic [1:0] status);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) status <= 2'b00;
+  else begin
+    case(status)
+      2'b00: status <= error ? 2'b11 : 2'b01;
+      2'b01: status <= 2'b10;
+      2'b10: status <= 2'b00;
+      2'b11: status <= 2'b00;
+    endcase
+  end
+end
+endmodule"
+"module proto_case_9(input logic clk, rst, req, ack, output logic req_pending);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) req_pending <= 0;
+  else begin
+    case(req_pending)
+      1'b0: if (req) req_pending <= 1;
+      1'b1: if (ack) req_pending <= 0;
+    endcase
+  end
+end
+endmodule"
+"module proto_case_10(input logic clk, rst, load, shift, output logic [1:0] mode);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) mode <= 0;
+  else begin
+    case(mode)
+      2'b00: if (load) mode <= 2'b01;
+      2'b01: if (shift) mode <= 2'b10;
+      2'b10: mode <= 2'b00;
+      default: mode <= 2'b00;
+    endcase
+  end
+end
+endmodule"
+"module proto_case_11(input logic clk, rst, increment, decrement, output logic [2:0] count);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) count <= 0;
+  else begin
+    case({increment, decrement})
+      2'b10: count <= count + 1;
+      2'b01: count <= count - 1;
+      default: count <= count;
+    endcase
+  end
+end
+endmodule"
+"module proto_case_12(input logic clk, rst, arm, trigger, output logic armed);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) armed <= 0;
+  else begin
+    case(armed)
+      1'b0: if (arm) armed <= 1;
+      1'b1: if (trigger) armed <= 0;
+    endcase
+  end
+end
+endmodule"
+"module proto_case_13(input logic clk, rst, go, done, output logic running);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) running <= 0;
+  else begin
+    case(running)
+      1'b0: if (go) running <= 1;
+      1'b1: if (done) running <= 0;
+    endcase
+  end
+end
+endmodule"
+"module proto_case_14(input logic clk, rst, enable, timeout, output logic active);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) active <= 0;
+  else begin
+    case(active)
+      1'b0: if (enable) active <= 1;
+      1'b1: if (timeout) active <= 0;
+    endcase
+  end
+end
+endmodule"
+"module proto_case_15(input logic clk, rst, in_valid, in_ready, output logic data_valid);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) data_valid <= 0;
+  else begin
+    case(data_valid)
+      1'b0: if (in_valid) data_valid <= 1;
+      1'b1: if (in_ready) data_valid <= 0;
+    endcase
+  end
+end
+endmodule"
+"module proto_case_16(input logic clk, rst, set, clear, output logic flag);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) flag <= 0;
+  else begin
+    case(flag)
+      1'b0: if (set) flag <= 1;
+      1'b1: if (clear) flag <= 0;
+    endcase
+  end
+end
+endmodule"
+"module case_range_1(input logic clk, rst, en, output logic [3:0] value);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) value <= 0;
+  else begin
+    case(value) inside
+      [0:3]: if (en) value <= value + 1;
+      [4:7]: if (en) value <= value - 1;
+      [8:11]: value <= 4'b0101;
+      [12:15]: value <= 0;
+    endcase
+  end
+end
+endmodule"
+"module case_range_2(input logic clk, rst, inc, dec, output logic [2:0] level);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) level <= 3'b011;
+  else begin
+    case(level) inside
+      [0:2]: begin
+        if (inc) level <= level + 1;
+        if (dec) level <= level - 1;
+      end
+      [3:5]: level <= 3'b010;
+      [6:7]: level <= 3'b011;
+    endcase
+  end
+end
+endmodule"
+"module case_set_1(input logic clk, rst, trigger, output logic [2:0] pattern);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) pattern <= 3'b001;
+  else begin
+    case(pattern) inside
+      {3'b001, 3'b010, 3'b100}: if (trigger) pattern <= pattern << 1;
+      3'b110, 3'b101, 3'b011: pattern <= 3'b111;
+      3'b111: pattern <= 3'b001;
+    endcase
+  end
+end
+endmodule"
+"module case_set_2(input logic clk, rst, mode, output logic [1:0] state);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) state <= 2'b00;
+  else begin
+    case(state) inside
+      {2'b00, 2'b11}: state <= mode ? 2'b01 : 2'b10;
+      {2'b01, 2'b10}: state <= state ^ 2'b11;
+    endcase
+  end
+end
+endmodule"
+"module casex_example(input logic clk, rst, ctrl, output logic [3:0] data);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) data <= 4'b0000;
+  else begin
+    casex(data)
+      4'b000x: data <= ctrl ? 4'b0010 : 4'b0001;
+      4'b001x: data <= data | 4'b1100;
+      4'b01xx: data <= {data[2:0], 1'b0};
+      4'b1xxx: data <= 4'b0000;
+      default: data <= data;
+    endcase
+  end
+end
+endmodule
+"
+"module casez_example(input logic clk, rst, update, output logic [3:0] mask);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) mask <= 4'b0001;
+  else begin
+    casez(mask)
+      4'b000?: mask <= mask << 1;
+      4'b001?: mask <= update ? 4'b0100 : 4'b0010;
+      4'b01??: mask <= mask | 4'b1000;
+      4'b1???: mask <= 4'b0001;
+    endcase
+  end
+end
+endmodule
+"
+"module case_range_mixed(input logic clk, rst, sel, output logic [4:0] counter);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) counter <= 5'd0;
+  else begin
+    case(counter) inside
+      [0:7], [24:31]: counter <= counter + 1;
+      [8:15]: counter <= sel ? counter - 1 : counter + 2;
+      [16:23]: counter <= 5'd0;
+    endcase
+  end
+end
+endmodule"
+"module case_set_mixed(input logic clk, rst, a, b, output logic [2:0] code);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) code <= 3'b000;
+  else begin
+    case(code) inside
+      {3'b000, 3'b111}: code <= a ? 3'b001 : 3'b110;
+      {3'b001, 3'b010}: code <= b ? code + 1 : code - 1;
+      {3'b011, 3'b100, 3'b101, 3'b110}: code <= 3'b000;
+    endcase
+  end
+end
+endmodule"
+"module casex_range(input logic clk, rst, en, output logic [5:0] value);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) value <= 6'b000001;
+  else begin
+    casex(value)
+      6'b0000xx: value <= en ? value << 1 : value;
+      6'b0001xx: value <= value + 1;
+      6'b001xxx: value <= value | 6'b110000;
+      6'b01xxxx: value <= 6'b000001;
+      6'b1xxxxx: value <= value & 6'b011111;
+    endcase
+  end
+end
+endmodule"
+"module casez_set(input logic clk, rst, trigger, output logic [3:0] seq);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) seq <= 4'b0001;
+  else begin
+    casez(seq)
+      4'b0001, 4'b0010, 4'b0100: seq <= seq << 1;
+      4'b1000: seq <= trigger ? 4'b0011 : 4'b1100;
+      4'b00??: seq <= 4'b0100;
+      4'b??1?: seq <= seq ^ 4'b1010;
+      4'b1???: seq <= 4'b0001;
+    endcase
+  end
+end
+endmodule"
+"module case_bitwise(input logic clk, rst, toggle, output logic [7:0] data);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) data <= 8'hAA;
+  else begin
+    case(data[1:0])
+      2'b00: data <= toggle ? data ^ 8'hFF : data;
+      2'b01: data <= data | 8'h55;
+      2'b10: data <= data & 8'hF0;
+      2'b11: data <= {data[6:0], data[7]};
+    endcase
+  end
+end
+endmodule"
+"module case_offset(input logic clk, rst, adjust, output logic [4:0] offset);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) offset <= 5'd8;
+  else begin
+    case(offset) inside
+      [0:4]: offset <= adjust ? offset + 3 : offset;
+      [5:9]: offset <= offset - 2;
+      [10:14]: offset <= 5'd15;
+      [15:19]: offset <= offset - 5;
+      [20:31]: offset <= 5'd0;
+    endcase
+  end
+end
+endmodule"
+"module case_priority(input logic clk, rst, req_a, req_b, req_c, output logic [2:0] grant);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) grant <= 3'b000;
+  else begin
+    case(1'b1)
+      req_a: grant <= 3'b001;
+      req_b: grant <= 3'b010;
+      req_c: grant <= 3'b100;
+      default: grant <= 3'b000;
+    endcase
+  end
+end
+endmodule"
+"module case_wrap(input logic clk, rst, inc, wrap, output logic [3:0] pointer);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) pointer <= 4'b0000;
+  else begin
+    case(pointer)
+      4'b0000: pointer <= inc ? 4'b0001 : pointer;
+      4'b1111: pointer <= wrap ? 4'b0000 : 4'b1110;
+      default: pointer <= inc ? pointer + 1 : pointer - 1;
+    endcase
+  end
+end
+endmodule"
+"module case_multi_cond(input logic clk, rst, cond1, cond2, output logic [2:0] mode);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) mode <= 3'b000;
+  else begin
+    case({cond1, cond2})
+      2'b00: mode <= mode;
+      2'b01: mode <= mode | 3'b001;
+      2'b10: mode <= mode & 3'b110;
+      2'b11: mode <= mode ^ 3'b011;
+    endcase
+  end
+end
+endmodule"
+"module case_threshold(input logic clk, rst, add, sub, output logic [5:0] threshold);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) threshold <= 6'd20;
+  else begin
+    case(threshold) inside
+      [0:10]: threshold <= add ? threshold + 5 : threshold;
+      [11:30]: begin
+        if (add) threshold <= threshold + 2;
+        if (sub) threshold <= threshold - 1;
+      end
+      [31:40]: threshold <= sub ? threshold - 3 : threshold;
+      [41:63]: threshold <= 6'd20;
+    endcase
+  end
+end
+endmodule"
+"module case_pattern_gen(input logic clk, rst, next, output logic [7:0] pattern);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) pattern <= 8'b10101010;
+  else begin
+    case(pattern[3:0])
+      4'b0000: pattern <= 8'b01010101;
+      4'b0101: pattern <= 8'b00110011;
+      4'b1010: pattern <= 8'b11001100;
+      4'b1111: pattern <= 8'b00001111;
+      default: if (next) pattern <= {pattern[6:0], pattern[7]};
+    endcase
+  end
+end
+endmodule"
+"module case_window(input logic clk, rst, slide, output logic [3:0] window);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) window <= 4'b1000;
+  else begin
+    case(window) inside
+      {4'b1000, 4'b0100, 4'b0010, 4'b0001}:
+        window <= slide ? {window[0], window[3:1]} : window;
+      default: window <= 4'b1000;
+    endcase
+  end
+end
+endmodule"
+"module case_lfsr(input logic clk, rst, seed_en, output logic [7:0] lfsr);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) lfsr <= 8'h01;
+  else begin
+    case(lfsr[0])
+      1'b0: lfsr <= {lfsr[0] ^ lfsr[2] ^ lfsr[3] ^ lfsr[4], lfsr[7:1]};
+      1'b1: begin
+        if (seed_en) lfsr <= 8'hA5;
+        else lfsr <= {lfsr[0] ^ lfsr[6], lfsr[7:1]};
+      end
+    endcase
+  end
+end
+endmodule"
+"module case_delay(input logic clk, rst, start, output logic [2:0] delay);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) delay <= 3'b000;
+  else begin
+    case(delay)
+      3'b000: delay <= start ? 3'b001 : 3'b000;
+      3'b001: delay <= 3'b010;
+      3'b010: delay <= 3'b100;
+      3'b100: delay <= 3'b000;
+      default: delay <= 3'b000;
+    endcase
+  end
+end
+endmodule"
+"module case_amplitude(input logic clk, rst, up, down, output logic [4:0] amplitude);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) amplitude <= 5'd16;
+  else begin
+    case(amplitude) inside
+      [0:7]: amplitude <= up ? amplitude + 4 : amplitude;
+      [8:15]: begin
+        if (up) amplitude <= amplitude + 2;
+        if (down) amplitude <= amplitude - 1;
+      end
+      [16:23]: amplitude <= down ? amplitude - 2 : amplitude;
+      [24:31]: amplitude <= 5'd16;
+    endcase
+  end
+end
+endmodule"
+"module case_edge_det(input logic clk, rst, sig, output logic [1:0] edge_state);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) edge_state <= 2'b00;
+  else begin
+    case(edge_state)
+      2'b00: edge_state <= sig ? 2'b01 : 2'b00;
+      2'b01: edge_state <= sig ? 2'b11 : 2'b10;
+      2'b10: edge_state <= sig ? 2'b01 : 2'b00;
+      2'b11: edge_state <= sig ? 2'b11 : 2'b10;
+    endcase
+  end
+end
+endmodule"
+"module case_rotation(input logic clk, rst, dir, output logic [5:0] rotator);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) rotator <= 6'b000111;
+  else begin
+    case(rotator[2:0])
+      3'b000: rotator <= dir ? {rotator[4:0], rotator[5]} : {rotator[0], rotator[5:1]};
+      3'b111: rotator <= 6'b111000;
+      3'b001, 3'b010, 3'b100: rotator <= rotator ^ 6'b101010;
+      default: rotator <= rotator + 1;
+    endcase
+  end
+end
+endmodule"
+"module case_phase(input logic clk, rst, adjust, output logic [3:0] phase);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) phase <= 4'b0001;
+  else begin
+    casez(phase)
+      4'b0001: phase <= adjust ? 4'b0010 : 4'b1000;
+      4'b001?: phase <= phase << 1;
+      4'b0100: phase <= 4'b1000;
+      4'b1???: phase <= phase >> 1;
+      default: phase <= 4'b0001;
+    endcase
+  end
+end
+endmodule"
+"module case_pulse_width(input logic clk, rst, inc, dec, output logic [3:0] width);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) width <= 4'd8;
+  else begin
+    case(width) inside
+      [0:3]: width <= inc ? width + 2 : width;
+      [4:7]: begin
+        if (inc) width <= width + 1;
+        if (dec) width <= width - 1;
+      end
+      [8:11]: width <= dec ? width - 2 : width;
+      [12:15]: width <= 4'd8;
+    endcase
+  end
+end
+endmodule"
+"module case_temp_ctrl(input logic clk, rst, heat, cool, output logic [3:0] temp);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) temp <= 4'b0110;
+  else begin
+    case(temp) inside
+      [0:3]: temp <= heat ? temp + 2 : temp;  // Too cold
+      [4:7]: begin                            // Comfort zone
+        if (heat) temp <= temp + 1;
+        if (cool) temp <= temp - 1;
+      end
+      [8:11]: temp <= cool ? temp - 2 : temp; // Too hot
+      [12:15]: temp <= 4'b0110;               // Reset to middle
+    endcase
+  end
+end
+endmodule"
+"module case_addr_decode(input logic clk, rst, enable, output logic [2:0] addr);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) addr <= 3'b000;
+  else begin
+    case(addr)
+      3'b000: addr <= enable ? 3'b001 : 3'b000;
+      3'b001, 3'b010, 3'b100: addr <= addr << 1;
+      3'b011: addr <= 3'b101;
+      3'b101: addr <= 3'b110;
+      3'b110, 3'b111: addr <= 3'b000;
+    endcase
+  end
+end
+endmodule
+"
+"module case_gray_counter(input logic clk, rst, inc, output logic [3:0] gray);
+logic [3:0] binary;
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) begin
+    binary <= 4'b0000;
+    gray <= 4'b0000;
+  end else if (inc) begin
+    case(gray)
+      4'b0000: gray <= 4'b0001;
+      4'b0001: gray <= 4'b0011;
+      4'b0011: gray <= 4'b0010;
+      4'b0010: gray <= 4'b0110;
+      4'b0110: gray <= 4'b0111;
+      4'b0111: gray <= 4'b0101;
+      4'b0101: gray <= 4'b0100;
+      4'b0100: gray <= 4'b1100;
+      4'b1100: gray <= 4'b1101;
+      4'b1101: gray <= 4'b1111;
+      4'b1111: gray <= 4'b1110;
+      4'b1110: gray <= 4'b1010;
+      4'b1010: gray <= 4'b1011;
+      4'b1011: gray <= 4'b1001;
+      4'b1001: gray <= 4'b1000;
+      4'b1000: gray <= 4'b0000;
+    endcase
+  end
+end
+endmodule"
+"module case_voltage_lvl(input logic clk, rst, up, dn, output logic [2:0] voltage);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) voltage <= 3'b011;
+  else begin
+    case(voltage)
+      3'b000: voltage <= up ? 3'b001 : 3'b000;
+      3'b001: voltage <= up ? 3'b010 : (dn ? 3'b000 : 3'b001);
+      3'b010: voltage <= up ? 3'b011 : (dn ? 3'b001 : 3'b010);
+      3'b011: voltage <= up ? 3'b100 : (dn ? 3'b010 : 3'b011);
+      3'b100: voltage <= up ? 3'b101 : (dn ? 3'b011 : 3'b100);
+      3'b101: voltage <= up ? 3'b110 : (dn ? 3'b100 : 3'b101);
+      3'b110: voltage <= dn ? 3'b101 : 3'b110;
+      3'b111: voltage <= 3'b011;
+    endcase
+  end
+end
+endmodule"
+"module case_data_align(input logic clk, rst, sync, output logic [3:0] align);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) align <= 4'b0001;
+  else begin
+    casex(align)
+      4'bxxx1: align <= sync ? 4'b0010 : {align[0], align[3:1]};
+      4'bxx10: align <= 4'b0100;
+      4'bx100: align <= 4'b1000;
+      4'b1000: align <= 4'b0001;
+      default: align <= 4'b0001;
+    endcase
+  end
+end
+endmodule
+"
+"module case_histogram(input logic clk, rst, inc, dec, output logic [3:0] hist_bin);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) hist_bin <= 4'd0;
+  else begin
+    case(hist_bin) inside
+      [0:2]: hist_bin <= inc ? hist_bin + 1 : hist_bin;
+      [3:7]: begin
+        if (inc && hist_bin < 4'd12) hist_bin <= hist_bin + 1;
+        if (dec && hist_bin > 4'd0) hist_bin <= hist_bin - 1;
+      end
+      [8:12]: hist_bin <= dec ? hist_bin - 1 : hist_bin;
+      [13:15]: hist_bin <= 4'd7;
+    endcase
+  end
+end
+endmodule"
+"module case_pwm_duty(input logic clk, rst, adj_up, adj_dn, output logic [4:0] duty);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) duty <= 5'd16;
+  else begin
+    case(duty) inside
+      [0:7]: duty <= adj_up ? duty + 4 : duty;
+      [8:15]: begin
+        if (adj_up) duty <= duty + 2;
+        if (adj_dn) duty <= duty - 1;
+      end
+      [16:23]: duty <= adj_dn ? duty - 2 : duty;
+      [24:31]: duty <= 5'd16;
+    endcase
+  end
+end
+endmodule"
+"module case_filter_tap(input logic clk, rst, update, output logic [3:0] coeff);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) coeff <= 4'b0001;
+  else begin
+    case(coeff) inside
+      {4'b0001, 4'b0010, 4'b0100, 4'b1000}: 
+        coeff <= update ? {coeff[2:0], coeff[3]} : coeff;
+      4'b0011: coeff <= 4'b0110;
+      4'b0110: coeff <= 4'b1100;
+      4'b1100: coeff <= 4'b1001;
+      4'b1001: coeff <= 4'b0011;
+      default: coeff <= 4'b0001;
+    endcase
+  end
+end
+endmodule"
+"module case_clk_div(input logic clk, rst, speed, output logic [2:0] div);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) div <= 3'b001;
+  else begin
+    case(div)
+      3'b000: div <= 3'b001;
+      3'b001: div <= speed ? 3'b010 : 3'b100;
+      3'b010: div <= 3'b100;
+      3'b011: div <= 3'b110;
+      3'b100: div <= speed ? 3'b011 : 3'b101;
+      3'b101: div <= 3'b110;
+      3'b110: div <= 3'b111;
+      3'b111: div <= 3'b001;
+    endcase
+  end
+end
+endmodule"
+"module case_saturation(input logic clk, rst, add, sub, output logic [3:0] sat_val);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) sat_val <= 4'b1000;
+  else begin
+    case(sat_val)
+      4'b0000: sat_val <= add ? 4'b0001 : 4'b0000;
+      4'b1111: sat_val <= sub ? 4'b1110 : 4'b1111;
+      default: begin
+        if (add && sat_val != 4'b1111) sat_val <= sat_val + 1;
+        if (sub && sat_val != 4'b0000) sat_val <= sat_val - 1;
+      end
+    endcase
+  end
+end
+endmodule"
+"module case_noise_shape(input logic clk, rst, dither, output logic [2:0] noise);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) noise <= 3'b000;
+  else begin
+    case(noise)
+      3'b000: noise <= dither ? 3'b001 : 3'b111;
+      3'b001: noise <= 3'b011;
+      3'b010: noise <= 3'b101;
+      3'b011: noise <= 3'b010;
+      3'b100: noise <= 3'b110;
+      3'b101: noise <= 3'b100;
+      3'b110: noise <= 3'b001;
+      3'b111: noise <= 3'b000;
+    endcase
+  end
+end
+endmodule"
+"module case_bias_adj(input logic clk, rst, inc, dec, output logic [3:0] bias);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) bias <= 4'b1000;
+  else begin
+    case(bias) inside
+      [0:3]: begin
+        if (inc) bias <= bias + 2;
+        if (dec) bias <= (bias == 0) ? 0 : bias - 1;
+      end
+      [4:11]: begin
+        if (inc && bias < 4'b1111) bias <= bias + 1;
+        if (dec && bias > 4'b0000) bias <= bias - 1;
+      end
+      [12:15]: begin
+        if (inc) bias <= 4'b1111;
+        if (dec) bias <= bias - 2;
+      end
+    endcase
+  end
+end
+endmodule"
+"module case_sync_pattern(input logic clk, rst, detect, output logic [4:0] sync);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) sync <= 5'b00001;
+  else begin
+    casez(sync)
+      5'b00001: sync <= detect ? 5'b00010 : 5'b10000;
+      5'b0001?: sync <= sync << 1;
+      5'b001??: sync <= 5'b01000;
+      5'b01???: sync <= 5'b10000;
+      5'b1????: sync <= 5'b00001;
+      default: sync <= 5'b00001;
+    endcase
+  end
+end
+endmodule"
+"module case_quantizer(input logic clk, rst, step, output logic [3:0] q_level);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) q_level <= 4'b1000;
+  else begin
+    case(q_level) inside
+      [0:1]: q_level <= step ? 4'b0010 : 4'b0001;
+      [2:5]: begin
+        if (step) q_level <= (q_level == 5) ? 4'b1000 : q_level + 1;
+        else q_level <= (q_level == 2) ? 4'b0001 : q_level - 1;
+      end
+      [6:9]: q_level <= step ? 4'b1010 : 4'b0101;
+      [10:13]: q_level <= step ? 4'b1110 : 4'b1011;
+      [14:15]: q_level <= 4'b1000;
+    endcase
+  end
+end
+endmodule"
+"module case_delay_chain(input logic clk, rst, propagate, output logic [3:0] delay_out);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) delay_out <= 4'b0001;
+  else begin
+    case(delay_out)
+      4'b0000: delay_out <= 4'b0001;
+      4'b0001: delay_out <= propagate ? 4'b0010 : 4'b0001;
+      4'b0010: delay_out <= 4'b0100;
+      4'b0100: delay_out <= 4'b1000;
+      4'b1000: delay_out <= 4'b0001;
+      default: delay_out <= 4'b0001;
+    endcase
+  end
+end
+endmodule"
+"module case_freq_hop(input logic clk, rst, hop_en, output logic [4:0] freq_code);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) freq_code <= 5'b00001;
+  else begin
+    case(freq_code)
+      5'b00001: freq_code <= hop_en ? 5'b00011 : 5'b00001;
+      5'b00011: freq_code <= 5'b00101;
+      5'b00101: freq_code <= 5'b00111;
+      5'b00111: freq_code <= 5'b01011;
+      5'b01011: freq_code <= 5'b01101;
+      5'b01101: freq_code <= 5'b01111;
+      5'b01111: freq_code <= 5'b10001;
+      5'b10001: freq_code <= 5'b10011;
+      5'b10011: freq_code <= 5'b10101;
+      5'b10101: freq_code <= 5'b10111;
+      5'b10111: freq_code <= 5'b11001;
+      5'b11001: freq_code <= 5'b11011;
+      5'b11011: freq_code <= 5'b11101;
+      5'b11101: freq_code <= 5'b11111;
+      5'b11111: freq_code <= 5'b00001;
+      default: freq_code <= 5'b00001;
+    endcase
+  end
+end
+endmodule"
+"module case_crc_update(input logic clk, rst, data_bit, output logic [3:0] crc);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) crc <= 4'b0000;
+  else begin
+    case(crc[3])
+      1'b0: crc <= {crc[2:0], data_bit} ^ 4'b0000;
+      1'b1: crc <= {crc[2:0], data_bit} ^ 4'b1001;
+    endcase
+  end
+end
+endmodule"
+"module case_brightness(input logic clk, rst, inc, dec, output logic [5:0] brightness);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) brightness <= 6'd32;
+  else begin
+    case(brightness) inside
+      [0:15]: brightness <= inc ? brightness + 4 : brightness;
+      [16:31]: begin
+        if (inc) brightness <= brightness + 2;
+        if (dec) brightness <= brightness - 1;
+      end
+      [32:47]: begin
+        if (inc) brightness <= brightness + 1;
+        if (dec) brightness <= brightness - 2;
+      end
+      [48:63]: brightness <= dec ? brightness - 4 : brightness;
+    endcase
+  end
+end
+endmodule"
+"module case_scramble(input logic clk, rst, scramble_en, output logic [3:0] scrambler);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) scrambler <= 4'b1111;
+  else begin
+    case(scrambler)
+      4'b0000: scrambler <= scramble_en ? 4'b0011 : 4'b0000;
+      4'b0001: scrambler <= 4'b0110;
+      4'b0010: scrambler <= 4'b1100;
+      4'b0011: scrambler <= 4'b1001;
+      4'b0100: scrambler <= 4'b0011;
+      4'b0101: scrambler <= 4'b0110;
+      4'b0110: scrambler <= 4'b1100;
+      4'b0111: scrambler <= 4'b1001;
+      4'b1000: scrambler <= 4'b0011;
+      4'b1001: scrambler <= 4'b0110;
+      4'b1010: scrambler <= 4'b1100;
+      4'b1011: scrambler <= 4'b1001;
+      4'b1100: scrambler <= scramble_en ? 4'b0001 : 4'b1100;
+      4'b1101: scrambler <= 4'b0110;
+      4'b1110: scrambler <= 4'b1100;
+      4'b1111: scrambler <= 4'b1001;
+    endcase
+  end
+end
+endmodule"
+"module case_phase_shift(input logic clk, rst, advance, output logic [2:0] phase);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) phase <= 3'b000;
+  else begin
+    case(phase)
+      3'b000: phase <= advance ? 3'b001 : 3'b111;
+      3'b001: phase <= advance ? 3'b010 : 3'b000;
+      3'b010: phase <= advance ? 3'b011 : 3'b001;
+      3'b011: phase <= advance ? 3'b100 : 3'b010;
+      3'b100: phase <= advance ? 3'b101 : 3'b011;
+      3'b101: phase <= advance ? 3'b110 : 3'b100;
+      3'b110: phase <= advance ? 3'b111 : 3'b101;
+      3'b111: phase <= advance ? 3'b000 : 3'b110;
+    endcase
+  end
+end
+endmodule"
+"module case_gain_ctrl(input logic clk, rst, boost, cut, output logic [4:0] gain);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) gain <= 5'd12;
+  else begin
+    case(gain) inside
+      [0:3]: gain <= boost ? gain + 3 : gain;
+      [4:7]: begin
+        if (boost) gain <= gain + 2;
+        if (cut) gain <= gain - 1;
+      end
+      [8:11]: begin
+        if (boost) gain <= gain + 1;
+        if (cut) gain <= gain - 1;
+      end
+      [12:15]: begin
+        if (boost) gain <= gain + 1;
+        if (cut) gain <= gain - 2;
+      end
+      [16:19]: gain <= cut ? gain - 3 : gain;
+      [20:31]: gain <= 5'd12;
+    endcase
+  end
+end
+endmodule"
+"module case_pulse_pos(input logic clk, rst, shift_left, shift_right, output logic [3:0] pulse_pos);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) pulse_pos <= 4'b0001;
+  else begin
+    case(pulse_pos)
+      4'b0000: pulse_pos <= 4'b0001;
+      4'b0001: pulse_pos <= shift_right ? 4'b0010 : (shift_left ? 4'b1000 : 4'b0001);
+      4'b0010: pulse_pos <= shift_right ? 4'b0100 : (shift_left ? 4'b0001 : 4'b0010);
+      4'b0100: pulse_pos <= shift_right ? 4'b1000 : (shift_left ? 4'b0010 : 4'b0100);
+      4'b1000: pulse_pos <= shift_right ? 4'b0001 : (shift_left ? 4'b0100 : 4'b1000);
+      default: pulse_pos <= 4'b0001;
+    endcase
+  end
+end
+endmodule"
+"module case_error_corr(input logic clk, rst, error, correct, output logic [2:0] error_state);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) error_state <= 3'b000;
+  else begin
+    case(error_state)
+      3'b000: error_state <= error ? 3'b001 : 3'b000;
+      3'b001: error_state <= correct ? 3'b010 : 3'b001;
+      3'b010: error_state <= 3'b011;
+      3'b011: error_state <= 3'b100;
+      3'b100: error_state <= 3'b101;
+      3'b101: error_state <= 3'b110;
+      3'b110: error_state <= 3'b111;
+      3'b111: error_state <= 3'b000;
+    endcase
+  end
+end
+endmodule"
+"module case_comp_thresh(input logic clk, rst, sample, output logic [3:0] threshold);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) threshold <= 4'b1000;
+  else begin
+    case(threshold) inside
+      [0:3]: threshold <= sample ? threshold + 2 : threshold;
+      [4:7]: threshold <= sample ? threshold + 1 : threshold - 1;
+      [8:11]: threshold <= sample ? threshold : threshold - 2;
+      [12:15]: threshold <= 4'b1000;
+    endcase
+  end
+end
+endmodule"
+"module case_wave_shape(input logic clk, rst, mode, output logic [3:0] wave);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) wave <= 4'b0000;
+  else begin
+    case(wave)
+      4'b0000: wave <= mode ? 4'b0001 : 4'b1111;
+      4'b0001: wave <= 4'b0011;
+      4'b0010: wave <= 4'b0111;
+      4'b0011: wave <= mode ? 4'b0111 : 4'b0001;
+      4'b0100: wave <= 4'b1000;
+      4'b0101: wave <= 4'b1010;
+      4'b0110: wave <= 4'b1100;
+      4'b0111: wave <= mode ? 4'b1111 : 4'b0110;
+      4'b1000: wave <= 4'b1001;
+      4'b1001: wave <= 4'b1011;
+      4'b1010: wave <= 4'b1101;
+      4'b1011: wave <= 4'b1110;
+      4'b1100: wave <= 4'b1101;
+      4'b1101: wave <= 4'b1110;
+      4'b1110: wave <= 4'b1111;
+      4'b1111: wave <= mode ? 4'b0000 : 4'b1110;
+    endcase
+  end
+end
+endmodule"
+"module case_refresh_ctrl(input logic clk, rst, refresh, output logic [4:0] refresh_cnt);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) refresh_cnt <= 5'd0;
+  else begin
+    case(refresh_cnt) inside
+      [0:7]: refresh_cnt <= refresh ? refresh_cnt + 1 : refresh_cnt;
+      [8:15]: refresh_cnt <= refresh_cnt - 1;
+      [16:23]: refresh_cnt <= 5'd24;
+      [24:31]: refresh_cnt <= 5'd0;
+    endcase
+  end
+end
+endmodule"
+"module case_dither_seq(input logic clk, rst, enable, output logic [2:0] dither);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) dither <= 3'b000;
+  else begin
+    case(dither)
+      3'b000: dither <= enable ? 3'b001 : 3'b000;
+      3'b001: dither <= 3'b010;
+      3'b010: dither <= 3'b100;
+      3'b011: dither <= 3'b101;
+      3'b100: dither <= 3'b110;
+      3'b101: dither <= 3'b111;
+      3'b110: dither <= 3'b011;
+      3'b111: dither <= 3'b000;
+    endcase
+  end
+end
+endmodule"
+"module case_sample_hold(input logic clk, rst, sample, hold, output logic [3:0] value);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) value <= 4'b0000;
+  else begin
+    case({sample, hold})
+      2'b10: value <= value + 1;  // Sample - increment
+      2'b01: value <= value - 1;  // Hold - decrement
+      2'b11: value <= 4'b1000;    // Both - reset to middle
+      default: value <= value;    // Neither - hold value
+    endcase
+  end
+end
+endmodule"
+"module case_gear_shift(input logic clk, rst, up, down, output logic [2:0] gear);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) gear <= 3'b001;
+  else begin
+    case(gear)
+      3'b001: gear <= up ? 3'b010 : (down ? 3'b001 : 3'b001);
+      3'b010: gear <= up ? 3'b011 : (down ? 3'b001 : 3'b010);
+      3'b011: gear <= up ? 3'b100 : (down ? 3'b010 : 3'b011);
+      3'b100: gear <= up ? 3'b101 : (down ? 3'b011 : 3'b100);
+      3'b101: gear <= up ? 3'b101 : (down ? 3'b100 : 3'b101);
+      default: gear <= 3'b001;
+    endcase
+  end
+end
+endmodule"
+"module case_adc_range(input logic clk, rst, ovf, unf, output logic [1:0] range);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) range <= 2'b01;
+  else begin
+    case(range)
+      2'b00: range <= ovf ? 2'b01 : 2'b00;
+      2'b01: begin
+        if (ovf) range <= 2'b10;
+        if (unf) range <= 2'b00;
+      end
+      2'b10: begin
+        if (ovf) range <= 2'b11;
+        if (unf) range <= 2'b01;
+      end
+      2'b11: range <= unf ? 2'b10 : 2'b11;
+    endcase
+  end
+end
+endmodule"
+"module case_pipe_stage(input logic clk, rst, valid, output logic [3:0] pipeline);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) pipeline <= 4'b0001;
+  else begin
+    case(pipeline)
+      4'b0000: pipeline <= 4'b0001;
+      4'b0001: pipeline <= valid ? 4'b0010 : 4'b0001;
+      4'b0010: pipeline <= 4'b0100;
+      4'b0100: pipeline <= 4'b1000;
+      4'b1000: pipeline <= 4'b0001;
+      default: pipeline <= 4'b0001;
+    endcase
+  end
+end
+endmodule"
+"module case_mux_sel(input logic clk, rst, next, output logic [2:0] mux_select);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) mux_select <= 3'b000;
+  else begin
+    case(mux_select)
+      3'b000: mux_select <= next ? 3'b001 : 3'b000;
+      3'b001: mux_select <= 3'b010;
+      3'b010: mux_select <= 3'b011;
+      3'b011: mux_select <= 3'b100;
+      3'b100: mux_select <= 3'b101;
+      3'b101: mux_select <= 3'b110;
+      3'b110: mux_select <= 3'b111;
+      3'b111: mux_select <= 3'b000;
+    endcase
+  end
+end
+endmodule"
+"module case_fade_rate(input logic clk, rst, fast, slow, output logic [3:0] rate);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) rate <= 4'b0100;
+  else begin
+    case(rate)
+      4'b0000: rate <= fast ? 4'b0001 : 4'b0000;
+      4'b0001: rate <= fast ? 4'b0010 : (slow ? 4'b0000 : 4'b0001);
+      4'b0010: rate <= fast ? 4'b0011 : (slow ? 4'b0001 : 4'b0010);
+      4'b0011: rate <= fast ? 4'b0100 : (slow ? 4'b0010 : 4'b0011);
+      4'b0100: rate <= fast ? 4'b0101 : (slow ? 4'b0011 : 4'b0100);
+      4'b0101: rate <= fast ? 4'b0110 : (slow ? 4'b0100 : 4'b0101);
+      4'b0110: rate <= fast ? 4'b0111 : (slow ? 4'b0101 : 4'b0110);
+      4'b0111: rate <= fast ? 4'b1000 : (slow ? 4'b0110 : 4'b0111);
+      4'b1000: rate <= slow ? 4'b0111 : 4'b1000;
+      default: rate <= 4'b0100;
+    endcase
+  end
+end
+endmodule"
+"module case_sensor_cal(input logic clk, rst, cal_step, output logic [2:0] cal_state);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) cal_state <= 3'b000;
+  else begin
+    case(cal_state)
+      3'b000: cal_state <= cal_step ? 3'b001 : 3'b000;
+      3'b001: cal_state <= cal_step ? 3'b010 : 3'b001;
+      3'b010: cal_state <= 3'b011;
+      3'b011: cal_state <= 3'b100;
+      3'b100: cal_state <= cal_step ? 3'b101 : 3'b100;
+      3'b101: cal_state <= 3'b110;
+      3'b110: cal_state <= 3'b111;
+      3'b111: cal_state <= 3'b000;
+    endcase
+  end
+end
+endmodule
+"
+"module case_burst_len(input logic clk, rst, inc, dec, output logic [3:0] burst);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) burst <= 4'b0010;
+  else begin
+    case(burst) inside
+      [1:2]: burst <= inc ? burst + 1 : burst;
+      [3:6]: begin
+        if (inc && burst < 4'd8) burst <= burst + 1;
+        if (dec && burst > 4'd1) burst <= burst - 1;
+      end
+      [7:8]: burst <= dec ? burst - 1 : burst;
+      [9:15]: burst <= 4'b0010;
+      0: burst <= 4'b0010;
+    endcase
+  end
+end
+endmodule"
+"module case_trim_val(input logic clk, rst, trim_up, trim_dn, output logic [3:0] trim);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) trim <= 4'b1000;
+  else begin
+    case(trim)
+      4'b0000: trim <= trim_up ? 4'b0001 : 4'b0000;
+      4'b0001: trim <= trim_up ? 4'b0010 : (trim_dn ? 4'b0000 : 4'b0001);
+      4'b0010: trim <= trim_up ? 4'b0011 : (trim_dn ? 4'b0001 : 4'b0010);
+      4'b0011: trim <= trim_up ? 4'b0100 : (trim_dn ? 4'b0010 : 4'b0011);
+      4'b0100: trim <= trim_up ? 4'b0101 : (trim_dn ? 4'b0011 : 4'b0100);
+      4'b0101: trim <= trim_up ? 4'b0110 : (trim_dn ? 4'b0100 : 4'b0101);
+      4'b0110: trim <= trim_up ? 4'b0111 : (trim_dn ? 4'b0101 : 4'b0110);
+      4'b0111: trim <= trim_up ? 4'b1000 : (trim_dn ? 4'b0110 : 4'b0111);
+      4'b1000: trim <= trim_up ? 4'b1001 : (trim_dn ? 4'b0111 : 4'b1000);
+      4'b1001: trim <= trim_up ? 4'b1010 : (trim_dn ? 4'b1000 : 4'b1001);
+      4'b1010: trim <= trim_up ? 4'b1011 : (trim_dn ? 4'b1001 : 4'b1010);
+      4'b1011: trim <= trim_up ? 4'b1100 : (trim_dn ? 4'b1010 : 4'b1011);
+      4'b1100: trim <= trim_up ? 4'b1101 : (trim_dn ? 4'b1011 : 4'b1100);
+      4'b1101: trim <= trim_up ? 4'b1110 : (trim_dn ? 4'b1100 : 4'b1101);
+      4'b1110: trim <= trim_up ? 4'b1111 : (trim_dn ? 4'b1101 : 4'b1110);
+      4'b1111: trim <= trim_dn ? 4'b1110 : 4'b1111;
+    endcase
+  end
+end
+endmodule"
+"module case_pattern_seq(input logic clk, rst, advance, output logic [3:0] pattern);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) pattern <= 4'b0000;
+  else begin
+    case(pattern)
+      4'b0000: pattern <= advance ? 4'b0001 : 4'b0000;
+      4'b0001: pattern <= 4'b0011;
+      4'b0010: pattern <= 4'b0110;
+      4'b0011: pattern <= 4'b0111;
+      4'b0100: pattern <= 4'b1100;
+      4'b0101: pattern <= 4'b1101;
+      4'b0110: pattern <= 4'b1110;
+      4'b0111: pattern <= 4'b1111;
+      4'b1000: pattern <= 4'b1001;
+      4'b1001: pattern <= 4'b1011;
+      4'b1010: pattern <= 4'b1011;
+      4'b1011: pattern <= 4'b1111;
+      4'b1100: pattern <= 4'b1101;
+      4'b1101: pattern <= 4'b1111;
+      4'b1110: pattern <= 4'b1111;
+      4'b1111: pattern <= advance ? 4'b0000 : 4'b1111;
+    endcase
+  end
+end
+endmodule"
+"module case_filter_mode(input logic clk, rst, mode_sel, output logic [1:0] filter_mode);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) filter_mode <= 2'b00;
+  else begin
+    case(filter_mode)
+      2'b00: filter_mode <= mode_sel ? 2'b01 : 2'b11;
+      2'b01: filter_mode <= 2'b10;
+      2'b10: filter_mode <= mode_sel ? 2'b11 : 2'b00;
+      2'b11: filter_mode <= 2'b00;
+    endcase
+  end
+end
+endmodule"
+"module case_power_state(input logic clk, rst, wake, sleep, output logic [2:0] pwr_state);
+always_ff @(posedge clk or posedge rst) begin
+  if (rst) pwr_state <= 3'b001;
+  else begin
+    case(pwr_state)
+      3'b000: pwr_state <= wake ? 3'b001 : 3'b000;
+      3'b001: pwr_state <= sleep ? 3'b010 : (wake ? 3'b011 : 3'b001);
+      3'b010: pwr_state <= wake ? 3'b001 : 3'b010;
+      3'b011: pwr_state <= 3'b100;
+      3'b100: pwr_state <= sleep ? 3'b010 : 3'b100;
+      3'b101: pwr_state <= 3'b001;
+      3'b110: pwr_state <= 3'b001;
+      3'b111: pwr_state <= 3'b001;
+    endcase
+  end
+end
+endmodule"
