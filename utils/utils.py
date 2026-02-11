@@ -1,17 +1,17 @@
 import re, requests, csv, json, uuid
 from .regex import extract_code, extract_tgts_rules
 
-def read_code_files(csv_path: str) -> list:
-    code_list = []
+def read_modules_file(csv_path: str) -> list:
+    modules_list = []
 
     with open(csv_path, newline="", encoding="utf-8") as csvfile:
         reader = csv.reader(csvfile)
         next(reader, None)  # Skip header
         for row in reader:
             if row:  # skip empty rows
-                code_list.append(row[0])
+                modules_list.append(row[0])
 
-    return code_list[53:]
+    return modules_list
 
 def generate_final_assertion_content(module_name:str, parameters: str, aux_vars: str, assertions: str) -> str:
 

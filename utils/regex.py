@@ -124,7 +124,7 @@ def extract_module_name_parms_ports(code: str)-> dict:
 
     return {}
 
-def extract_header_and_vars(code: str, comb_blocks: list, seq_blocks: list, func_blocks: list)-> dict:
+def extract_module_interface_and_decls(code: str, comb_blocks: list, seq_blocks: list, func_blocks: list)-> dict:
     """
     Isolates the module header and internal variable declarations/assignments.
     This works by 'carving out' the procedural blocks (always, functions) from the
@@ -219,17 +219,20 @@ def immediate_asserts_from_tgts(tgts_rules: list):
 
     return "\n".join(sva_lines)
 
-def extract_sequential_clock_trigger(block: str):
+def extract_sensitivity_list(block: str):
     match = re.search(r'@\((.*?)\)', block)
     if match:
         block_triggers = match.group(1)
         if " or " in block_triggers:
-            return block_triggers.split('or')[0][:-1]
+            clk_and_rst = block_triggers.split(' or ')
+            return {
+                'clk': clk_and_rst[0],
+                'rst': clk_and_rst[1]
+            }
         else:
-            return block_triggers
-
-
-import re
+            return {
+                'clk': block_triggers
+            }
 
 
 def sequential_properties_from_tgts(tgts_rules: list, clock_trigger: str):
@@ -292,3 +295,43 @@ def get_alpha_uuid():
     mapping = str.maketrans("0123456789", "ghijklmnop")
 
     return raw_uuid.translate(mapping)
+
+
+def contains_assertions(code):
+    """Check if code contains actual assertions"""
+
+    # Clean and extract from markdown
+    if not code:
+        return False
+
+    # Parse for assertion constructs
+    patterns = [
+        r'assert\s*\(',  # Immediate assertions
+        r'assert\s+property\s*\(',  # Concurrent assertions
+        r'cover\s+property\s*\(',  # Cover properties
+        r'assume\s+property\s*\(',  # Assume properties
+        r'ap_\w+\s*:\s*assert\s+property',  # Labeled assertions
+    ]
+
+    for pattern in patterns:
+        if re.search(pattern, code, re.IGNORECASE):
+            return True
+
+    # Check for SVA sequences/temporal logic
+    sv_keywords = ['|=>', '|->', '##', '[*', '[=', 'throughout']
+    for keyword in sv_keywords:
+        if keyword in code:
+            return True
+
+    return False
+
+
+def classify_output_quality(code):
+    """
+    Tiered classification:
+    0: No valid output/missing markdown
+    1: Contains code but no assertions
+    2: Contains assertions but syntax errors
+    3: Contains valid assertions
+    """
+    pass
