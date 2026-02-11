@@ -13,7 +13,7 @@ def experiment1(model_name: str, modules_path: str, output_filepath: str):
         writer = csv.writer(results_file)
         writer.writerow(["original_code", "generated_code", "iverilog_output", "time(s)", "prompt_tkns", "output_tkns"])
 
-        codes = utils.read_code_files(modules_path)
+        codes = utils.read_modules_file(modules_path)
 
         for i in range(len(codes)):
             print("########################################")

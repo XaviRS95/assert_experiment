@@ -16,7 +16,7 @@ def experiment2_full_ai(model_name: str, modules_path: str, output_filepath: str
         writer = csv.writer(results_file)
         writer.writerow(["original_code", "generated_code", "iverilog_output", "time(s)", "prompt_tkns", "output_tkns"])
 
-        codes = utils.read_code_files(modules_path)
+        codes = utils.read_modules_file(modules_path)
 
         for i in range(len(codes)):
             print("########################################")
@@ -59,7 +59,7 @@ def experiment2_regex_aided(model_name: str, modules_path: str, output_filepath:
         writer = csv.writer(results_file)
         writer.writerow(["original_code", "generated_code", "iverilog_output", "time(s)", "prompt_tkns", "output_tkns"])
 
-        codes = utils.read_code_files(modules_path)
+        codes = utils.read_modules_file(modules_path)
 
         for i in range(len(codes)):
             print(f'Module #{i + 1} out of {len(codes)} in model {model_name}')
@@ -76,8 +76,8 @@ def experiment2_regex_aided(model_name: str, modules_path: str, output_filepath:
 
             # Reassemble for syntax check
             clean_func_blocks = regex.extract_functions(code=clean_code)
-            header_and_vars = regex.extract_header_and_vars(code=clean_code, comb_blocks=clean_comb_blocks,
-                                                            seq_blocks=clean_seq_blocks, func_blocks=clean_func_blocks)
+            header_and_vars = regex.extract_module_interface_and_decls(code=clean_code, comb_blocks=clean_comb_blocks,
+                                                                       seq_blocks=clean_seq_blocks, func_blocks=clean_func_blocks)
 
             module_name = header_and_vars['header']['module_name']
             parameters = f"#({header_and_vars['header']['parameters']})" if header_and_vars['header'][

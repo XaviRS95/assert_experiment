@@ -235,20 +235,67 @@ def extract_sensitivity_list(block: str):
             }
 
 
-def sequential_properties_from_tgts(tgts_rules: list, clock_trigger: str):
-    sva_lines = []
+def remove_reset_signal(clause: str, reset_signal:str) -> str:
+
+    sig = re.escape(reset_signal)
+
+    # 1. Pattern to match the reset signal and any comparison to a value (e.g., == 1'b1)
+    # Matches: rst_n, rst_n == 1, rst_n == 1'b1, !rst_n, etc.
+    val_pattern = r"(\d+'b[01xXzZ]|\d+)"  # Matches 1'b1, 0, 1, etc.
+    comparison = rf"(?:\s*(?:==|!=)\s*{val_pattern})?"
+    reset_core = rf"(?:!\s*)?\(?\b{sig}\b{comparison}\)?"
+
+    # 2. Check for the reset logic and remove it along with leading/trailing operators
+    # Pattern A: Matches "reset && ..." or "reset || ..."
+    trailing_op = rf"{reset_core}\s*(?:&&|\|\|)\s*"
+    # Pattern B: Matches "... && reset" or "... || reset"
+    leading_op = rf"\s*(?:&&|\|\|)\s*{reset_core}"
+
+    # Execute removals
+    new_clause = re.sub(trailing_op, '', clause)
+    new_clause = re.sub(leading_op, '', new_clause)
+    new_clause = re.sub(reset_core, '', new_clause)
+
+    # 3. Final Cleanup
+    # Remove any stray "!()" or "()" left behind
+    new_clause = re.sub(r'!\s*\(\s*\)', '', new_clause)
+    new_clause = re.sub(r'\(\s*\)', '', new_clause)
+
+    # Clean up double spaces
+    new_clause = re.sub(r'\s+', ' ', new_clause).strip()
+
+    final_output = f"{new_clause}" if new_clause else "ASYNC_RST_CHECK"
+
+    return final_output
+
+
+
+def sequential_properties_from_tgts(tgts_rules: list, sensitivity_list: dict):
+    seq_tests = []
+
+    reset = sensitivity_list['rst'].split(' ')
+
+    disable_iff = ''
+    reset_signal_name = ''
+    reset_signal_activation = ''
+
+    if reset:
+        reset_signal_trigger = reset[0]
+        reset_signal_name = reset[1]
+        reset_signal_activation = f'{"!" if reset_signal_trigger == "negedge" else ""}{reset_signal_name}'
+        disable_iff = f'disable iff({reset_signal_activation})' if reset else ''
 
     for rule in tgts_rules:
+        #This avoids malformed TGTS rules that might internally not check anything.
         if rule['clauses'] not in ['true', 'TRUE'] and rule['check'] not in ['true', 'TRUE']:
             property_label = get_alpha_uuid()
-            # property_label = f"property_label_{rule['name']}"
+
             # 1. Clean up logical operators in clauses
             clauses = rule['clauses'].replace(' AND ', '&&').replace(' and ', '').replace(' NOT ', '!').replace(' not ','').replace(' OR ','||').replace(' or ','')
             checks = rule['check'].replace(' AND ', '&&').replace(' and ', '').replace(' NOT ', '!').replace(' not ','').replace(' OR ','||').replace(' or ','')
 
             #Eliminate same-cycle notations
-            clauses = clauses.replace('[t]', '').replace('[ t ]', '')
-            checks = checks.replace('[t]', '').replace('[ t ]', '')
+            clauses = clauses.replace('[t]', '').replace('[ t ]', '').replace('[t+1]', '').replace('[t + 1]', '')
 
             # 2. Extract variable and delay from rule['check']
             match = re.search(r'(\w+)\s*\[\s*t\s*\+\s*(\d+)\s*\]', checks)
@@ -276,15 +323,32 @@ def sequential_properties_from_tgts(tgts_rules: list, clock_trigger: str):
             else:
                 final_check = checks
 
-            # 5. Generate the SVA block with corrected parentheses
-            sva_block = (f"property {property_label};\n"
-                         f"    @({clock_trigger}) ({clauses}) |=> ({final_check});\n"
-                         f"endproperty\n"
-                         f"assert property ({property_label});\n")
 
-            sva_lines.append(sva_block)
+            final_check = final_check.replace('[t]', '').replace('[ t ]', '').replace('[t+1]', '').replace('[t + 1]', '')
 
-    return "\n".join(sva_lines)
+            if reset:
+                # Removes all reset signal usages from the clause statement:
+                clauses = remove_reset_signal(clause=clauses, reset_signal=reset_signal_name)
+
+            #If the Async reset check is detected, it generates that immediate check. If not, it proceeds to generate a new sequential property.
+            if clauses == "ASYNC_RST_CHECK" and reset_signal_activation:
+                async_reset_assert = (f"always_comb begin\n"
+                                      f"    if ({reset_signal_activation}) begin\n"
+                                      f"        {get_alpha_uuid()}: assert ({final_check});\n"
+                                      f"    end\n"
+                                      f"end")
+
+                seq_tests.append(async_reset_assert)
+
+            else:
+                property_block = (f"property {property_label};\n"
+                                  f"    @({sensitivity_list['clk']}) {disable_iff} ({clauses}) |=> ({final_check});\n"
+                                  f"endproperty\n"
+                                  f"assert property ({property_label});\n")
+
+                seq_tests.append(property_block)
+
+    return "\n".join(seq_tests)
 
 def get_alpha_uuid():
     # Generate a standard UUID4

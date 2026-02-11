@@ -1,4 +1,4 @@
-from prompts.prompts_experiment3 import comb_to_tgts, seq_to_tgts
+from prompts.prompts_experiment3 import comb_to_tgts_prompt, seq_to_tgts_prompt
 from utils import utils, regex
 import time, os, csv
 
@@ -12,7 +12,7 @@ def experiment3(model_name: str, modules_path: str, output_filepath: str):
         writer = csv.writer(results_file)
         writer.writerow(["original_code", "generated_code", "iverilog_output", "time(s)", "prompt_tkns", "output_tkns"])
 
-        codes = utils.read_code_files(modules_path)
+        codes = utils.read_modules_file(modules_path)
 
         for i in range(len(codes)):
             print(f'Module #{i + 1} out of {len(codes)}')
@@ -27,8 +27,8 @@ def experiment3(model_name: str, modules_path: str, output_filepath: str):
             clean_comb_blocks = regex.get_blocks(code=clean_code, pattern=r'always_comb')
             clean_seq_blocks = regex.get_blocks(code=clean_code, pattern=r'always_(?:ff|latch)')
             clean_func_blocks = regex.extract_functions(code=clean_code)
-            header_and_vars = regex.extract_header_and_vars(code=clean_code, comb_blocks=clean_comb_blocks,
-                                                      seq_blocks=clean_seq_blocks, func_blocks=clean_func_blocks)
+            header_and_vars = regex.extract_module_interface_and_decls(code=clean_code, comb_blocks=clean_comb_blocks,
+                                                                       seq_blocks=clean_seq_blocks, func_blocks=clean_func_blocks)
 
             module_name = header_and_vars['header']['module_name']
             parameters = header_and_vars['header']['parameters']
@@ -39,7 +39,7 @@ def experiment3(model_name: str, modules_path: str, output_filepath: str):
             sequential_properties = []
             #Combinational blocks
             for block in clean_comb_blocks:
-                comb_to_tgts_prompt = comb_to_tgts(parameters=parameters, ports=ports, inner_vars=inner_vars, block=block)
+                comb_to_tgts_prompt = comb_to_tgts_prompt(parameters=parameters, ports=ports, inner_vars=inner_vars, block=block)
                 model_response = utils.query_ollama(prompt=comb_to_tgts_prompt, model=model_name, code_call=False)
                 #Counts how many tokens took to obtain the response
                 used_prompt_tokens += model_response['prompt_tkns']
@@ -49,13 +49,13 @@ def experiment3(model_name: str, modules_path: str, output_filepath: str):
 
             #Sequential blocks
             for block in clean_seq_blocks:
-                seq_to_tgts_prompt = seq_to_tgts(parameters=parameters, ports=ports, inner_vars=inner_vars, block=block)
+                seq_to_tgts_prompt = seq_to_tgts_prompt(parameters=parameters, ports=ports, inner_vars=inner_vars, block=block)
                 model_response = utils.query_ollama(prompt=seq_to_tgts_prompt, model=model_name, code_call=False)
                 #Counts how many tokens took to obtain the response
                 used_prompt_tokens += model_response['prompt_tkns']
                 generated_response_tokens += model_response['response_tkns']
-                clock_trigger = regex.extract_sequential_clock_trigger(block=block)
-                sequential_properties.append(regex.sequential_properties_from_tgts(tgts_rules=model_response['tgts_rules'], clock_trigger=clock_trigger))
+                clock_trigger = regex.extract_sensitivity_list(block=block)
+                sequential_properties.append(regex.sequential_properties_from_tgts(tgts_rules=model_response['tgts_rules'], sensitivity_list=clock_trigger))
 
             final_module_parameters = f'# ({parameters})' if parameters else ''
             final_module_ports = ports.replace('output logic', 'input logic')

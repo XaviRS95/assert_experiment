@@ -13,7 +13,7 @@ def generate_comb_asserts(
         model_name,
 )->dict:
 
-    prompt_tkns = 0,  # Total number of tokens in the prompts to process all sequential blocks
+    prompt_tkns = 0  # Total number of tokens in the prompts to process all sequential blocks
     response_tkns = 0  # Total number of tokes in the responses to generate all TGTS rules
 
     immediate_assertions = [] #Auxiliar list to store all final assertions
@@ -46,7 +46,7 @@ def generate_seq_properties(
         model_name,
 ) -> dict:
 
-    prompt_tkns = 0,  # Total number of tokens in the prompts to process all sequential blocks
+    prompt_tkns = 0  # Total number of tokens in the prompts to process all sequential blocks
     response_tkns = 0  # Total number of tokes in the responses to generate all TGTS rules
 
     sequential_properties = [] #Auxiliar list to store all final properties
@@ -58,8 +58,8 @@ def generate_seq_properties(
 
         model_response = utils.query_ollama(prompt=prompt, model=model_name, code_call=False)
 
-        prompt_tkns += model_response.get('prompt_tkns', 0)
-        response_tkns += model_response.get('response_tkns', 0)
+        prompt_tkns += model_response['prompt_tkns']
+        response_tkns += model_response['response_tkns']
 
         #Extracts the clock and possible reset sensitivity list
         sensitivity_list = regex.extract_sensitivity_list(block=block)
@@ -67,7 +67,7 @@ def generate_seq_properties(
         #Generates the sequential properties from the TGTS rules previously generated
         block_sequential_properties = regex.sequential_properties_from_tgts(
             tgts_rules=model_response['tgts_rules'],
-            clock_trigger=sensitivity_list
+            sensitivity_list=sensitivity_list
         )
 
         sequential_properties.append(block_sequential_properties)
@@ -95,8 +95,8 @@ def experiment3(model_name: str, modules_path: str, output_filepath: str):
         for i in range(len(modules)):
             print(f'Module #{i + 1} out of {len(modules)} in model {model_name}')
 
-            used_prompt_tokens = 0
-            generated_response_tokens = 0
+            total_prompt_tkns = 0
+            total_response_tkns = 0
 
             print(f"Original code: \n{modules[i]}\n")
 
@@ -136,6 +136,9 @@ def experiment3(model_name: str, modules_path: str, output_filepath: str):
                     inner_vars = inner_vars,
                     model_name = model_name)
 
+                total_prompt_tkns += immediate_assertions['prompt_tkns']
+                total_response_tkns += immediate_assertions['response_tkns']
+
                 sequential_properties = generate_seq_properties(
                     clean_seq_blocks=clean_seq_blocks,
                     parameters=parameters,
@@ -143,18 +146,22 @@ def experiment3(model_name: str, modules_path: str, output_filepath: str):
                     inner_vars=inner_vars,
                     model_name=model_name)
 
+                total_prompt_tkns += sequential_properties['prompt_tkns']
+                total_response_tkns += sequential_properties['response_tkns']
+
                 # Final assembly of the module:
 
                 final_module_parameters = f'# ({parameters})' if parameters else ''
                 final_module_ports = ports.replace('output logic', 'input logic')
 
                 #Formatting immediate assertions to be included in the module:
-                final_module_assertions = '\n\n'.join(immediate_assertions)
+                final_module_assertions = '\n\n'.join(immediate_assertions['immediate_assertions'])
+
                 final_module_assertion_block = (
                     f"always_comb begin\n    {final_module_assertions}\n    end") if final_module_assertions else ''
 
                 #Formatting sequential properties to be included in the module:
-                final_module_properties = '\n'.join(sequential_properties)
+                final_module_properties = '\n'.join(sequential_properties['sequential_properties'])
 
                 #Template to generate the final SystemVerilog module:
                 final_module = f"""module {module_name}_asserts {final_module_parameters} ({final_module_ports});
@@ -184,18 +191,16 @@ def experiment3(model_name: str, modules_path: str, output_filepath: str):
                 final_module,
                 compiler_output,
                 time2 - time1,
-                used_prompt_tokens,
-                generated_response_tokens
+                total_prompt_tkns,
+                total_response_tkns
             ])
 
             print(f"Status: {compiler_output} | Time: {time2 - time1:.2f}s")
-            print(f"Total Prompt Tokens: {used_prompt_tokens}")
-            print(f"Total Response Tokens: {generated_response_tokens}")
+            print(f"Total Prompt Tokens: {total_prompt_tkns}")
+            print(f"Total Response Tokens: {total_response_tkns}")
 
             if compiler_output == "OK":
                 correctly_generated_numbers += 1
-
-            print(f"Overall Progress: {correctly_generated_numbers}/{len(modules)} ({correctly_generated_numbers / len(modules):.2%})")
             print("########################################")
 
 
@@ -205,13 +210,13 @@ if __name__ == "__main__":
     parser.add_argument(
         "--model",
         type=str,
-        default="deepseek-coder-v2:16b",
+        default="qwen3-coder:30b",
         help="Model name in Ollama"
     )
     parser.add_argument(
         "--path",
         type=str,
-        default="sv_cases.csv",
+        default="datasets/case_easy_comb.csv",
         help="Path to the source CSV"
     )
     parser.add_argument(

@@ -165,42 +165,9 @@ def experiment3_sv_to_tgts(code: str) -> str:
 
     return TEMPLATE
 
-def experiment3_tgts_to_assertions(tgts: str) -> str:
-
-    TEMPLATE = f"""
-    You are a formal verification assistant.
-    You generate SystemVerilog Assertions (SVA) from a Typed Guarded Transition System (TGTS).
-    The TGTS is a complete formal model of an RTL design.
-    You must not guess, not simplify, and not reinterpret the TGTS.
-    
-    The TGTS uses discrete time steps:
-    x[t] = value of signal x at current clock edge
-    x[t+1] = value of signal x at next clock edge
-    
-    EVENT(posedge(clk)) corresponds to @(posedge clk)
-    EVENT(negedge(rst_n)) corresponds to @(negedge rst_n)
-    
-    You must:
-    Use only information in the TGTS
-    Not infer missing behavior
-    Not simplify pattern matches
-    Not merge rules
-    Not skip default behavior
-    Not introduce new logic
-    Every TGTS rule must produce at least one SVA.
-    ALWAYS OUTPUT ONLY THE FINAL SYSTEMVERILOG WITHOUT EXPLANATIONS 
-    
-    The following is the complete Typed Guarded Transition System of the design:
-    
-    {tgts}
-    
-    """
-
-    return TEMPLATE
 
 
-
-def comb_to_tgts(parameters: str, ports: str, inner_vars:str, block: str):
+def comb_to_tgts_prompt(parameters: str, ports: str, inner_vars:str, block: str):
     """
 
     :param parameters:
@@ -265,52 +232,8 @@ Use:
 
     return TEMPLATE
 
-def tgts_to_comb_rules(tgts: str)-> str:
-    TEMPLATE = f"""
 
-    ROLE: TGTS → SystemVerilog Assertion generator (COMBINATIONAL).
-    
-    IMPORTANT:
-    - Design is PURELY COMBINATIONAL.
-    - Do NOT use clocks.
-    - Use @(*) for assertions.
-    - Do NOT invent signals.
-    - Do NOT explain.
-    - Output PROPERTIES only.
-    
-    TASK:
-    For EACH TGTS RULE below, generate one named property.
-    
-    The TGTS rule format example:
-    
-    RULE rule_tl_i_a_valid_true
-        WHEN condition1 && (condition2 == 3'b000) || (condition3 == 3'b000)
-        THEN value_check = 1'b0;
-
-    The property format must be:
-    
-    property rule_tl_i_a_valid_true_property;
-      @(*) condition1 && (condition2 == 3'b000) || (condition3 == 3'b000) |-> value_check == 1'b0;
-    endproperty
-    
-    Rules:
-    - One property per TGTS RULE
-    - Property name must be derived from RULE name
-    - Boolean expression must directly reflect the RULE guard and assignment
-    - Use |-> implication
-    
-    TGTS INPUT:
-    {tgts}
-    
-    OUTPUT:
-    SystemVerilog properties only.
-    
-    """
-
-    return TEMPLATE
-
-
-def seq_to_tgts(parameters: str, ports: str, inner_vars: str, block: str):
+def seq_to_tgts_prompt(parameters: str, ports: str, inner_vars: str, block: str):
     """
 
     :param parameters:
@@ -328,17 +251,16 @@ TGTS GRAMMAR RUES
 
 IMPORTANT:
 - This module is PURELY SEQUENTIAL.
-- Sequential blocks use <= as assignations, instead of =.
-- There is only 1 implication per rule. NEVER include more than 1.
+- NEVER include |=> or |->
 - TEMPORAL NOTATION: Use [t] for current and [t+1] for the next cycle
 - DELAYS: Represent #N as [t + N units].
 - LOGIC OPERATORS: Use '&&', '||', '!', '==', '!=', '>', '<', '<=', '>='.
 - AVOID using IF, ELSE clauses. Every branch must be its own RULE with a unique, full guard.  
 - IGNORE ALL UNCONDITIONAL ASSIGNMENTS. Include only assignemnts inside case, if/else and for loops.
+- clock signals are forbidden to be used in TGTS clauses
 - Do NOT invent signals or use dummy variables.
 - Do NOT explain.
 - ONLY output TGTS rules only.
-- Use |=> implication
 
 
 TASK:
