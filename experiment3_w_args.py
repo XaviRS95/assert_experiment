@@ -53,6 +53,8 @@ def generate_seq_properties(
 
     for block in clean_seq_blocks:
 
+        block = regex.extract_block_content(block=block)
+
         prompt = seq_to_tgts_prompt(parameters=parameters, ports=ports, inner_vars=inner_vars,
                                                 block=block)
 
@@ -216,7 +218,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--path",
         type=str,
-        default="datasets/case_easy_comb.csv",
+        default="datasets/sv_cases.csv",
         help="Path to the source CSV"
     )
     parser.add_argument(

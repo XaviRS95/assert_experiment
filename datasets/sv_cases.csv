@@ -1,4 +1,4 @@
-codetype
+modules
 "module case_example1(input logic [1:0] a, output logic y);
     always_comb begin
         case(a)

@@ -1,57 +1,53 @@
 import re
 
 
-def clean_reset_logic(text, signal_name):
-    sig = re.escape(signal_name)
+def strip_always_wrapper(text):
+    # 1. Identify the header: always_ff/comb/latch + optional @(...) + begin
+    # This regex looks for the first occurrence of the always block start
+    header_pattern = re.compile(
+        r"always_(?:ff|comb|latch)\s*(?:@\s*\(.*?\))?\s*begin",
+        re.DOTALL
+    )
 
-    # 1. Pattern to match the reset signal and any comparison to a value (e.g., == 1'b1)
-    # Matches: rst_n, rst_n == 1, rst_n == 1'b1, !rst_n, etc.
-    val_pattern = r"(\d+'b[01xXzZ]|\d+)"  # Matches 1'b1, 0, 1, etc.
-    comparison = rf"(?:\s*(?:==|!=)\s*{val_pattern})?"
-    reset_core = rf"(?:!\s*)?\(?\b{sig}\b{comparison}\)?"
+    header_match = header_pattern.search(text)
 
-    # 2. Check for the reset logic and remove it along with leading/trailing operators
-    # Pattern A: Matches "reset && ..." or "reset || ..."
-    trailing_op = rf"{reset_core}\s*(?:&&|\|\|)\s*"
-    # Pattern B: Matches "... && reset" or "... || reset"
-    leading_op = rf"\s*(?:&&|\|\|)\s*{reset_core}"
+    if not header_match:
+        return "No always block found."
 
-    # Execute removals
-    new_text = re.sub(trailing_op, '', text)
-    new_text = re.sub(leading_op, '', new_text)
-    new_text = re.sub(reset_core, '', new_text)
+    # The starting point of our content is right after the 'begin'
+    content_start = header_match.end()
 
-    # 3. Final Cleanup
-    # Remove any stray "!()" or "()" left behind
-    new_text = re.sub(r'!\s*\(\s*\)', '', new_text)
-    new_text = re.sub(r'\(\s*\)', '', new_text)
+    # 2. Find the index of the absolute LAST 'end' in the string
+    # We use rfind to search backwards from the end of the file
+    last_end_match = list(re.finditer(r'\bend\b(?!\s*\w)', text))
 
-    # Clean up double spaces
-    new_text = re.sub(r'\s+', ' ', new_text).strip()
+    if not last_end_match:
+        return "No closing 'end' found."
 
-    return new_text
+    # We take the start position of the very last 'end' keyword found
+    content_end = last_end_match[-1].start()
+
+    # 3. Slice the string to extract only the internal content
+    extracted_logic = text[content_start:content_end]
+
+    return extracted_logic.strip('\n\r')
 
 
-# --- Test Case ---
-signal = "rst_n"
-test_input = "WHEN state == 2'b00 && !(rst_n == 1'b1) THEN state[t+1] == 2'b01"
+# --- Testing with your nested case example ---
+sv_input = """
+always_ff @(posedge clk or negedge reset) begin
+        if(!reset)
+            count <= 2'b00;
+        else
+            case(count)
+                2'b00: count <= 2'b01;
+                2'b01: count <= 2'b10;
+                2'b10: count <= 2'b11;
+                2'b11: count <= 2'b00;
+                default: count <= 2'b00;
+            endcase
+    end
+"""
 
-cleaned = clean_reset_logic(test_input, signal)
-
-print(f"Input : {test_input}")
-print(f"Output: {cleaned}")
-# --- Test ---
-signal = "rst_n"
-examples = [
-    f"!{signal} && state == SAFE",
-    f"{signal} == 1 || mode == DEBUG",
-    f"{signal} == 0",
-    f"state == DANGER && {signal}",
-    f" WHEN state == !({signal} == 1'b1) && 2'b00 THEN state[t+1] == 2'b01"
-
-]
-
-for ex in examples:
-    result = clean_reset_logic(ex, signal)
-    print(f"Input:  {ex}")
-    print(f"Output: {result}\n")
+result = strip_always_wrapper(sv_input)
+print(result)

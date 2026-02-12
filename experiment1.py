@@ -51,7 +51,7 @@ def experiment1(model_name: str, modules_path: str, output_filepath: str):
 if __name__ == "__main__":
 
     MODEL = "deepseek-coder-v2:16b"
-    MODULES_PATH = "sv_cases.csv"
+    MODULES_PATH = "datasets/sv_cases.csv"
     OUTPUT_CSV_FILENAME = f"sv_results_1_{MODEL.replace(':', '_')}.csv"
 
     experiment1(model_name=MODEL, modules_path=MODULES_PATH, output_filepath=OUTPUT_CSV_FILENAME)
