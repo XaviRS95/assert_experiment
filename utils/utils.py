@@ -1,5 +1,6 @@
-import re, requests, csv, json, uuid
-from .regex import extract_code, extract_tgts_rules
+import requests, csv, json
+from utils.regex_utils.llm_utils import extract_code
+from utils.regex_utils.tgts_parsing import extract_tgts_rules
 
 def read_modules_file(csv_path: str) -> list:
     modules_list = []
