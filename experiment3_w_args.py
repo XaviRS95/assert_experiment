@@ -216,7 +216,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--path",
         type=str,
-        default="datasets/case_easy_comb.csv",
+        default="datasets/case_easy_seq.csv",
         help="Path to the source CSV"
     )
     parser.add_argument(
