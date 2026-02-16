@@ -1,9 +1,6 @@
-Metadata-Version: 2.4
+Metadata-Version: 2.1
 Name: sv-experiment-project
 Version: 0.1.0
 Summary: SystemVerilog code generation and testing experiments
 Requires-Python: >=3.8
 Requires-Dist: requests==2.32.5
-Dynamic: requires-dist
-Dynamic: requires-python
-Dynamic: summary

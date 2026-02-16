@@ -1,1 +1,64 @@
 original_code,generated_code,iverilog_output,time(s),prompt_tkns,output_tkns
+"module seq_case73(
+    input logic clk, reset, serial_in,
+    output logic [3:0] q
+);
+    always_ff @(posedge clk or posedge reset) begin
+        if(reset)
+            q <= 4'b0000;
+        else
+            case(q)
+                default: q <= {q[2:0], serial_in}; // shift left
+            endcase
+    end
+endmodule","module seq_case73_asserts  (input logic clk, reset, serial_in,
+input logic [3:0] q);
+
+    
+
+    
+
+    
+
+    always_comb begin
+    if (reset) begin
+        maelpjlgmdockdmjbhkeiioiddpaccmm: assert (q[1] == 0);
+    end
+end
+always_comb begin
+    if (reset) begin
+        gnjomhblmehekainppdhafcpjgkbmjcn: assert (q[2] == 0);
+    end
+end
+always_comb begin
+    if (reset) begin
+        mlkkbodngceaklbapdlomkcliffhjheb: assert (q[3] == 0);
+    end
+end
+always_comb begin
+    if (reset) begin
+        aapbaakbcjhpkjfobnglblnpgnincgjm: assert (q[4] == 0);
+    end
+end
+always_comb begin
+    if (reset) begin
+        iamndfmaclkckmldagopllodckgablfk: assert (q[1] == q[2]);
+    end
+end
+always_comb begin
+    if (reset) begin
+        njgbgmgaiaphkiemablcpbfkhbkbnnne: assert (q[2] == q[3]);
+    end
+end
+always_comb begin
+    if (reset) begin
+        ppofbeekabadkmcmoldfagbkdmnniofl: assert (q[3] == q[4]);
+    end
+end
+always_comb begin
+    if (reset) begin
+        inhiefnfamidkeblaaghooagogoaaeap: assert (q[4] == serial_in);
+    end
+end
+
+endmodule",OK,112.0827362537384,408,207

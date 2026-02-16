@@ -34,31 +34,37 @@ def process_delay_expression(checks: str) -> str:
 
 
 def remove_reset_signal(clause: str, reset_signal: str) -> str:
-    """Remove reset signal references from a clause"""
-    if not clause or not reset_signal:
-        return clause
-
-    sig = re.escape(reset_signal)
-
-    # Pattern to match reset signal with optional comparisons
+    # 1. Define the reset expression (e.g., reset == 1'b1, !reset, etc.)
     val_pattern = r"(\d+'b[01xXzZ]|\d+)"
-    comparison = rf"(?:\s*(?:==|!=)\s*{val_pattern})?"
-    reset_core = rf"(?:!\s*)?\(?\b{sig}\b{comparison}\)?"
+    comparison_ops = r"(?:==|!=|<=|>=|<|>)"
 
-    # Remove reset with trailing/leading operators
-    trailing_op = rf"{reset_core}\s*(?:&&|\|\|)\s*"
-    leading_op = rf"\s*(?:&&|\|\|)\s*{reset_core}"
+    # Matches the core signal: !reset or reset == 1'b1
+    reset_core = rf"(?:!\s*)?\b{reset_signal}\b(?:\s*{comparison_ops}\s*{val_pattern})?"
 
-    new_clause = re.sub(trailing_op, '', clause)
-    new_clause = re.sub(leading_op, '', new_clause)
-    new_clause = re.sub(reset_core, '', new_clause)
+    # 2. Match reset with a trailing or leading operator
+    # Case A: (reset == 1 && ... -> matches 'reset == 1 && '
+    # Case B: ... && reset == 1) -> matches ' && reset == 1'
+    pattern = rf"({reset_core}\s*(&&|\|\|)\s*)|(\s*(&&|\|\|)\s*{reset_core})|({reset_core})"
 
-    # Cleanup
-    new_clause = re.sub(r'!\s*\(\s*\)', '', new_clause)
-    new_clause = re.sub(r'\(\s*\)', '', new_clause)
-    new_clause = re.sub(r'\s+', ' ', new_clause).strip()
+    # Remove the reset part
+    result = re.sub(pattern, '', clause).strip()
 
-    return new_clause if new_clause else "ASYNC_RST_CHECK"
+    # 3. FIX THE PARENTHESES (The "Shrapnel" Phase)
+    # If we are left with "( count == 0 )" -> remove both
+    # If we are left with "( count == 0"   -> remove leading
+    # If we are left with "count == 0 )"   -> remove trailing
+
+    # Simple balance check: if the string starts with '(' and ends with ')'
+    # but the internal logic is now standalone, strip them.
+    if result.startswith('(') and not result.endswith(')'):
+        result = result[1:]
+    elif result.endswith(')') and not result.startswith('('):
+        result = result[:-1]
+
+    # Final check for an empty wrap: "()"
+    result = re.sub(r'\(\s*\)', '', result)
+
+    return result.strip() if result else "ASYNC_RST_CHECK"
 
 
 def generate_async_reset_assert(reset_signal_activation: str, final_check: str) -> str:
