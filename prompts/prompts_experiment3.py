@@ -17,7 +17,7 @@ IMPORTANT:
 - Do NOT introduce clocks, events, or t/t+1.
 - LOGIC OPERATORS: Use '&&', '||', '!', '==', '!=', '>', '<', '<=', '>='.
 - Use ONLY same-cycle assignments respecting the original variable names:  == 
-- Do NOT invent signals or use dummy variables.
+- ONLY use variable names that are in the original module without any modification
 - Do NOT explain.
 - ONLY output TGTS rules only.
 - IGNORE ALL UNCONDITIONAL ASSIGNATIONS.
@@ -89,7 +89,7 @@ IMPORTANT:
 - AVOID using IF, ELSE clauses. Every branch must be its own RULE with a unique, full guard.  
 - IGNORE ALL UNCONDITIONAL ASSIGNMENTS. Include only assignemnts inside case, if/else and for loops.
 - clock and reset signals are forbidden to be used in TGTS clauses
-- Do NOT invent signals or use dummy variables.
+- ONLY use variable names that are in the original module without any modification
 - Do NOT explain.
 - ONLY output TGTS rules only.
 

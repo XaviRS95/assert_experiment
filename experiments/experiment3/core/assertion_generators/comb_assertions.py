@@ -2,7 +2,7 @@ from utils import utils
 from prompts.prompts_experiment3 import comb_to_tgts_prompt
 from utils.tgts_extractions import tgts_to_immediate_asserts
 from experiments.experiment3.tracking.token_tracker import TokenTracker
-
+from utils.regex_utils import sv_parsing
 
 class CombinationalAssertionGenerator:
     """Generates assertions for combinational blocks"""
@@ -33,7 +33,6 @@ class CombinationalAssertionGenerator:
     def _process_single_block(self, block: str, parameters: str,
                               ports: str, inner_vars: str) -> str:
         """Process a single combinational block"""
-        from utils.regex_utils import sv_parsing
 
         headerless_block = sv_parsing.extract_block_content(block=block)
 
@@ -55,6 +54,8 @@ class CombinationalAssertionGenerator:
             model_response.get('response_tkns', 0)
         )
 
-        return tgts_to_immediate_asserts.immediate_asserts_from_tgts(
+        immediate_asserts = tgts_to_immediate_asserts.immediate_asserts_from_tgts(
             tgts_rules=model_response['tgts_rules']
         )
+
+        return immediate_asserts

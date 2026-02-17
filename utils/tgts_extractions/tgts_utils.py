@@ -1,6 +1,10 @@
 import re
 from ..regex_utils.text_processing import get_alpha_uuid
 
+def constains_delays(text: str)-> bool:
+    delay_pattern = r"\[\s*t\s*(?:\+\s*\d+)?\s*\]"
+    return True if re.search(delay_pattern, text) else False
+
 def extract_delay_pattern(checks: str) -> tuple:
     """Extract variable name and delay value from [t+delay] pattern"""
     match = re.search(r'(\w+)\s*\[\s*t\s*\+\s*(\d+)\s*\]', checks)
@@ -12,60 +16,119 @@ def extract_delay_pattern(checks: str) -> tuple:
 
 
 def process_delay_expression(checks: str) -> str:
-    """Convert [t+delay] notation to SVA ##delay syntax"""
-    var_name, delay_val = extract_delay_pattern(checks)
-    if not var_name:
+    # 1. Find the "Anchor" (the t+n part on the LHS)
+    # Matches: var_name [ t + 1 ]
+    anchor_match = re.search(r'(\w+)\s*\[\s*t\s*\+\s*(\d+)\s*\]', checks)
+
+    if not anchor_match:
         return checks
 
-    # Get the part after the index
-    val_part = checks.split(']')[-1]
+    var_name = anchor_match.group(1)
+    anchor_delay = int(anchor_match.group(2))
 
-    # Apply $past logic if variable appears in val_part
-    if var_name in val_part:
-        val_part = re.sub(rf'\b{var_name}\b', f'$past({var_name})', val_part)
+    # 2. Split the expression into LHS and RHS
+    # Using a split that handles various operators
+    parts = re.split(r'(==|>=|<=|>|<|!=)', checks)
+    if len(parts) < 3:
+        return checks
 
-    # Determine SVA delay syntax
-    if delay_val == 1:
-        check_sva = var_name
-    else:
-        check_sva = f"##{delay_val - 1} {var_name}"
+    lhs = parts[0]
+    operator = parts[1]
+    rhs = "".join(parts[2:])
 
-    return f"{check_sva}{val_part}"
+    # 3. Process LHS: Remove the [t+n]
+    new_lhs = re.sub(rf'{var_name}\s*\[\s*t\s*\+\s*{anchor_delay}\s*\]', var_name, lhs).strip()
+
+    # 4. Process RHS: Convert [t] or [t+m] to $past
+    # Look for the variable with any bracketed t expression
+    def replace_with_past(match):
+        inner_t = match.group(2)  # This is "t" or "t + 0" or "t + 1"
+
+        # Determine the offset
+        if inner_t.strip() == 't':
+            offset = anchor_delay
+        else:
+            # Extract number from 't + m'
+            offset_match = re.search(r'\d+', inner_t)
+            m = int(offset_match.group(0)) if offset_match else 0
+            offset = anchor_delay - m
+
+        if offset > 0:
+            return f"$past({var_name}, {offset})" if offset > 1 else f"$past({var_name})"
+        return var_name
+
+    # Regex to find var[t...] on the RHS
+    rhs_pattern = rf'\b({var_name})\s*\[\s*(t(?:\s*\+\s*\d+)?)\s*\]'
+    new_rhs = re.sub(rhs_pattern, replace_with_past, rhs).strip()
+
+    return f"{new_lhs} {operator} {new_rhs}"
 
 
 def remove_reset_signal(clause: str, reset_signal: str) -> str:
-    # 1. Define the reset expression (e.g., reset == 1'b1, !reset, etc.)
+    # 1. Define the core reset pattern
     val_pattern = r"(\d+'b[01xXzZ]|\d+)"
     comparison_ops = r"(?:==|!=|<=|>=|<|>)"
-
-    # Matches the core signal: !reset or reset == 1'b1
     reset_core = rf"(?:!\s*)?\b{reset_signal}\b(?:\s*{comparison_ops}\s*{val_pattern})?"
 
-    # 2. Match reset with a trailing or leading operator
-    # Case A: (reset == 1 && ... -> matches 'reset == 1 && '
-    # Case B: ... && reset == 1) -> matches ' && reset == 1'
-    pattern = rf"({reset_core}\s*(&&|\|\|)\s*)|(\s*(&&|\|\|)\s*{reset_core})|({reset_core})"
+    # 2. Split the clause by && or || while keeping the operators
+    # This creates a list like ['((rst == 0)', '&&', '(val > 0))']
+    parts = re.split(r'(&&|\|\|)', clause)
 
-    # Remove the reset part
-    result = re.sub(pattern, '', clause).strip()
+    # 3. Filter out parts that contain the reset signal
+    # We also need to keep track of where operators are to avoid "&& &&"
+    new_parts = []
+    for part in parts:
+        if not re.search(reset_core, part):
+            new_parts.append(part)
 
-    # 3. FIX THE PARENTHESES (The "Shrapnel" Phase)
-    # If we are left with "( count == 0 )" -> remove both
-    # If we are left with "( count == 0"   -> remove leading
-    # If we are left with "count == 0 )"   -> remove trailing
+    # 4. Join and Clean Up
+    # After filtering, we might have dangling operators at the start/end
+    # or double operators like "&& &&"
+    temp_result = "".join(new_parts).strip()
 
-    # Simple balance check: if the string starts with '(' and ends with ')'
-    # but the internal logic is now standalone, strip them.
-    if result.startswith('(') and not result.endswith(')'):
-        result = result[1:]
-    elif result.endswith(')') and not result.startswith('('):
-        result = result[:-1]
+    # Remove leading/trailing/double operators
+    temp_result = re.sub(r'^\s*(&&|\|\|)\s*', '', temp_result)
+    temp_result = re.sub(r'\s*(&&|\|\|)\s*$', '', temp_result)
+    temp_result = re.sub(r'(&&|\|\|)\s*(&&|\|\|)', r'\1', temp_result)
 
-    # Final check for an empty wrap: "()"
-    result = re.sub(r'\(\s*\)', '', result)
+    # 5. Fix Parentheses Balance (The "Healer")
+    def heal_balance(text):
+        # Left-to-Right: Remove orphaned ')'
+        balance = 0
+        pass1 = ""
+        for char in text:
+            if char == '(':
+                balance += 1
+                pass1 += char
+            elif char == ')':
+                if balance > 0:
+                    balance -= 1
+                    pass1 += char
+            else:
+                pass1 += char
 
-    return result.strip() if result else "ASYNC_RST_CHECK"
+        # Right-to-Left: Remove orphaned '('
+        balance = 0
+        pass2 = ""
+        for char in reversed(pass1):
+            if char == ')':
+                balance += 1
+                pass2 += char
+            elif char == '(':
+                if balance > 0:
+                    balance -= 1
+                    pass2 += char
+            else:
+                pass2 += char
+        return pass2[::-1]
 
+    result = heal_balance(temp_result).strip()
+
+    # Final check: if it's just empty parentheses or nothing, it's a reset block
+    if not result or result in ["()", "(( ))"]:
+        return "ASYNC_RST_CHECK"
+
+    return result
 
 def generate_async_reset_assert(reset_signal_activation: str, final_check: str) -> str:
     """Generate async reset assertion block"""

@@ -1,6 +1,7 @@
 from ..tgts_extractions.tgts_utils import (extract_reset_info,
                                            filter_valid_tgts_rules,
                                            clean_logical_operators,
+                                           constains_delays,
                                            remove_clock_cycle_notation,
                                            process_delay_expression,
                                            remove_reset_signal,
@@ -22,12 +23,15 @@ def sequential_properties_from_tgts(tgts_rules: list, sensitivity_list: dict) ->
     for rule in valid_rules:
         # Clean up clauses
         clauses = clean_logical_operators(rule['clauses'])
-        clauses = remove_clock_cycle_notation(clauses)
+        if constains_delays(text=clauses):
+            clauses = remove_clock_cycle_notation(clauses)
 
         # Process check expression
         checks = clean_logical_operators(rule['check'])
-        final_check = process_delay_expression(checks)
-        final_check = remove_clock_cycle_notation(final_check)
+        final_check = checks
+        if constains_delays(text=checks):
+            final_check = process_delay_expression(checks)
+            final_check = remove_clock_cycle_notation(final_check)
 
         # Remove reset signal if present
         if reset_info['reset_signal_name']:
