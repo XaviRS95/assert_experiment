@@ -1,0 +1,70 @@
+// minimal_testbench.sv
+module top;
+    // Clock and reset
+    logic clk = 0;
+    logic rst_n = 0;
+
+    // Generate clock
+    always #5 clk = ~clk;
+
+    // Release reset after 20ns
+    initial #20 rst_n = 1;
+
+    // TODO: Declare your DUT signals here
+    // Example:
+    logic [31:0] data_in;
+    logic [3:0] cmd;
+    logic [31:0] data_out;
+    logic busy;
+
+    // Instantiate DUT
+    original_module dut (
+        .clk(clk),
+        .rst_n(rst_n),
+        .data_in(data_in),
+        .cmd(cmd),
+        .data_out(data_out),
+        .busy(busy)
+    );
+
+    // Instantiate assertions
+    assertion_module check (
+        .clk(clk),
+        .rst_n(rst_n),
+        .data_in(data_in),
+        .cmd(cmd),
+        .data_out(data_out),
+        .busy(busy)
+    );
+
+    // Stimulus
+    initial begin
+        @(posedge rst_n);  // Wait for reset
+
+        for(int i=0; i<1000; i++) begin
+            @(posedge clk);
+
+            // TODO: Set your input ranges here
+            data_in = $urandom_range(0, 2**32-1);  // 32-bit input
+            cmd     = $urandom_range(0, 15);       // 4-bit command
+
+            // INTERESTING TO INCLUDE IN THE FINAL PAPER THAT INCLUDING
+            // THESE TYPE OF FEATURES WOULD BE A FUTURE CHALLENGE, since one would have to know the real purpose of each signal.
+            if (busy) begin
+                @(posedge clk);  // Wait if busy
+            end
+            //
+            //
+        end
+
+        $display("Test completed");
+        $assertreport;
+        $finish;
+    end
+
+    // Dump waves
+    initial begin
+        $dumpfile("wave.vcd");
+        $dumpvars(0, top);
+    end
+endmodule

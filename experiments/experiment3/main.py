@@ -3,7 +3,6 @@ from experiments.experiment3.config.file_handling import initialize_csv_file
 from experiments.experiment3.core.experiment_controller import ExperimentController
 from utils.file_handling import file_reader
 
-
 def main():
     """Main entry point for experiment 3"""
 
