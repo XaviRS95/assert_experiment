@@ -1,7 +1,5 @@
 import re
 
-def extract_module_info(module: str):
-
 
 
 def generate_clock_reset_initial_section(clock_signal:str='', reset_signal:str='', clock_period:int=0, initial_reset_time:int=0):
@@ -43,8 +41,6 @@ def generate_instantiate_section(module_name: str, signals_list: list, section_t
 def generate_signal_stimulus(signals: list, clock_signal: str, reset_signal:str) -> str:
     """Generate stimulus assignments for input signals only"""
     template = ''
-
-
 
     for signal in signals:
         # Skip outputs
@@ -147,48 +143,3 @@ def generate_full_instantiate_section(clean_signals: list, dut_section: str, ass
     signals = '\n'.join([f'\t{signal};' for signal in signals])
 
     return signals + '\n\n' + dut_section + '\n' + assert_section
-
-
-signals = [
-        "input logic clk",
-        "input logic rst",
-        "input logic [31:0] data_in",
-        "input logic [3:0] addr",
-        "input logic write_en",
-        "output logic [31:0] data_out",
-        "output logic ready"
-    ]
-
-input_signals = [signal.replace("input ", "") for signal in signals if 'output ' not in signal]
-
-in_out_signal_removals = [signal.replace("input ", "").replace("output ", "") for signal in signals]
-
-signals_names = extract_variable_names(signals_list = signals)
-
-dut_section = generate_instantiate_section(
-    module_name='modulo_original',
-    signals_list=signals_names,
-    section_type='dut'
-)
-
-assert_section = generate_instantiate_section(
-    module_name='modulo_aserciones',
-    signals_list=signals_names,
-    section_type='assert'
-)
-
-clock_reset_initial_section = generate_clock_reset_initial_section(
-clock_signal = 'clk', reset_signal = 'rst', clock_period = 5, initial_reset_time = 20
-)
-
-initial_stimuli_variables = generate_signal_stimulus(signals = input_signals, clock_signal = 'clk', reset_signal = 'rst')
-
-initial_stimuli_section = generate_initial_stimulus(num_of_tests = 100, signal_stimulus = initial_stimuli_variables, clock_activation = 'posedge clk', reset_activation = 'posedge rst')
-
-full_instantiate_section = generate_full_instantiate_section(clean_signals = in_out_signal_removals, dut_section = dut_section, assert_section = assert_section, clock_signal = 'clk', reset_signal = 'rst')
-
-final_module = generate_final_module(clock_reset_initial_section=clock_reset_initial_section, instantiate_section=full_instantiate_section, initial_stimuli_section=initial_stimuli_section)
-
-
-
-print(final_module)

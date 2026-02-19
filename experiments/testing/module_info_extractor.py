@@ -1,12 +1,43 @@
 import re
 
+def get_module_name(module: str):
+    # Look for 'module' followed by the name
+    match = re.search(r'module\s+(\w+)', module)
+    return match.group(1) if match else None
 
-def normalize_ports_with_range(port_string):
+def get_port_signals(module: str):
+    # Captures everything between 'module name (...);'
+    # Handles multi-line port lists
+    port_block = re.search(r'module\s+\w+\s*\((.*?)\)\s*;', module, re.DOTALL)
+    if not port_block:
+        return []
+
+    # Split by comma and clean up whitespace/newlines
+    raw_ports = port_block.group(1).split(',')
+    clean_ports = [re.sub(r'\s+', ' ', p).strip() for p in raw_ports]
+    return [p for p in clean_ports if p]
+
+def get_triggers(module: str):
+    # Find all always blocks and capture their trigger/type
+
+    # 1. Capture sequential blocks: always_ff @(...) or always_latch @(...)
+    seq_matches = re.finditer(r'always_(?:ff|latch) @(.*) begin', module)
+
+    clk_trigger = ''
+    rst_trigger = ''
+
+    for m in seq_matches:
+        trigger = m.group(1).strip().replace('(','').replace(')','').split(' or ')
+        if trigger:
+            clk_trigger = trigger[0]
+            if len(trigger) > 1:
+                rst_trigger = trigger[1]
+        continue
+
+    return clk_trigger, rst_trigger
+
+def normalize_ports_with_range(input_signals: list):
     # Remove outer module parentheses/semicolon
-    port_string = port_string.strip().strip('();')
-
-    # Split by commas, avoiding splitting inside bit ranges [3:0]
-    parts = re.split(r',\s*(?![^\[]*\])', port_string)
 
     normalized = []
 
@@ -15,7 +46,7 @@ def normalize_ports_with_range(port_string):
     curr_type = "logic"
     curr_range = ""
 
-    for part in parts:
+    for part in input_signals:
         part = part.strip()
         if not part: continue
 
@@ -51,11 +82,3 @@ def normalize_ports_with_range(port_string):
             normalized.append(f"{full_decl} {p_name}")
 
     return normalized
-
-
-# --- Testing with your specific case ---
-raw_input = "input logic clk, input logic rst, input logic mode_sel, output logic [1:0] filter_mode, output logic [1:0] val"
-expanded = normalize_ports_with_range(raw_input)
-
-for p in expanded:
-    print(f"'{p}',")
