@@ -1,6 +1,6 @@
 from utils import utils
 from prompts.prompts_experiment3 import comb_to_tgts_prompt
-from utils.tgts_extractions import tgts_to_immediate_asserts
+from experiments.experiment3.processing.tgts_extractions import tgts_to_immediate_asserts
 from experiments.experiment3.tracking.token_tracker import TokenTracker
 from utils.regex_utils import sv_parsing
 

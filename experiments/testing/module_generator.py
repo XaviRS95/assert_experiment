@@ -40,9 +40,12 @@ def generate_instantiate_section(module_name: str, signals_list: list, section_t
 
 def generate_signal_stimulus(signals: list, clock_signal: str, reset_signal:str) -> str:
     """Generate stimulus assignments for input signals only"""
+
+    input_signals = [signal.replace("input ", "") for signal in signals if 'output ' not in signal]
+
     template = ''
 
-    for signal in signals:
+    for signal in input_signals:
         # Skip outputs
         if clock_signal not in signal and reset_signal not in signal:
 
@@ -137,9 +140,32 @@ def generate_final_module(clock_reset_initial_section: str, instantiate_section:
 
 def generate_full_instantiate_section(clean_signals: list, dut_section: str, assert_section: str, clock_signal:str = '', reset_signal: str = ''):
 
+    clean_signals = [signal.replace("input ", "").replace("output ", "") for signal in clean_signals]
+
     #Eliminate clock and reset signal from the list.
-    signals = [signal for signal in clean_signals if clock_signal not in signal and reset_signal not in signal]
+    clean_signals = [signal for signal in clean_signals if clock_signal not in signal and reset_signal not in signal]
 
-    signals = '\n'.join([f'\t{signal};' for signal in signals])
+    clean_signals = '\n'.join([f'\t{signal};' for signal in clean_signals])
 
-    return signals + '\n\n' + dut_section + '\n' + assert_section
+    return clean_signals + '\n\n' + dut_section + '\n' + assert_section
+
+def genetate_dut_assert_sections(signals: list, dut_module_name: str, assert_module_name: str) -> dict:
+
+    signals_names = extract_variable_names(signals_list = signals)
+
+    dut_section = generate_instantiate_section(
+        module_name=dut_module_name,
+        signals_list=signals_names,
+        section_type='dut'
+    )
+
+    assert_section = generate_instantiate_section(
+        module_name=assert_module_name,
+        signals_list=signals_names,
+        section_type='assert'
+    )
+
+    return {
+        'dut_section': dut_section,
+        'assert_section': assert_section
+    }

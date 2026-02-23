@@ -16,8 +16,6 @@ def read_modules_file(csv_path: str) -> list:
 
 def generate_final_assertion_content(module_name:str, parameters: str, aux_vars: str, assertions: str) -> str:
 
-    #if f'module {module_name}' in
-
     header = f""" module {module_name}_assertions ({parameters});"""
 
     new_module = f"""{header}\n\n{aux_vars}\n\n{assertions}\n\nendmodule;"""
@@ -67,4 +65,4 @@ def check_code_syntax(code: str):
         result = json.loads(response.content.decode("utf-8"))
         return result['result']
     else:
-        return 'CODE BLOCK NOT FOUND'
+        return 'CODE_BLOCK_NOT_FOUND'

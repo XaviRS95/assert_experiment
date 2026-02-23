@@ -1,6 +1,6 @@
 from utils import utils
 from prompts.prompts_experiment3 import seq_to_tgts_prompt
-from utils.tgts_extractions import tgts_to_sequential_properties
+from experiments.experiment3.processing.tgts_extractions import tgts_to_sequential_properties
 from utils.regex_utils import sv_parsing
 from experiments.experiment3.tracking.token_tracker import TokenTracker
 

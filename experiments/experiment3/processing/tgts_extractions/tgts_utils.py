@@ -1,5 +1,5 @@
 import re
-from ..regex_utils.text_processing import get_alpha_uuid
+from utils.regex_utils.text_processing import get_alpha_uuid
 
 def constains_delays(text: str)-> bool:
     delay_pattern = r"\[\s*t\s*(?:\+\s*\d+)?\s*\]"

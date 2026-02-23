@@ -1,4 +1,4 @@
-from ..regex_utils.text_processing import get_alpha_uuid
+from utils.regex_utils.text_processing import get_alpha_uuid
 from .tgts_utils import clean_logical_operators, filter_valid_tgts_rules
 
 def immediate_asserts_from_tgts(tgts_rules: list) -> str:

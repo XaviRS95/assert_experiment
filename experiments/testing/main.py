@@ -55,9 +55,13 @@ input logic [1:0] count);
 endmodule
 """
 
-code_module_name = get_module_name(module=code_module)
+NUM_EXPERIMENTS = 100
+CLOCK_PERIOD_NS = 5
+INITIAL_RESET_NS = 20
 
-test_module_name = get_module_name(module=test_module)
+dut_module_name = get_module_name(module=code_module)
+
+assert_module_name = get_module_name(module=test_module)
 
 signals = get_port_signals(module=code_module)
 
@@ -66,36 +70,40 @@ clk_trigger, rst_trigger = get_triggers(module=code_module)
 clk_signal = clk_trigger.split(' ')[-1] if clk_trigger else ''
 rst_signal = rst_trigger.split(' ')[-1] if rst_trigger else ''
 
-input_signals = [signal.replace("input ", "") for signal in signals if 'output ' not in signal]
-
+#Adds the type of signal and input|output to those signals that don't have it.
 full_type_signals = normalize_ports_with_range(input_signals=signals)
 
-in_out_signal_removals = [signal.replace("input ", "").replace("output ", "") for signal in signals]
-
-signals_names = extract_variable_names(signals_list = signals)
-
-dut_section = generate_instantiate_section(
-    module_name=code_module_name,
-    signals_list=signals_names,
-    section_type='dut'
-)
-
-assert_section = generate_instantiate_section(
-    module_name=test_module_name,
-    signals_list=signals_names,
-    section_type='assert'
-)
+#Extracts only the input signals, leaving the output signals apart.
 
 clock_reset_initial_section = generate_clock_reset_initial_section(
-clock_signal = clk_signal, reset_signal = rst_signal, clock_period = 5, initial_reset_time = 20
+    clock_signal = clk_signal,
+    reset_signal = rst_signal,
+    clock_period = CLOCK_PERIOD_NS,
+    initial_reset_time = INITIAL_RESET_NS
 )
 
-initial_stimuli_variables = generate_signal_stimulus(signals = full_type_signals, clock_signal = clk_signal, reset_signal = rst_signal)
+dut_assert_sections = genetate_dut_assert_sections(
+    signals=full_type_signals,
+    dut_module_name=dut_module_name,
+    assert_module_name=assert_module_name)
 
-initial_stimuli_section = generate_initial_stimulus(num_of_tests = 100, signal_stimulus = initial_stimuli_variables, clock_activation = clk_trigger, reset_activation = rst_trigger)
+initial_stimuli_variables = generate_signal_stimulus(signals = full_type_signals,
+                                                     clock_signal = clk_signal,
+                                                     reset_signal = rst_signal)
 
-full_instantiate_section = generate_full_instantiate_section(clean_signals = in_out_signal_removals, dut_section = dut_section, assert_section = assert_section, clock_signal = clk_signal, reset_signal = rst_signal)
+initial_stimuli_section = generate_initial_stimulus(num_of_tests = NUM_EXPERIMENTS,
+                                                    signal_stimulus = initial_stimuli_variables,
+                                                    clock_activation = clk_trigger,
+                                                    reset_activation = rst_trigger)
 
-final_module = generate_final_module(clock_reset_initial_section=clock_reset_initial_section, instantiate_section=full_instantiate_section, initial_stimuli_section=initial_stimuli_section)
+full_instantiate_section = generate_full_instantiate_section(clean_signals = full_type_signals,
+                                                             dut_section = dut_assert_sections['dut_section'],
+                                                             assert_section = dut_assert_sections['assert_section'],
+                                                             clock_signal = clk_signal,
+                                                             reset_signal = rst_signal)
+
+final_module = generate_final_module(clock_reset_initial_section=clock_reset_initial_section,
+                                     instantiate_section=full_instantiate_section,
+                                     initial_stimuli_section=initial_stimuli_section)
 
 print(final_module)

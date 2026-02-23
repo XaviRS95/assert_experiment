@@ -26,6 +26,7 @@ def sequential_properties_from_tgts(tgts_rules: list, sensitivity_list: dict) ->
         if constains_delays(text=clauses):
             clauses = remove_clock_cycle_notation(clauses)
 
+
         # Process check expression
         checks = clean_logical_operators(rule['check'])
         final_check = checks
