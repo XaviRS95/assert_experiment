@@ -1,8 +1,31 @@
 import re
 
 
+def generate_reset_initial_info(reset_trigger:str, reset_signal: str, initial_reset_time: int)-> str:
 
-def generate_clock_reset_initial_section(clock_signal:str='', reset_signal:str='', clock_period:int=0, initial_reset_time:int=0):
+    TEMPLATE = '\n'
+
+    if reset_signal and reset_trigger:
+        reset_info = {
+            'reset_assert_value': "0",
+            'reset_deassert_value': "1",
+            'reset_wait_edge': "posedge reset",  # Wait for low→high
+        }
+
+        if "posedge" in reset_trigger:
+            reset_info['reset_assert_value'] = "1"
+            reset_info['reset_deassert_value'] = "0"
+            reset_info['reset_wait_edge'] = "negedge reset"  # Wait for high→low
+
+        TEMPLATE = (f'\tinitial begin\n'
+                    f'\t\t{reset_signal} = {reset_info["reset_assert_value"]};\n'
+                    f'\t\t#{initial_reset_time};\n'
+                    f'\t\t{reset_signal} = {reset_info["reset_deassert_value"]};\n'
+                    f'\tend\n')
+
+    return TEMPLATE
+
+def generate_clock_reset_initial_section(initial_reset_info: str, clock_signal:str= '', reset_signal:str= '', clock_period:int=0):
     template = ''
 
     #Generates the section of clock_signal if there is a clock in the module.
@@ -13,9 +36,11 @@ def generate_clock_reset_initial_section(clock_signal:str='', reset_signal:str='
 
     #Generates the reset section for if there is a reset section.
     if reset_signal:
-        template += f'\tlogic {reset_signal} = 0;\n'
-        if initial_reset_time > 0:
-            template += f'\tinitial #{initial_reset_time} {reset_signal} = 1;\n'
+        template += f'\tlogic {reset_signal};\n'
+
+    if initial_reset_info:
+        template += f'{initial_reset_info}\n'
+
 
     return template
 
@@ -47,7 +72,7 @@ def generate_signal_stimulus(signals: list, clock_signal: str, reset_signal:str)
 
     for signal in input_signals:
         # Skip outputs
-        if clock_signal not in signal and reset_signal not in signal:
+        if (not clock_signal or clock_signal not in signal) and (not reset_signal or reset_signal not in signal):
 
             sig_type, sig_name, array_info = parse_signal_declaration(signal)
 
@@ -107,15 +132,18 @@ def parse_signal_declaration(signal_line):
 
     return None, None, None
 
-def generate_initial_stimulus(num_of_tests:int, signal_stimulus: str, clock_activation:str='', reset_activation:str=''):
+
+
+def generate_initial_stimulus(num_of_tests:int, signal_stimulus: str, clock_activation:str=''):
+
+    clock_activation = "@(" + clock_activation + ");" if clock_activation else ''
+
     TEMPLATE = (f'\tinitial begin',
-                f'\t\t@({reset_activation});',
                 f'\t\tfor(int i=0; i<{num_of_tests};i++) begin',
-                f'\t\t\t@({clock_activation});',
+                f'\t\t\t{clock_activation}',
                 f'{signal_stimulus}',
                 f'\t\tend',
                 f'\t\t$display("Test complete!");',
-                f'\t\t$assertreport;',
                 f'\t\t$finish;',
                 f'\tend')
 
@@ -142,8 +170,12 @@ def generate_full_instantiate_section(clean_signals: list, dut_section: str, ass
 
     clean_signals = [signal.replace("input ", "").replace("output ", "") for signal in clean_signals]
 
-    #Eliminate clock and reset signal from the list.
-    clean_signals = [signal for signal in clean_signals if clock_signal not in signal and reset_signal not in signal]
+    #Eliminate clock and reset signal from the list if they exist
+    if clock_signal:
+        clean_signals = [signal for signal in clean_signals if clock_signal not in signal]
+
+    if reset_signal:
+        clean_signals = [signal for signal in clean_signals if reset_signal not in signal]
 
     clean_signals = '\n'.join([f'\t{signal};' for signal in clean_signals])
 
@@ -162,7 +194,7 @@ def genetate_dut_assert_sections(signals: list, dut_module_name: str, assert_mod
     assert_section = generate_instantiate_section(
         module_name=assert_module_name,
         signals_list=signals_names,
-        section_type='assert'
+        section_type='assertions'
     )
 
     return {

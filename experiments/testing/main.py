@@ -2,57 +2,87 @@ from module_info_extractor import *
 from module_generator import *
 
 code_module= """
-module seq_case71(
-    input logic clk, reset,
-    output logic [1:0] count
+module multi_proto_arbiter (
+    input  logic tl_valid_i,
+    input  logic axi_awvalid_i,
+    input  logic axi_arvalid_i,
+    input  logic obi_req_i,
+    input  logic [2:0] tl_opcode_i,
+    input  logic [1:0] obi_resp_i,
+    output logic grant_o,
+    output logic deny_o,
+    output logic error_o
 );
-    always_ff @(posedge clk or negedge reset) begin
-        if(!reset)
-            count <= 2'b00;
-        else
-            case(count)
-                2'b00: count <= 2'b01;
-                2'b01: count <= 2'b10;
-                2'b10: count <= 2'b11;
-                2'b11: count <= 2'b00;
-                default: count <= 2'b00;
-            endcase
+
+    always_comb begin
+        grant_o = 1'b0;
+        deny_o  = 1'b0;
+        error_o = 1'b0;
+
+        unique case (1'b1)
+            tl_valid_i: begin
+                unique case (tl_opcode_i)
+                    3'b000: grant_o = 1'b1; // Get
+                    3'b001, 3'b010: grant_o = 1'b1; // Put
+                    default: deny_o = 1'b1;
+                endcase
+            end
+
+            axi_awvalid_i || axi_arvalid_i: begin
+                grant_o = 1'b1;
+            end
+
+            obi_req_i: begin
+                unique case (obi_resp_i)
+                    2'b00: grant_o = 1'b1;
+                    2'b10: deny_o = 1'b1;
+                    default: error_o = 1'b1;
+                endcase
+            end
+
+            default: error_o = 1'b1;
+        endcase
     end
 endmodule
 """
 
 test_module="""
-module seq_case71_asserts  (
-input logic clk, 
-reset,
-input logic [1:0] count);
+module multi_proto_arbiter_asserts  (input logic tl_valid_i,
+input logic axi_awvalid_i,
+input logic axi_arvalid_i,
+input logic obi_req_i,
+input logic [2:0] tl_opcode_i,
+input logic [1:0] obi_resp_i,
+input logic grant_o,
+input logic deny_o,
+input logic error_o);
 
-	property lkcknhahejcmkjgookebmjjmmacghmjf;
-	    @(posedge clk) disable iff(!reset) ((count == 2'b00)) |=> (count == 2'b01);
-	endproperty
-	assert property (lkcknhahejcmkjgookebmjjmmacghmjf);
+    
 
-	property ehiilmflnhejkhboaliecmkhhimflbhe;
-	    @(posedge clk) disable iff(!reset) ((count == 2'b01)) |=> (count == 2'b10);
-	endproperty
-	assert property (ehiilmflnhejkhboaliecmkhhimflbhe);
+    
 
-	property kjhbapemmdidknbppgcieolbkbeoaaka;
-	    @(posedge clk) disable iff(!reset) ((count == 2'b10)) |=> (count == 2'b11);
-	endproperty
-	assert property (kjhbapemmdidknbppgcieolbkbeoaaka);
+    always_comb begin
+    efbpnigdecknkcpbolcgjbpgmcpfdkjb: assert( (tl_valid_i && tl_opcode_i == 3'b000) ? (grant_o == 1'b1) : 1 )  else $error(""Error in immediate assert efbpnigdecknkcpbolcgjbpgmcpfdkjb"");
 
-	property bkclmchdnjaikhkiaofnmkgchakeandi;
-	    @(posedge clk) disable iff(!reset) ((count == 2'b11)) |=> (count == 2'b00);
-	endproperty
-	assert property (bkclmchdnjaikhkiaofnmkgchakeandi);
+ekfjgkhlnjkgkabmbflcoljlnmehmiba: assert( (tl_valid_i && (tl_opcode_i == 3'b001 || tl_opcode_i == 3'b010)) ? (grant_o == 1'b1) : 1 )  else $error(""Error in immediate assert ekfjgkhlnjkgkabmbflcoljlnmehmiba"");
 
-	property lclfbpjcjadikkpebdlopjjjdilcbgoi;
-	    @(posedge clk) disable iff(!reset) ((count != 2'b00 && count != 2'b01 && count != 2'b10 && count != 2'b11)) |=> (count == 2'b00);
-	endproperty
-	assert property (lclfbpjcjadikkpebdlopjjjdilcbgoi);
+pkfbmbfjanbnkfepobfkfijkdcbfbkha: assert( (tl_valid_i && !(tl_opcode_i == 3'b000 || tl_opcode_i == 3'b001 || tl_opcode_i == 3'b010)) ? (deny_o == 1'b1) : 1 )  else $error(""Error in immediate assert pkfbmbfjanbnkfepobfkfijkdcbfbkha"");
 
-endmodule
+anegpnkdgnjjkchfapbhiapeeploooka: assert( (axi_awvalid_i || axi_arvalid_i) ? (grant_o == 1'b1) : 1 )  else $error(""Error in immediate assert anegpnkdgnjjkchfapbhiapeeploooka"");
+
+aefnnkdkmpdfkglbpfimeocnkfkjaokl: assert( (obi_req_i && obi_resp_i == 2'b00) ? (grant_o == 1'b1) : 1 )  else $error(""Error in immediate assert aefnnkdkmpdfkglbpfimeocnkfkjaokl"");
+
+aihckfbhmldikbgmpmelikkiomejdelk: assert( (obi_req_i && obi_resp_i == 2'b10) ? (deny_o == 1'b1) : 1 )  else $error(""Error in immediate assert aihckfbhmldikbgmpmelikkiomejdelk"");
+
+inmnglnhgbnnkbodbpnanfjlngmljood: assert( (obi_req_i && !(obi_resp_i == 2'b00 || obi_resp_i == 2'b10)) ? (error_o == 1'b1) : 1 )  else $error(""Error in immediate assert inmnglnhgbnnkbodbpnanfjlngmljood"");
+
+jgkclgglkjilkhoabpbpohnfehhgmfge: assert( (!tl_valid_i && !axi_awvalid_i && !axi_arvalid_i && !obi_req_i) ? (error_o == 1'b1) : 1 )  else $error(""Error in immediate assert jgkclgglkjilkhoabpbpohnfehhgmfge"");
+
+    end
+
+    
+
+    endmodule
 """
 
 NUM_EXPERIMENTS = 100
@@ -75,11 +105,15 @@ full_type_signals = normalize_ports_with_range(input_signals=signals)
 
 #Extracts only the input signals, leaving the output signals apart.
 
+initial_reset_info = generate_reset_initial_info(reset_trigger = rst_trigger,
+                                                 reset_signal = rst_signal,
+                                                 initial_reset_time = INITIAL_RESET_NS)
+
 clock_reset_initial_section = generate_clock_reset_initial_section(
+    initial_reset_info=initial_reset_info,
     clock_signal = clk_signal,
     reset_signal = rst_signal,
-    clock_period = CLOCK_PERIOD_NS,
-    initial_reset_time = INITIAL_RESET_NS
+    clock_period = CLOCK_PERIOD_NS
 )
 
 dut_assert_sections = genetate_dut_assert_sections(
@@ -87,20 +121,22 @@ dut_assert_sections = genetate_dut_assert_sections(
     dut_module_name=dut_module_name,
     assert_module_name=assert_module_name)
 
-initial_stimuli_variables = generate_signal_stimulus(signals = full_type_signals,
-                                                     clock_signal = clk_signal,
-                                                     reset_signal = rst_signal)
-
-initial_stimuli_section = generate_initial_stimulus(num_of_tests = NUM_EXPERIMENTS,
-                                                    signal_stimulus = initial_stimuli_variables,
-                                                    clock_activation = clk_trigger,
-                                                    reset_activation = rst_trigger)
 
 full_instantiate_section = generate_full_instantiate_section(clean_signals = full_type_signals,
                                                              dut_section = dut_assert_sections['dut_section'],
                                                              assert_section = dut_assert_sections['assert_section'],
                                                              clock_signal = clk_signal,
                                                              reset_signal = rst_signal)
+
+
+initial_stimuli_variables = generate_signal_stimulus(signals = full_type_signals,
+                                                     clock_signal = clk_signal,
+                                                     reset_signal = rst_signal)
+
+initial_stimuli_section = generate_initial_stimulus(num_of_tests = NUM_EXPERIMENTS,
+                                                    signal_stimulus = initial_stimuli_variables,
+                                                    clock_activation = clk_trigger)
+
 
 final_module = generate_final_module(clock_reset_initial_section=clock_reset_initial_section,
                                      instantiate_section=full_instantiate_section,

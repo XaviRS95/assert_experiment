@@ -1,0 +1,1698 @@
+modules
+"
+module mux2to1 (
+    input  logic a,
+    input  logic b,
+    input  logic sel,
+    output logic y
+);
+    always_comb begin
+        if (sel == 1'b1)
+            y = b;
+        else
+            y = a;
+    end
+endmodule
+"
+"
+module abs_value (
+    input  logic signed [3:0] a,
+    output logic        [3:0] y
+);
+    always_comb begin
+        if (a < 0)
+            y = -a;
+        else
+            y = a;
+    end
+endmodule
+"
+"
+module min_two (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a < b)
+            y = a;
+        else
+            y = b;
+    end
+endmodule
+"
+"
+module bin_to_onehot (
+    input  logic [1:0] sel,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (sel == 2'b00)
+            y = 4'b0001;
+        else if (sel == 2'b01)
+            y = 4'b0010;
+        else if (sel == 2'b10)
+            y = 4'b0100;
+        else
+            y = 4'b1000;
+    end
+endmodule
+"
+"
+module sat_adder (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    output logic [3:0] y
+);
+    logic [4:0] sum;
+
+    always_comb begin
+        sum = {1'b0, a} + {1'b0, b};
+        if (sum > 5'b01111)
+            y = 4'b1111;
+        else
+            y = sum[3:0];
+    end
+endmodule
+"
+"
+module sign_extend (
+    input  logic [3:0] a,
+    output logic [7:0] y
+);
+    always_comb begin
+        if (a[3] == 1'b1)
+            y = {4'b1111, a};
+        else
+            y = {4'b0000, a};
+    end
+endmodule
+"
+"
+module priority_encoder (
+    input  logic [3:0] req,
+    output logic [1:0] grant,
+    output logic       valid
+);
+    always_comb begin
+        valid = 1'b1;
+        if (req[0])
+            grant = 2'b00;
+        else if (req[1])
+            grant = 2'b01;
+        else if (req[2])
+            grant = 2'b10;
+        else if (req[3])
+            grant = 2'b11;
+        else begin
+            grant = 2'b00;
+            valid = 1'b0;
+        end
+    end
+endmodule
+"
+"
+module grade_classifier (
+    input  logic [6:0] score,  // 0 to 100
+    output logic [1:0] grade   // 0=F, 1=C, 2=B, 3=A
+);
+    always_comb begin
+        if (score >= 7'd90)
+            grade = 2'd3;  // A
+        else if (score >= 7'd75)
+            grade = 2'd2;  // B
+        else if (score >= 7'd60)
+            grade = 2'd1;  // C
+        else
+            grade = 2'd0;  // F
+    end
+endmodule
+"
+"
+module comparator (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    output logic       eq,
+    output logic       gt,
+    output logic       lt
+);
+    always_comb begin
+        if (a == b) begin
+            eq = 1'b1; gt = 1'b0; lt = 1'b0;
+        end else if (a > b) begin
+            eq = 1'b0; gt = 1'b1; lt = 1'b0;
+        end else begin
+            eq = 1'b0; gt = 1'b0; lt = 1'b1;
+        end
+    end
+endmodule
+"
+"
+module mux4to1 (
+    input  logic [3:0] data,
+    input  logic [1:0] sel,
+    output logic       y
+);
+    always_comb begin
+        if (sel == 2'b00)
+            y = data[0];
+        else if (sel == 2'b01)
+            y = data[1];
+        else if (sel == 2'b10)
+            y = data[2];
+        else
+            y = data[3];
+    end
+endmodule
+"
+"
+module clamp (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a < 4'd3)
+            y = 4'd3;
+        else if (a > 4'd12)
+            y = 4'd12;
+        else
+            y = a;
+    end
+endmodule
+"
+"
+module odd_even (
+    input  logic [3:0] a,
+    output logic       is_even
+);
+    always_comb begin
+        if (a[0] == 1'b0)
+            is_even = 1'b1;
+        else
+            is_even = 1'b0;
+    end
+endmodule
+"
+"
+module three_way_cmp (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    output logic [1:0] y  // 2'b00 = a<b, 2'b01 = a==b, 2'b10 = a>b
+);
+    always_comb begin
+        if (a < b)
+            y = 2'b00;
+        else if (a == b)
+            y = 2'b01;
+        else
+            y = 2'b10;
+    end
+endmodule
+"
+"
+module invalid_range (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a >= 4'd0 && a <= 4'd9)
+            y = a;
+        else
+            y = 4'bxxxx; // undefined for values 10-15
+    end
+endmodule
+"
+"
+module priority_enc (
+    input  logic [3:0] req,
+    output logic [1:0] grant
+);
+    always_comb begin
+        if (req[3])
+            grant = 2'b11;
+        else if (req[2])
+            grant = 2'b10;
+        else if (req[1])
+            grant = 2'b01;
+        else
+            grant = 2'b00;
+    end
+endmodule
+"
+"
+module tristate_buf (
+    input  logic [3:0] a,
+    input  logic       en,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (en)
+            y = a;
+        else
+            y = 4'bzzzz;
+    end
+endmodule
+"
+"
+module max_three (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    input  logic [3:0] c,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a >= b && a >= c)
+            y = a;
+        else if (b >= a && b >= c)
+            y = b;
+        else
+            y = c;
+    end
+endmodule
+"
+"
+module sign_extend (
+    input  logic [3:0] a,
+    output logic [7:0] y
+);
+    always_comb begin
+        if (a[3] == 1'b1)
+            y = {4'b1111, a};
+        else
+            y = {4'b0000, a};
+    end
+endmodule
+"
+"
+module sat_sub (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (b > a)
+            y = 4'd0;
+        else
+            y = a - b;
+    end
+endmodule
+"
+"
+module grade (
+    input  logic [6:0] score, // 0 to 100
+    output logic [1:0] grade  // 0=F, 1=C, 2=B, 3=A
+);
+    always_comb begin
+        if (score >= 7'd90)
+            grade = 2'd3; // A
+        else if (score >= 7'd75)
+            grade = 2'd2; // B
+        else if (score >= 7'd50)
+            grade = 2'd1; // C
+        else
+            grade = 2'd0; // F
+    end
+endmodule
+"
+"
+module mult2bit (
+    input  logic [1:0] a,
+    input  logic [1:0] b,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a == 2'b00 || b == 2'b00)
+            y = 4'd0;
+        else if (a == 2'b01)
+            y = {2'b00, b};
+        else if (a == 2'b10)
+            y = {1'b0, b, 1'b0};
+        else
+            y = {2'b00, b} + {1'b0, b, 1'b0}; // 3*b
+    end
+endmodule
+"
+"
+module mult2bit (
+    input  logic [1:0] a,
+    input  logic [1:0] b,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a == 2'b00 || b == 2'b00)
+            y = 4'd0;
+        else if (a == 2'b01)
+            y = {2'b00, b};
+        else if (a == 2'b10)
+            y = {1'b0, b, 1'b0};
+        else
+            y = {2'b00, b} + {1'b0, b, 1'b0}; // 3*b
+    end
+endmodule
+"
+"
+module bit_reverse (
+    input  logic [3:0] a,
+    input  logic       en,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (en)
+            y = {a[0], a[1], a[2], a[3]};
+        else
+            y = a;
+    end
+endmodule
+"
+"
+module ones_threshold (
+    input  logic [3:0] a,
+    output logic       y  // 1 if more than 2 bits are set
+);
+    logic [2:0] count;
+
+    always_comb begin
+        count = a[0] + a[1] + a[2] + a[3];
+        if (count > 3'd2)
+            y = 1'b1;
+        else
+            y = 1'b0;
+    end
+endmodule
+"
+"
+module gray_decode (
+    input  logic [1:0] gray,
+    output logic [1:0] bin
+);
+    always_comb begin
+        if (gray == 2'b00)
+            bin = 2'b00;
+        else if (gray == 2'b01)
+            bin = 2'b01;
+        else if (gray == 2'b11)
+            bin = 2'b10;
+        else
+            bin = 2'b11;
+    end
+endmodule
+"
+"
+module div2 (
+    input  logic [3:0] a,
+    output logic [3:0] quotient,
+    output logic       remainder
+);
+    always_comb begin
+        if (a[0] == 1'b1) begin
+            quotient  = {1'b0, a[3:1]};
+            remainder = 1'b1;
+        end else begin
+            quotient  = {1'b0, a[3:1]};
+            remainder = 1'b0;
+        end
+    end
+endmodule
+"
+"
+module zero_highz (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a == 4'd0)
+            y = 4'bzzzz;
+        else
+            y = a;
+    end
+endmodule
+"
+"
+module majority (
+    input  logic a,
+    input  logic b,
+    input  logic c,
+    output logic y
+);
+    always_comb begin
+        if ((a & b) | (a & c) | (b & c))
+            y = 1'b1;
+        else
+            y = 1'b0;
+    end
+endmodule
+"
+"
+module nibble_swap (
+    input  logic [7:0] a,
+    input  logic       en,
+    output logic [7:0] y
+);
+    always_comb begin
+        if (en)
+            y = {a[3:0], a[7:4]};
+        else
+            y = a;
+    end
+endmodule
+"
+"
+module range_detect (
+    input  logic [4:0] a,      // 0 to 31
+    output logic [4:0] y
+);
+    always_comb begin
+        if (a >= 5'd10 && a <= 5'd20)
+            y = a;
+        else if (a < 5'd10)
+            y = 5'd0;
+        else
+            y = 5'bxxxxx; // undefined above 20
+    end
+endmodule
+"
+"
+module signed_cmp (
+    input  logic signed [3:0] a,
+    input  logic signed [3:0] b,
+    output logic              gt,  // a > b
+    output logic              eq,  // a == b
+    output logic              lt   // a < b
+);
+    always_comb begin
+        if (a > b) begin
+            gt = 1'b1; eq = 1'b0; lt = 1'b0;
+        end else if (a == b) begin
+            gt = 1'b0; eq = 1'b1; lt = 1'b0;
+        end else begin
+            gt = 1'b0; eq = 1'b0; lt = 1'b1;
+        end
+    end
+endmodule
+"
+"
+module sat_mult3 (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    logic [5:0] result;
+
+    always_comb begin
+        result = {2'b00, a} + {1'b0, a, 1'b0}; // a + 2*a
+        if (result > 6'd15)
+            y = 4'b1111;
+        else
+            y = result[3:0];
+    end
+endmodule
+"
+"
+module parity_gen (
+    input  logic [3:0] a,
+    output logic       parity // 1 if odd number of ones (to make even parity)
+);
+    always_comb begin
+        if (^a == 1'b1)
+            parity = 1'b1;
+        else
+            parity = 1'b0;
+    end
+endmodule
+"
+"
+module shift_left (
+    input  logic [3:0] a,
+    input  logic [1:0] shamt, // shift amount: 0, 1, or 2
+    output logic [3:0] y
+);
+    always_comb begin
+        if (shamt == 2'b00)
+            y = a;
+        else if (shamt == 2'b01)
+            y = {a[2:0], 1'b0};
+        else if (shamt == 2'b10)
+            y = {a[1:0], 2'b00};
+        else
+            y = 4'bxxxx; // undefined for shamt == 3
+    end
+endmodule
+"
+"
+module logic_op (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    input  logic [1:0] op, // 00=AND, 01=OR, 10=XOR
+    output logic [3:0] y
+);
+    always_comb begin
+        if (op == 2'b00)
+            y = a & b;
+        else if (op == 2'b01)
+            y = a | b;
+        else if (op == 2'b10)
+            y = a ^ b;
+        else
+            y = 4'bxxxx; // undefined
+    end
+endmodule
+"
+"
+module input_valid (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a >= 4'd5 && a <= 4'd10)
+            y = a;
+        else
+            y = 4'bzzzz;
+    end
+endmodule
+"
+"
+module average (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    output logic [3:0] y
+);
+    logic [4:0] sum;
+
+    always_comb begin
+        sum = {1'b0, a} + {1'b0, b};
+        if (sum[0] == 1'b1)
+            y = sum[4:1] + 4'd1; // round up
+        else
+            y = sum[4:1];
+    end
+endmodule
+"
+"
+module quadrant (
+    input  logic signed [1:0] x,
+    input  logic signed [1:0] y,
+    output logic        [1:0] quad // 0=Q1, 1=Q2, 2=Q3, 3=Q4
+);
+    always_comb begin
+        if (x >= 0 && y >= 0)
+            quad = 2'd0; // Q1
+        else if (x < 0 && y >= 0)
+            quad = 2'd1; // Q2
+        else if (x < 0 && y < 0)
+            quad = 2'd2; // Q3
+        else
+            quad = 2'd3; // Q4
+    end
+endmodule
+"
+"
+module masker (
+    input  logic [3:0] a,
+    input  logic [1:0] sel, // 00=mask lower 2, 01=mask upper 2, 10=mask all, 11=pass
+    output logic [3:0] y
+);
+    always_comb begin
+        if (sel == 2'b00)
+            y = {a[3:2], 2'b00};
+        else if (sel == 2'b01)
+            y = {2'b00, a[1:0]};
+        else if (sel == 2'b10)
+            y = 4'b0000;
+        else
+            y = a;
+    end
+endmodule
+"
+"
+module thermo_code (
+    input  logic [1:0] a,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a == 2'b00)
+            y = 4'b0000;
+        else if (a == 2'b01)
+            y = 4'b0001;
+        else if (a == 2'b10)
+            y = 4'b0011;
+        else
+            y = 4'b0111;
+    end
+endmodule
+"
+"
+module abs_diff (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a >= b)
+            y = a - b;
+        else
+            y = b - a;
+    end
+endmodule
+"
+"
+module even_odd_sep (
+    input  logic [3:0] a,
+    output logic [3:0] even_out,
+    output logic [3:0] odd_out
+);
+    always_comb begin
+        if (a[0] == 1'b0) begin
+            even_out = a;
+            odd_out  = 4'b0000;
+        end else begin
+            even_out = 4'b0000;
+            odd_out  = a;
+        end
+    end
+endmodule
+"
+"
+module pow2_detect (
+    input  logic [3:0] a,
+    output logic       is_pow2
+);
+    always_comb begin
+        if (a == 4'd1 || a == 4'd2 || a == 4'd4 || a == 4'd8)
+            is_pow2 = 1'b1;
+        else
+            is_pow2 = 1'b0;
+    end
+endmodule
+"
+"
+module round_mult4 (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a[1:0] == 2'b00)
+            y = a;
+        else if (a[1:0] <= 2'b10)
+            y = {a[3:2], 2'b00};         // round down
+        else
+            y = {a[3:2], 2'b00} + 4'd4;  // round up
+    end
+endmodule
+"
+"
+module mux_highz (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    input  logic [1:0] sel,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (sel == 2'b00)
+            y = a;
+        else if (sel == 2'b01)
+            y = b;
+        else
+            y = 4'bzzzz;
+    end
+endmodule
+"
+"
+module div3_approx (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a <= 4'd2)
+            y = 4'd0;
+        else if (a <= 4'd5)
+            y = 4'd1;
+        else if (a <= 4'd8)
+            y = 4'd2;
+        else if (a <= 4'd11)
+            y = 4'd3;
+        else
+            y = 4'd4;
+    end
+endmodule
+"
+"
+module seven_seg (
+    input  logic [3:0] digit,
+    output logic [6:0] seg // segments: gfedcba
+);
+    always_comb begin
+        if (digit == 4'd0)
+            seg = 7'b0111111;
+        else if (digit == 4'd1)
+            seg = 7'b0000110;
+        else if (digit == 4'd2)
+            seg = 7'b1011011;
+        else if (digit == 4'd3)
+            seg = 7'b1001111;
+        else if (digit == 4'd4)
+            seg = 7'b1100110;
+        else if (digit == 4'd5)
+            seg = 7'b1101101;
+        else if (digit == 4'd6)
+            seg = 7'b1111101;
+        else if (digit == 4'd7)
+            seg = 7'b0000111;
+        else if (digit == 4'd8)
+            seg = 7'b1111111;
+        else if (digit == 4'd9)
+            seg = 7'b1101111;
+        else
+            seg = 7'bxxxxxxx; // undefined for 10-15
+    end
+endmodule
+"
+"
+module ones_comp (
+    input  logic [3:0] a,
+    input  logic       en,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (en)
+            y = ~a;
+        else
+            y = a;
+    end
+endmodule
+"
+"
+module dual_thresh (
+    input  logic [4:0] a,
+    output logic [1:0] y  // 00=low, 01=mid, 10=high
+);
+    always_comb begin
+        if (a < 5'd10)
+            y = 2'b00; // low
+        else if (a >= 5'd10 && a <= 5'd20)
+            y = 2'b01; // mid
+        else
+            y = 2'b10; // high
+    end
+endmodule
+"
+"
+module cond_swap (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    output logic [3:0] y_a,
+    output logic [3:0] y_b
+);
+    always_comb begin
+        if (a > b) begin
+            y_a = b;
+            y_b = a;
+        end else begin
+            y_a = a;
+            y_b = b;
+        end
+    end
+endmodule
+"
+"
+module overflow_detect (
+    input  logic signed [3:0] a,
+    input  logic signed [3:0] b,
+    output logic signed [3:0] y,
+    output logic              overflow
+);
+    logic signed [4:0] result;
+
+    always_comb begin
+        result = {a[3], a} + {b[3], b};
+        if (result > 5'sd7 || result < -5'sd8) begin
+            overflow = 1'b1;
+            y        = 4'bxxxx;
+        end else begin
+            overflow = 1'b0;
+            y        = result[3:0];
+        end
+    end
+endmodule
+"
+"
+module leading_zero (
+    input  logic [3:0] a,
+    output logic [2:0] y
+);
+    always_comb begin
+        if (a[3] == 1'b1)
+            y = 3'd0;
+        else if (a[2] == 1'b1)
+            y = 3'd1;
+        else if (a[1] == 1'b1)
+            y = 3'd2;
+        else if (a[0] == 1'b1)
+            y = 3'd3;
+        else
+            y = 3'd4;
+    end
+endmodule
+"
+"
+module cond_invert (
+    input  logic [3:0] a,
+    input  logic [3:0] mask, // bits set in mask get inverted
+    output logic [3:0] y
+);
+    always_comb begin
+        if (mask == 4'b0000)
+            y = a;
+        else
+            y = a ^ mask;
+    end
+endmodule
+"
+"
+module mod3 (
+    input  logic [3:0] a,
+    output logic [1:0] y
+);
+    always_comb begin
+        if (a <= 4'd2)
+            y = a[1:0];
+        else if (a <= 4'd5)
+            y = (a - 4'd3) > 4'd1 ? 2'd2 : (a - 4'd3)[1:0];
+        else if (a <= 4'd8)
+            y = (a - 4'd6)[1:0];
+        else if (a <= 4'd11)
+            y = (a - 4'd9)[1:0];
+        else
+            y = (a - 4'd12)[1:0];
+    end
+endmodule
+"
+"
+module bin_to_bcd (
+    input  logic [3:0] a,   // valid input: 0 to 9
+    output logic [3:0] bcd
+);
+    always_comb begin
+        if (a <= 4'd9)
+            bcd = a;
+        else
+            bcd = 4'bxxxx; // undefined for 10-15
+    end
+endmodule
+"
+"
+module adder2bit (
+    input  logic [1:0] a,
+    input  logic [1:0] b,
+    output logic [1:0] y,
+    output logic       carry
+);
+    logic [2:0] result;
+
+    always_comb begin
+        result = {1'b0, a} + {1'b0, b};
+        if (result > 3'd3) begin
+            carry = 1'b1;
+            y     = result[1:0];
+        end else begin
+            carry = 1'b0;
+            y     = result[1:0];
+        end
+    end
+endmodule
+"
+"
+module zero_suppress (
+    input  logic [3:0] a,
+    input  logic       en,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (en && a == 4'd0)
+            y = 4'bzzzz;
+        else if (!en && a == 4'd0)
+            y = 4'bxxxx;
+        else
+            y = a;
+    end
+endmodule
+"
+"
+module sat_mult5 (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    logic [5:0] result;
+
+    always_comb begin
+        result = {2'b00, a} + {a, 2'b00}; // a + 4a = 5a
+        if (result > 6'd15)
+            y = 4'b1111;
+        else
+            y = result[3:0];
+    end
+endmodule
+"
+"
+module classifier (
+    input  logic [3:0] a,
+    output logic [1:0] y  // 00=zero, 01=small (1-7), 10=large (8-15)
+);
+    always_comb begin
+        if (a == 4'd0)
+            y = 2'b00;
+        else if (a <= 4'd7)
+            y = 2'b01;
+        else
+            y = 2'b10;
+    end
+endmodule
+"
+"
+module safe_negate (
+    input  logic signed [3:0] a,
+    output logic signed [3:0] y,
+    output logic              overflow
+);
+    always_comb begin
+        if (a == 4'sb1000) begin // -8 cannot be negated in 4-bit signed
+            y        = 4'sb0111; // clamp to max positive
+            overflow = 1'b1;
+        end else begin
+            y        = -a;
+            overflow = 1'b0;
+        end
+    end
+endmodule
+"
+"
+module interleave (
+    input  logic [1:0] a,
+    input  logic [1:0] b,
+    input  logic       en,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (en)
+            y = {a[1], b[1], a[0], b[0]};
+        else
+            y = {2'b00, a} | {b, 2'b00};
+    end
+endmodule
+"
+"
+module mult2_ovf (
+    input  logic [3:0] a,
+    output logic [3:0] y,
+    output logic       overflow
+);
+    always_comb begin
+        if (a[3] == 1'b1) begin
+            overflow = 1'b1;
+            y        = 4'b1111; // saturate
+        end else begin
+            overflow = 1'b0;
+            y        = {a[2:0], 1'b0};
+        end
+    end
+endmodule
+"
+"
+module boundary_check (
+    input  logic [3:0] a,
+    input  logic [3:0] lower,
+    input  logic [3:0] upper,
+    output logic       in_range
+);
+    always_comb begin
+        if (a >= lower && a <= upper)
+            in_range = 1'b1;
+        else
+            in_range = 1'b0;
+    end
+endmodule
+"
+"
+module fib_lookup (
+    input  logic [2:0] n,
+    output logic [4:0] y
+);
+    always_comb begin
+        if (n == 3'd0)
+            y = 5'd0;
+        else if (n == 3'd1)
+            y = 5'd1;
+        else if (n == 3'd2)
+            y = 5'd1;
+        else if (n == 3'd3)
+            y = 5'd2;
+        else if (n == 3'd4)
+            y = 5'd3;
+        else if (n == 3'd5)
+            y = 5'd5;
+        else if (n == 3'd6)
+            y = 5'd8;
+        else
+            y = 5'd13;
+    end
+endmodule
+"
+"
+module sub_borrow (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    output logic [3:0] y,
+    output logic       borrow
+);
+    always_comb begin
+        if (b > a) begin
+            borrow = 1'b1;
+            y      = 4'd0;
+        end else begin
+            borrow = 1'b0;
+            y      = a - b;
+        end
+    end
+endmodule
+"
+"
+module rotate_left (
+    input  logic [3:0] a,
+    input  logic [1:0] shamt,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (shamt == 2'b00)
+            y = a;
+        else if (shamt == 2'b01)
+            y = {a[2:0], a[3]};
+        else if (shamt == 2'b10)
+            y = {a[1:0], a[3:2]};
+        else
+            y = {a[0], a[3:1]};
+    end
+endmodule
+"
+"
+module signmag_to_twos (
+    input  logic [3:0] a, // a[3] = sign bit, a[2:0] = magnitude
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a[3] == 1'b0)
+            y = {1'b0, a[2:0]};       // positive: unchanged
+        else
+            y = ~{1'b0, a[2:0]} + 4'd1; // negative: negate magnitude
+    end
+endmodule
+"
+"
+module half_select (
+    input  logic [7:0] a,
+    input  logic       sel,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (sel == 1'b0)
+            y = a[3:0];  // lower nibble
+        else
+            y = a[7:4];  // upper nibble
+    end
+endmodule
+"
+"
+module excess3_enc (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a <= 4'd9)
+            y = a + 4'd3;
+        else
+            y = 4'bxxxx; // undefined for 10-15
+    end
+endmodule
+"
+"
+module bit_mask_hz (
+    input  logic [3:0] a,
+    input  logic [1:0] sel,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (sel == 2'b00)
+            y = a & 4'b1100; // mask lower 2 bits
+        else if (sel == 2'b01)
+            y = a & 4'b0011; // mask upper 2 bits
+        else if (sel == 2'b10)
+            y = 4'bzzzz;     // high impedance
+        else
+            y = 4'bxxxx;     // undefined
+    end
+endmodule
+"
+"
+module sat_mult6 (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    logic [6:0] result;
+
+    always_comb begin
+        result = {a, 1'b0} + {a, 2'b00}; // 2a + 4a = 6a
+        if (result > 7'd15)
+            y = 4'b1111;
+        else
+            y = result[3:0];
+    end
+endmodule
+"
+"
+module hamming_cmp (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    output logic       y // 1 if a has more ones than b
+);
+    logic [2:0] count_a, count_b;
+
+    always_comb begin
+        count_a = a[0] + a[1] + a[2] + a[3];
+        count_b = b[0] + b[1] + b[2] + b[3];
+        if (count_a > count_b)
+            y = 1'b1;
+        else
+            y = 1'b0;
+    end
+endmodule
+"
+"
+module arith_shift_right (
+    input  logic signed [3:0] a,
+    input  logic        [1:0] shamt,
+    output logic signed [3:0] y
+);
+    always_comb begin
+        if (shamt == 2'b00)
+            y = a;
+        else if (shamt == 2'b01)
+            y = {a[3], a[3:1]};
+        else if (shamt == 2'b10)
+            y = {a[3], a[3], a[3:2]};
+        else
+            y = {a[3], a[3], a[3], a[3]}; // all sign bits
+    end
+endmodule
+"
+"
+module bcd_valid (
+    input  logic [3:0] a,
+    output logic       valid,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a <= 4'd9) begin
+            valid = 1'b1;
+            y     = a;
+        end else begin
+            valid = 1'b0;
+            y     = 4'bxxxx;
+        end
+    end
+endmodule
+"
+"
+module signed_mult2 (
+    input  logic signed [1:0] a,
+    input  logic signed [1:0] b,
+    output logic signed [3:0] y
+);
+    always_comb begin
+        if (a == 2'sb10 && b == 2'sb10) // -2 * -2 = 4, fits in 4-bit signed
+            y = 4'sd4;
+        else
+            y = a * b;
+    end
+endmodule
+"
+"
+module num_quadrant (
+    input  logic [3:0] a,
+    output logic [1:0] y // 00=0-3, 01=4-7, 10=8-11, 11=12-15
+);
+    always_comb begin
+        if (a <= 4'd3)
+            y = 2'b00;
+        else if (a <= 4'd7)
+            y = 2'b01;
+        else if (a <= 4'd11)
+            y = 2'b10;
+        else
+            y = 2'b11;
+    end
+endmodule
+"
+"
+module dual_out_sel (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    input  logic [1:0] sel,
+    output logic [3:0] y0,
+    output logic [3:0] y1
+);
+    always_comb begin
+        if (sel == 2'b00) begin
+            y0 = a;
+            y1 = b;
+        end else if (sel == 2'b01) begin
+            y0 = b;
+            y1 = a;
+        end else if (sel == 2'b10) begin
+            y0 = a & b;
+            y1 = a | b;
+        end else begin
+            y0 = 4'bzzzz;
+            y1 = 4'bzzzz;
+        end
+    end
+endmodule
+"
+"
+module inc_wrap (
+    input  logic [3:0] a,
+    output logic [3:0] y,
+    output logic       wrapped
+);
+    always_comb begin
+        if (a == 4'b1111) begin
+            y       = 4'b0000;
+            wrapped = 1'b1;
+        end else begin
+            y       = a + 4'd1;
+            wrapped = 1'b0;
+        end
+    end
+endmodule
+"
+"
+module clamp_positive (
+    input  logic signed [3:0] a,
+    output logic signed [3:0] y
+);
+    always_comb begin
+        if (a < 4'sd0)
+            y = 4'sd0;
+        else
+            y = a;
+    end
+endmodule
+"
+"
+module sparse_decode (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a == 4'd0)
+            y = 4'b0001;
+        else if (a == 4'd3)
+            y = 4'b0010;
+        else if (a == 4'd7)
+            y = 4'b0100;
+        else if (a == 4'd12)
+            y = 4'b1000;
+        else if (a == 4'd15)
+            y = 4'b1111;
+        else
+            y = 4'bxxxx; // undefined for all other inputs
+    end
+endmodule
+"
+"
+module div4_rem (
+    input  logic [3:0] a,
+    output logic [3:0] quotient,
+    output logic [1:0] remainder
+);
+    always_comb begin
+        quotient  = {2'b00, a[3:2]};
+        remainder = a[1:0];
+        if (a[1:0] == 2'b00)
+            quotient = {2'b00, a[3:2]};
+        else
+            quotient = {2'b00, a[3:2]};
+    end
+endmodule
+"
+"
+module bit_extract (
+    input  logic [3:0] a,
+    input  logic [1:0] pos, // bit position to extract
+    output logic       y
+);
+    always_comb begin
+        if (pos == 2'b00)
+            y = a[0];
+        else if (pos == 2'b01)
+            y = a[1];
+        else if (pos == 2'b10)
+            y = a[2];
+        else
+            y = a[3];
+    end
+endmodule
+"
+"
+module twos_comp (
+    input  logic [3:0] a,
+    output logic [3:0] y,
+    output logic       is_zero
+);
+    always_comb begin
+        if (a == 4'b0000) begin
+            y       = 4'b0000;
+            is_zero = 1'b1;
+        end else begin
+            y       = ~a + 4'b0001;
+            is_zero = 1'b0;
+        end
+    end
+endmodule
+"
+"
+module floor_even (
+    input  logic signed [3:0] a,
+    output logic signed [3:0] y
+);
+    always_comb begin
+        if (a[0] == 1'b0)
+            y = a;        // already even
+        else if (a < 4'sd0)
+            y = a - 4'sd1; // round toward negative infinity
+        else
+            y = a - 4'sd1; // round down
+    end
+endmodule
+"
+"
+module voter_2of3 (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    input  logic [3:0] c,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a == b)
+            y = a;
+        else if (a == c)
+            y = a;
+        else
+            y = b; // b and c must agree, or fall back to b
+    end
+endmodule
+"
+"
+module parity_redirect (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (^a == 1'b0)    // even parity: route a
+            y = a;
+        else if (^b == 1'b0) // even parity: route b
+            y = b;
+        else
+            y = 4'bxxxx;   // both odd parity: undefined
+    end
+endmodule
+"
+"
+module mag_detect (
+    input  logic signed [4:0] a,
+    output logic        [1:0] y  // 00=zero, 01=small(-4 to 4), 10=large
+);
+    always_comb begin
+        if (a == 5'sd0)
+            y = 2'b00;
+        else if (a >= -5'sd4 && a <= 5'sd4)
+            y = 2'b01;
+        else
+            y = 2'b10;
+    end
+endmodule
+"
+"
+module dec_wrap (
+    input  logic [3:0] a,
+    output logic [3:0] y,
+    output logic       wrapped
+);
+    always_comb begin
+        if (a == 4'b0000) begin
+            y       = 4'b1111;
+            wrapped = 1'b1;
+        end else begin
+            y       = a - 4'd1;
+            wrapped = 1'b0;
+        end
+    end
+endmodule
+"
+"
+module alt_mask (
+    input  logic [3:0] a,
+    input  logic       sel,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (sel == 1'b0)
+            y = a & 4'b1010; // keep bits 3 and 1
+        else
+            y = a & 4'b0101; // keep bits 2 and 0
+    end
+endmodule
+"
+"
+module safe_adder (
+    input  logic signed [3:0] a,
+    input  logic signed [3:0] b,
+    output logic signed [3:0] y,
+    output logic              overflow
+);
+    logic signed [4:0] result;
+
+    always_comb begin
+        result = {a[3], a} + {b[3], b};
+        if (result > 5'sd7) begin
+            y        = 4'sd7;  // clamp to max positive
+            overflow = 1'b1;
+        end else if (result < -5'sd8) begin
+            y        = -4'sd8; // clamp to min negative
+            overflow = 1'b1;
+        end else begin
+            y        = result[3:0];
+            overflow = 1'b0;
+        end
+    end
+endmodule
+"
+"
+module gray_encode (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (a[3] == 1'b0)
+            y[3] = 1'b0;
+        else
+            y[3] = 1'b1;
+
+        if (a[3] == a[2])
+            y[2] = 1'b0;
+        else
+            y[2] = 1'b1;
+
+        if (a[2] == a[1])
+            y[1] = 1'b0;
+        else
+            y[1] = 1'b1;
+
+        if (a[1] == a[0])
+            y[0] = 1'b0;
+        else
+            y[0] = 1'b1;
+    end
+endmodule
+"
+"
+module sat_mult7 (
+    input  logic [3:0] a,
+    output logic [3:0] y
+);
+    logic [6:0] result;
+
+    always_comb begin
+        result = {a, 1'b0} + {a, 2'b00} + {3'b000, a}; // 2a + 4a + a = 7a
+        if (result > 7'd15)
+            y = 4'b1111;
+        else
+            y = result[3:0];
+    end
+endmodule
+"
+"
+module split_valid (
+    input  logic [3:0] a,
+    output logic [1:0] upper,
+    output logic [1:0] lower,
+    output logic       valid
+);
+    always_comb begin
+        upper = a[3:2];
+        lower = a[1:0];
+        if (upper == lower)
+            valid = 1'b0; // reject symmetric inputs
+        else
+            valid = 1'b1;
+    end
+endmodule
+"
+"
+module signed_mag_cmp (
+    input  logic signed [3:0] a,
+    input  logic signed [3:0] b,
+    output logic              y // 1 if |a| > |b|
+);
+    logic [3:0] abs_a, abs_b;
+
+    always_comb begin
+        if (a < 4'sd0)
+            abs_a = -a;
+        else
+            abs_a = a;
+
+        if (b < 4'sd0)
+            abs_b = -b;
+        else
+            abs_b = b;
+
+        if (abs_a > abs_b)
+            y = 1'b1;
+        else
+            y = 1'b0;
+    end
+endmodule
+"
+"
+module bitfield_insert (
+    input  logic [3:0] base,
+    input  logic [1:0] val,
+    input  logic       sel, // 0=insert into lower 2 bits, 1=insert into upper 2 bits
+    output logic [3:0] y
+);
+    always_comb begin
+        if (sel == 1'b0)
+            y = {base[3:2], val};
+        else
+            y = {val, base[1:0]};
+    end
+endmodule
+"
+"
+module acc_limit (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    input  logic [3:0] limit,
+    output logic [3:0] y
+);
+    logic [4:0] sum;
+
+    always_comb begin
+        sum = {1'b0, a} + {1'b0, b};
+        if (sum[4:0] > {1'b0, limit})
+            y = limit;
+        else
+            y = sum[3:0];
+    end
+endmodule
+"
+"
+module lut3 (
+    input  logic [2:0] a,
+    output logic [2:0] y
+);
+    always_comb begin
+        if (a == 3'b000)
+            y = 3'b111;
+        else if (a == 3'b001)
+            y = 3'b101;
+        else if (a == 3'b010)
+            y = 3'b011;
+        else if (a == 3'b011)
+            y = 3'b110;
+        else if (a == 3'b100)
+            y = 3'b001;
+        else if (a == 3'b101)
+            y = 3'b010;
+        else if (a == 3'b110)
+            y = 3'b100;
+        else
+            y = 3'b000;
+    end
+endmodule
+"
+"
+module clamp_sub (
+    input  logic [3:0] a,
+    input  logic [3:0] b,
+    input  logic [3:0] clamp_val,
+    output logic [3:0] y,
+    output logic       clamped
+);
+    always_comb begin
+        if (b > a) begin
+            y       = clamp_val;
+            clamped = 1'b1;
+        end else begin
+            y       = a - b;
+            clamped = 1'b0;
+        end
+    end
+endmodule
+"
+"
+module bit_set (
+    input  logic [3:0] a,
+    input  logic [1:0] pos, // position to set
+    input  logic       en,
+    output logic [3:0] y
+);
+    always_comb begin
+        if (!en) begin
+            y = a;
+        end else if (pos == 2'b00) begin
+            y = a | 4'b0001;
+        end else if (pos == 2'b01) begin
+            y = a | 4'b0010;
+        end else if (pos == 2'b10) begin
+            y = a | 4'b0100;
+        end else begin
+            y = a | 4'b1000;
+        end
+    end
+endmodule
+"
+"
+module dead_zone (
+    input  logic signed [3:0] a,
+    input  logic        [1:0] threshold,
+    output logic signed [3:0] y
+);
+    always_comb begin
+        if (a >= 4'sd0 && a <= {2'b00, threshold})
+            y = 4'sd0;
+        else if (a < 4'sd0 && (-a) <= {2'b00, threshold})
+            y = 4'sd0;
+        else
+            y = a;
+    end
+endmodule
+"
