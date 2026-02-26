@@ -142,6 +142,7 @@ def generate_initial_stimulus(num_of_tests:int, signal_stimulus: str, clock_acti
                 f'\t\tfor(int i=0; i<{num_of_tests};i++) begin',
                 f'\t\t\t{clock_activation}',
                 f'{signal_stimulus}',
+                f'\t\t\t#5ns;\n'
                 f'\t\tend',
                 f'\t\t$display("Test complete!");',
                 f'\t\t$finish;',
