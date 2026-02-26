@@ -1,5 +1,6 @@
-import re, requests, csv, json, uuid
-from .regex import extract_code, extract_tgts_rules
+import requests, csv, json
+from utils.regex_utils.llm_utils import extract_code
+from utils.regex_utils.tgts_parsing import extract_tgts_rules
 
 def read_modules_file(csv_path: str) -> list:
     modules_list = []
@@ -14,8 +15,6 @@ def read_modules_file(csv_path: str) -> list:
     return modules_list
 
 def generate_final_assertion_content(module_name:str, parameters: str, aux_vars: str, assertions: str) -> str:
-
-    #if f'module {module_name}' in
 
     header = f""" module {module_name}_assertions ({parameters});"""
 
@@ -66,4 +65,4 @@ def check_code_syntax(code: str):
         result = json.loads(response.content.decode("utf-8"))
         return result['result']
     else:
-        return 'CODE BLOCK NOT FOUND'
+        return 'CODE_BLOCK_NOT_FOUND'
