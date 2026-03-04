@@ -1,7 +1,7 @@
 from experiments.experiment3.config.arguments import parse_arguments, get_output_filename
 from experiments.experiment3.config.file_handling import initialize_csv_file
 from experiments.experiment3.core.experiment_controller import ExperimentController
-from utils.file_handling import file_reader
+from utils.file_handling import file_handling
 
 def main():
     """Main entry point for experiment 3"""

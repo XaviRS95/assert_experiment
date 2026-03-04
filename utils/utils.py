@@ -1,18 +1,34 @@
-import requests, csv, json
+import requests, csv, json, os
 from utils.regex_utils.llm_utils import extract_code
 from utils.regex_utils.tgts_parsing import extract_tgts_rules
+from pathlib import Path
 
-def read_modules_file(csv_path: str) -> list:
-    modules_list = []
+def read_modules_file(filepath: str) -> list:
+    """
+    Reads SystemVerilog modules from a CSV file.
 
-    with open(csv_path, newline="", encoding="utf-8") as csvfile:
-        reader = csv.reader(csvfile)
-        next(reader, None)  # Skip header
+    Args:
+        filepath: Path to the CSV file containing a 'modules' column
+
+    Returns:
+        List of module strings (excluding the header row)
+    """
+    modules = []
+
+    final_filepath = f'{Path(__file__).parent.parent.parent.absolute()}/datasets/{filepath}'
+
+    if not os.path.exists(final_filepath):
+        raise FileNotFoundError(f"CSV file not found: {final_filepath}")
+
+    with open(final_filepath, 'r', encoding='utf-8') as csvfile:
+        reader = csv.DictReader(csvfile)  # Uses first row as headers
+
         for row in reader:
-            if row:  # skip empty rows
-                modules_list.append(row[0])
+            if 'modules' in row and row['modules'].strip():
+                modules.append(row['modules'].strip())
 
-    return modules_list
+    print(f"Loaded {len(modules)} modules from {final_filepath}")
+    return modules
 
 def generate_final_assertion_content(module_name:str, parameters: str, aux_vars: str, assertions: str) -> str:
 

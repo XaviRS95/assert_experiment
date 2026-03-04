@@ -2,7 +2,7 @@ import csv
 import os
 import time
 import argparse
-from utils import regex_utils, utils
+from utils import utils
 from prompts.prompts_experiment2 import *
 
 
@@ -36,10 +36,8 @@ def experiment2(model_name: str, modules_path: str, output_filepath: str):
                 model_response['response_tkns']
             ])
             print(f'Module #{i + 1} out of {len(codes)}')
-            print(f"Original code: \n{codes[i]}")
-            print('')
-            print(f'Generated properties: \n{model_response["sv_code"]}')
-            print('')
+            print(f"Original code: \n{codes[i]}\n")
+            print(f'Generated properties: \n{model_response["sv_code"]}\n')
             print(compiler_output, time2 - time1)
             print(f"Prompt consumed # of tokens: {model_response['prompt_tkns']}")
             print(f'Response-generated # of tokens: {model_response["response_tkns"]}')
