@@ -5,10 +5,10 @@ class TokenTracker:
         self.prompt_tkns = 0
         self.response_tkns = 0
 
-    def add_tokens(self, prompt_tkns: int, response_tkns: int):
+    def save_tokens(self, prompt_tkns: int, response_tkns: int):
         """Add token counts from an operation"""
-        self.prompt_tkns += prompt_tkns
-        self.response_tkns += response_tkns
+        self.prompt_tkns = prompt_tkns
+        self.response_tkns = response_tkns
 
     def reset(self):
         """Reset token counts"""

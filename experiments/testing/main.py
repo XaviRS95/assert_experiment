@@ -88,6 +88,7 @@ jgkclgglkjilkhoabpbpohnfehhgmfge: assert( (!tl_valid_i && !axi_awvalid_i && !axi
 NUM_EXPERIMENTS = 100
 CLOCK_PERIOD_NS = 5
 INITIAL_RESET_NS = 20
+TIMESCALE = 'timescale 1ns/1ns'
 
 dut_module_name = get_module_name(module=code_module)
 
@@ -138,7 +139,8 @@ initial_stimuli_section = generate_initial_stimulus(num_of_tests = NUM_EXPERIMEN
                                                     clock_activation = clk_trigger)
 
 
-final_module = generate_final_module(clock_reset_initial_section=clock_reset_initial_section,
+final_module = generate_final_module(timescale=TIMESCALE,
+                                     clock_reset_initial_section=clock_reset_initial_section,
                                      instantiate_section=full_instantiate_section,
                                      initial_stimuli_section=initial_stimuli_section)
 
