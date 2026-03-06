@@ -58,8 +58,12 @@ def query_ollama(
 
     data = response.json()
     if code_call:
+
+        sv_code, is_valid = extract_code(output=data["response"])
+
         return {
-            'sv_code' :  extract_code(output=data["response"]),
+            'sv_code' :  sv_code,
+            'is_valid' : is_valid,
             'prompt_tkns' : data['prompt_eval_count'],
             'response_tkns' : data['eval_count']
         }

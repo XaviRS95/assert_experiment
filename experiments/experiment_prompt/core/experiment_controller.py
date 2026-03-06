@@ -45,7 +45,7 @@ class ExperimentController:
 
         elapsed_time = time.time() - time1
 
-        if model_response['sv_code'] != 'NO_CODE':
+        if model_response['is_valid']:
 
             # Track tokens
             self.token_tracker.save_tokens(
@@ -59,7 +59,7 @@ class ExperimentController:
 
             return self._create_result(module_code, model_response['sv_code'], compiler_output, elapsed_time)
         else:
-            return self._create_result(module_code, '', 'NO_SV_MODULE_FOUND', elapsed_time)
+            return self._create_result(module_code, model_response['sv_code'], 'INVALID_OUTPUT', elapsed_time)
 
 
 
