@@ -11996,7 +11996,7 @@ endmodule","** Error (suppressible): prueba.sv(14): (vlog-1957) The sva directiv
             end
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,387.190393447876,0,0
+endmodule",,NON_VALID_OUTPUT,387.190393447876,0,0
 "module tl_axi_obi_bridge_sec (
     input  logic tl_valid_i,
     input  logic [2:0] tl_opcode_i,
@@ -14184,7 +14184,7 @@ endmodule","module multi_core_bus_ctrl_lvl_assertions (
             end
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,191.3837118148804,0,0
+endmodule",,NON_VALID_OUTPUT,191.3837118148804,0,0
 "module tl_axi_obi_sec (
     input  logic tl_valid_i,
     input  logic [2:0] tl_opcode_i,

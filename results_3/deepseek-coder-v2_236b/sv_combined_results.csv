@@ -5771,7 +5771,7 @@ always_comb begin
     default: y = 8'h00;
   endcase
 end
-endmodule",OK,16.761735677719116,212,152,"module nested_case_1_assertions(
+endmodule",NON_VALID_OUTPUT,16.761735677719116,212,152,"module nested_case_1_assertions(
     input logic [1:0] op, func,
     input logic [7:0] a, b,
     output logic [7:0] y);
@@ -5860,7 +5860,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",OK,43.0453622341156,198,138,"module nested_case_2_assertions(
+endmodule",NON_VALID_OUTPUT,43.0453622341156,198,138,"module nested_case_2_assertions(
     input logic [2:0] mode, sel,
     output logic [3:0] y
 );
@@ -5943,7 +5943,7 @@ always_comb begin
     default: y = 1;
   endcase
 end
-endmodule",OK,33.163610219955444,180,120,"module nested_case_3_assertions(input logic [1:0] a,b,c, output logic y);
+endmodule",NON_VALID_OUTPUT,33.163610219955444,180,120,"module nested_case_3_assertions(input logic [1:0] a,b,c, output logic y);
 
     property p_y_a00_b00_assign;
         (a == 2'b00 && b == 2'b00) |-> (y == c[0]);
@@ -6116,7 +6116,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",OK,51.33150315284729,193,133,"module nested_case_5_assertions(input logic [1:0] s1,s2, output logic y);
+endmodule",NON_VALID_OUTPUT,51.33150315284729,193,133,"module nested_case_5_assertions(input logic [1:0] s1,s2, output logic y);
 
     property p_y_1_when_s1_00_and_s2_00;
         (s1 == 2'b00 && s2 == 2'b00) |=> (y == 1);
@@ -6388,7 +6388,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",OK,37.4427535533905,169,109,"module nested_case_8_assertions(input logic [3:0] a, input logic [1:0] b, output logic y);
+endmodule",NON_VALID_OUTPUT,37.4427535533905,169,109,"module nested_case_8_assertions(input logic [3:0] a, input logic [1:0] b, output logic y);
 
 property p_y_assign_aA_b00;
   @(posedge clk) (a == 4'hA && b == 2'b00) |-> (y == 1);
@@ -6454,7 +6454,7 @@ always_comb begin
     default: z = 0;
   endcase
 end
-endmodule",OK,42.82836723327637,163,103,"module nested_case_9_assertions(input logic [1:0] x, y, output logic z);
+endmodule",NON_VALID_OUTPUT,42.82836723327637,163,103,"module nested_case_9_assertions(input logic [1:0] x, y, output logic z);
 
     property p_z_inner_case;
         (x == 2'b01 && y == 2'b10) |-> (z == 1);
@@ -11969,7 +11969,7 @@ endmodule
         endcase
     end
 
-endmodule",OK,30.64296317100525,338,278,"module coherence_cmd_decode_assertions (
+endmodule",NON_VALID_OUTPUT,30.64296317100525,338,278,"module coherence_cmd_decode_assertions (
     input logic [4:0] cmd,
     output logic       req_shared,
     output logic       req_exclusive,
@@ -12947,7 +12947,7 @@ endmodule
         endcase
     end
 
-endmodule",OK,119.04065608978271,745,685,"module cpu_full_decoder_assertions (
+endmodule",NON_VALID_OUTPUT,119.04065608978271,745,685,"module cpu_full_decoder_assertions (
     input logic [31:0] instr,
     output logic       reg_write,
     output logic       mem_read,
@@ -13406,7 +13406,7 @@ endmodule
         endcase
     end
 
-endmodule",OK,38.12841296195984,403,343,"module storage_cmd_proc_assertions(
+endmodule",NON_VALID_OUTPUT,38.12841296195984,403,343,"module storage_cmd_proc_assertions(
     input logic [7:0] cmd,
     input logic [3:0] feature,
     input logic [1:0] subop,
@@ -13582,7 +13582,7 @@ endmodule
         endcase
     end
 
-endmodule",OK,37.22375965118408,395,335,"module thermal_policy_assertions (
+endmodule",NON_VALID_OUTPUT,37.22375965118408,395,335,"module thermal_policy_assertions (
     input logic [1:0] mode,
     input logic [2:0] temp_level,
     output logic       throttle,
@@ -15052,7 +15052,7 @@ endmodule
         endcase
     end
 
-endmodule",OK,56.43206572532654,396,336,"module obi_addr_check_assertions (
+endmodule",NON_VALID_OUTPUT,56.43206572532654,396,336,"module obi_addr_check_assertions (
     input  logic [31:0] addr,
     input  logic        we,
     input  logic        priv,
@@ -15208,7 +15208,7 @@ endmodule
         endcase
     end
 
-endmodule",OK,38.35052084922791,407,347,"module rstmgr_policy_assertions (
+endmodule",NON_VALID_OUTPUT,38.35052084922791,407,347,"module rstmgr_policy_assertions (
     input logic [2:0] reset_cause,
     input logic [2:0] lc_state,
     output logic       cold_reset,
@@ -15594,7 +15594,7 @@ endmodule
         endcase
     end
 
-endmodule",OK,36.20139026641846,382,322,"module otp_ctrl_decode_assertions (
+endmodule",NON_VALID_OUTPUT,36.20139026641846,382,322,"module otp_ctrl_decode_assertions (
     input logic [3:0] cmd,
     input logic [1:0] part,
     input logic write_en,
@@ -16743,7 +16743,7 @@ endmodule
         endcase
     end
 
-endmodule",OK,37.13273882865906,395,335,"module lc_ctrl_perm_check_assertions (
+endmodule",NON_VALID_OUTPUT,37.13273882865906,395,335,"module lc_ctrl_perm_check_assertions (
     input logic [2:0] lc_state_i,
     input logic [1:0] lc_transition_i,
     output logic       allow_o,
@@ -17174,7 +17174,7 @@ endmodule
         end
     end
 
-endmodule",OK,69.2298572063446,415,355,"module tl_a_perm_check_assertions(
+endmodule",NON_VALID_OUTPUT,69.2298572063446,415,355,"module tl_a_perm_check_assertions(
     input logic a_valid,
     input logic [2:0] a_opcode,
     input logic [2:0] a_param,
@@ -18682,7 +18682,7 @@ endmodule
         endcase
     end
 
-endmodule",OK,27.47755694389344,313,253,"module chisel_fsm_ctrl_assertions (
+endmodule",NON_VALID_OUTPUT,27.47755694389344,313,253,"module chisel_fsm_ctrl_assertions (
     input logic [3:0] state_i,
     input logic       fire_i,
     output logic      advance_o,
@@ -19903,7 +19903,7 @@ endmodule
         end
     end
 
-endmodule",OK,63.586519718170166,433,373,"module sec_lc_gate_assertions (
+endmodule",NON_VALID_OUTPUT,63.586519718170166,433,373,"module sec_lc_gate_assertions (
     input logic sec_req_i,
     input logic [2:0] lc_state_i,
     input logic [1:0] access_type_i,
@@ -22056,7 +22056,7 @@ endmodule
             endcase
         end
     end
-endmodule",OK,82.71728682518005,551,491,"module sec_lc_gate_4lvl_assertions (
+endmodule",NON_VALID_OUTPUT,82.71728682518005,551,491,"module sec_lc_gate_4lvl_assertions (
     input logic sec_req_i,
     input logic [2:0] lc_state_i,
     input logic [1:0] access_type_i,
@@ -23366,7 +23366,7 @@ endmodule
             end
         end
     end
-endmodule",OK,63.31264519691467,501,441,"module multi_core_bus_ctrl_assertions (
+endmodule",NON_VALID_OUTPUT,63.31264519691467,501,441,"module multi_core_bus_ctrl_assertions (
     input logic [3:0] req_i,
     input logic [1:0] line_state_i [3:0],
     input logic [2:0] msg_type_i [3:0],
@@ -23576,7 +23576,7 @@ endmodule
             end
         end
     end
-endmodule",OK,73.67716193199158,576,516,"module piton_l2_evict_coh_assertions (
+endmodule",NON_VALID_OUTPUT,73.67716193199158,576,516,"module piton_l2_evict_coh_assertions (
     input logic [3:0] req_i,
     input logic [1:0] line_state_i [3:0],
     input logic [1:0] lru_i [3:0],
@@ -24226,7 +24226,7 @@ endmodule
             endcase
         end
     end
-endmodule",OK,81.16606855392456,552,492,"module sec_lc_multi_lvl_assertions (
+endmodule",NON_VALID_OUTPUT,81.16606855392456,552,492,"module sec_lc_multi_lvl_assertions (
     input logic sec_req_i,
     input logic [2:0] lc_state_i,
     input logic [1:0] access_type_i,
@@ -25111,7 +25111,7 @@ endmodule
             default: error_o = 1'b1;
         endcase
     end
-endmodule",OK,50.291982889175415,499,439,"module chisel_event_fsm_prio_assertions (
+endmodule",NON_VALID_OUTPUT,50.291982889175415,499,439,"module chisel_event_fsm_prio_assertions (
     input  logic [7:0] evt_i,
     input  logic [3:0] state_i,
     output logic fire_o,
@@ -25329,7 +25329,7 @@ endmodule
             endcase
         end
     end
-endmodule",OK,57.44398522377014,552,492,"module sec_lc_gate_lvl_assertions (
+endmodule",NON_VALID_OUTPUT,57.44398522377014,552,492,"module sec_lc_gate_lvl_assertions (
     input logic sec_req_i,
     input logic [2:0] lc_state_i,
     input logic [1:0] access_type_i,
@@ -26513,7 +26513,7 @@ endmodule
             endcase
         end
     end
-endmodule",OK,57.34371900558472,550,490,"module sec_lc_gate_alert_assertions (
+endmodule",NON_VALID_OUTPUT,57.34371900558472,550,490,"module sec_lc_gate_alert_assertions (
     input logic sec_req_i,
     input logic [2:0] lc_state_i,
     input logic [1:0] access_type_i,
@@ -27404,7 +27404,7 @@ endmodule
             default: out_o = 8'h00;
         endcase
     end
-endmodule",OK,27.77964949607849,313,253,"module chisel_prio_mux_masked_assertions (
+endmodule",NON_VALID_OUTPUT,27.77964949607849,313,253,"module chisel_prio_mux_masked_assertions (
     input logic [3:0] sel_i,
     input logic [7:0] in0_i, in1_i, in2_i, in3_i,
     input logic mask_i,

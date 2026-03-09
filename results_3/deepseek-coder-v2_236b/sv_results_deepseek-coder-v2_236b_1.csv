@@ -2770,7 +2770,7 @@ always_comb begin
     default: y = 8'h00;
   endcase
 end
-endmodule",OK,16.761735677719116,212,152
+endmodule",NON_VALID_OUTPUT,16.761735677719116,212,152
 "module nested_case_2(input logic [2:0] mode, sel, output logic [3:0] y);
 always_comb begin
   case(mode)
@@ -2799,7 +2799,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",OK,43.0453622341156,198,138
+endmodule",NON_VALID_OUTPUT,43.0453622341156,198,138
 "module nested_case_3(input logic [1:0] a,b,c, output logic y);
 always_comb begin
   case(a)
@@ -2826,7 +2826,7 @@ always_comb begin
     default: y = 1;
   endcase
 end
-endmodule",OK,33.163610219955444,180,120
+endmodule",NON_VALID_OUTPUT,33.163610219955444,180,120
 "module nested_case_4(input logic [3:0] op, input logic [1:0] sub, output logic [3:0] y);
 always_comb begin
   case(op)
@@ -2901,7 +2901,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",OK,51.33150315284729,193,133
+endmodule",NON_VALID_OUTPUT,51.33150315284729,193,133
 "module nested_case_6(input logic [2:0] a,b, output logic [2:0] y);
 always_comb begin
   case(a)
@@ -3035,7 +3035,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",OK,37.4427535533905,169,109
+endmodule",NON_VALID_OUTPUT,37.4427535533905,169,109
 "module nested_case_9(input logic [1:0] x,y, output logic z);
 always_comb begin
   case(x)
@@ -3060,7 +3060,7 @@ always_comb begin
     default: z = 0;
   endcase
 end
-endmodule",OK,42.82836723327637,163,103
+endmodule",NON_VALID_OUTPUT,42.82836723327637,163,103
 "module nested_case_10(input logic [2:0] a,b, output logic y);
 always_comb begin
   case(a)
@@ -5774,7 +5774,7 @@ endmodule","module coherence_cmd_decode (
         endcase
     end
 
-endmodule",OK,30.64296317100525,338,278
+endmodule",NON_VALID_OUTPUT,30.64296317100525,338,278
 "module pcie_tlp_decoder (
     input  logic [7:0] tlp_type,
     output logic       is_mem,
@@ -6349,7 +6349,7 @@ endmodule","module cpu_full_decoder (
         endcase
     end
 
-endmodule",OK,119.04065608978271,745,685
+endmodule",NON_VALID_OUTPUT,119.04065608978271,745,685
 "module packet_classifier (
     input  logic [31:0] hdr,
     output logic        fast_path,
@@ -6567,7 +6567,7 @@ endmodule","module storage_cmd_proc (
         endcase
     end
 
-endmodule",OK,38.12841296195984,403,343
+endmodule",NON_VALID_OUTPUT,38.12841296195984,403,343
 "module thermal_policy (
     input  logic [1:0] mode,
     input  logic [2:0] temp_level,
@@ -6646,7 +6646,7 @@ endmodule","module thermal_policy (
         endcase
     end
 
-endmodule",OK,37.22375965118408,395,335
+endmodule",NON_VALID_OUTPUT,37.22375965118408,395,335
 "module interconnect_router (
     input  logic [3:0] master_id,
     input  logic [1:0] txn_type,
@@ -7486,7 +7486,7 @@ endmodule","module obi_addr_check (
         endcase
     end
 
-endmodule",OK,56.43206572532654,396,336
+endmodule",NON_VALID_OUTPUT,56.43206572532654,396,336
 "module rstmgr_policy (
     input  logic [2:0] reset_cause,
     input  logic [2:0] lc_state,
@@ -7565,7 +7565,7 @@ endmodule","module rstmgr_policy (
         endcase
     end
 
-endmodule",OK,38.35052084922791,407,347
+endmodule",NON_VALID_OUTPUT,38.35052084922791,407,347
 "module tlul_access_filter (
     input  logic [2:0] opcode,
     input  logic [2:0] param,
@@ -7790,7 +7790,7 @@ endmodule","module otp_ctrl_decode (
         endcase
     end
 
-endmodule",OK,36.20139026641846,382,322
+endmodule",NON_VALID_OUTPUT,36.20139026641846,382,322
 "module alert_aggregator (
     input  logic [3:0] src,
     input  logic [1:0] sev,
@@ -8442,7 +8442,7 @@ endmodule","module lc_ctrl_perm_check (
         endcase
     end
 
-endmodule",OK,37.13273882865906,395,335
+endmodule",NON_VALID_OUTPUT,37.13273882865906,395,335
 "module obi_host_resp_gen (
     input  logic [1:0] obi_result_i,
     input  logic       obi_priv_i,
@@ -8673,7 +8673,7 @@ endmodule","module tl_a_perm_check (
         end
     end
 
-endmodule",OK,69.2298572063446,415,355
+endmodule",NON_VALID_OUTPUT,69.2298572063446,415,355
 "module tl_d_resp_gen (
     input  logic        d_valid,
     input  logic [2:0]  d_opcode,
@@ -9535,7 +9535,7 @@ endmodule","module chisel_fsm_ctrl (
         endcase
     end
 
-endmodule",OK,27.47755694389344,313,253
+endmodule",NON_VALID_OUTPUT,27.47755694389344,313,253
 "module axil_to_tlul_opcode (
     input  logic awvalid,
     input  logic arvalid,
@@ -10214,7 +10214,7 @@ endmodule","module sec_lc_gate (
         end
     end
 
-endmodule",OK,63.586519718170166,433,373
+endmodule",NON_VALID_OUTPUT,63.586519718170166,433,373
 "module piton_l2_repl (
     input  logic [3:0] req_i,            // request from 4 cores
     input  logic [1:0] line_state_i [3:0], // MESI states per core
@@ -11235,7 +11235,7 @@ endmodule","module sec_lc_gate_4lvl (
             endcase
         end
     end
-endmodule",OK,82.71728682518005,551,491
+endmodule",NON_VALID_OUTPUT,82.71728682518005,551,491
 "module chisel_priority_mux_nested (
     input  logic [3:0] sel_i,
     input  logic [7:0] in0_i,
@@ -11864,7 +11864,7 @@ endmodule","module multi_core_bus_ctrl (
             end
         end
     end
-endmodule",OK,63.31264519691467,501,441
+endmodule",NON_VALID_OUTPUT,63.31264519691467,501,441
 "module piton_l2_evict_coh (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -11941,7 +11941,7 @@ endmodule","module piton_l2_evict_coh (
             end
         end
     end
-endmodule",OK,73.67716193199158,576,516
+endmodule",NON_VALID_OUTPUT,73.67716193199158,576,516
 "module axi_tl_obi_sec (
     input  logic axi_awvalid_i,
     input  logic axi_arvalid_i,
@@ -12253,7 +12253,7 @@ endmodule","module sec_lc_multi_lvl (
             endcase
         end
     end
-endmodule",OK,81.16606855392456,552,492
+endmodule",NON_VALID_OUTPUT,81.16606855392456,552,492
 "module multi_core_bus_arb (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -12656,7 +12656,7 @@ endmodule","module chisel_event_fsm_prio (
             default: error_o = 1'b1;
         endcase
     end
-endmodule",OK,50.291982889175415,499,439
+endmodule",NON_VALID_OUTPUT,50.291982889175415,499,439
 "module sec_lc_gate_lvl (
     input  logic sec_req_i,
     input  logic [2:0] lc_state_i,
@@ -12747,7 +12747,7 @@ endmodule","module sec_lc_gate_lvl (
             endcase
         end
     end
-endmodule",OK,57.44398522377014,552,492
+endmodule",NON_VALID_OUTPUT,57.44398522377014,552,492
 "module multi_core_bus_ctrl_lvl (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -13262,7 +13262,7 @@ endmodule","module sec_lc_gate_alert (
             endcase
         end
     end
-endmodule",OK,57.34371900558472,550,490
+endmodule",NON_VALID_OUTPUT,57.34371900558472,550,490
 "module multi_core_bus_arb_alert (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -13608,7 +13608,7 @@ endmodule","module chisel_prio_mux_masked (
             default: out_o = 8'h00;
         endcase
     end
-endmodule",OK,27.77964949607849,313,253
+endmodule",NON_VALID_OUTPUT,27.77964949607849,313,253
 "module sec_lc_gate_priv_mask (
     input  logic sec_req_i,
     input  logic [2:0] lc_state_i,
