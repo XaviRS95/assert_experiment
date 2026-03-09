@@ -64,16 +64,15 @@ class ExperimentController:
 
 
     def _create_result(self, original_code: str, generated_code: str,
-                       compiler_output: str, start_time: float) -> dict:
+                       compiler_output: str, elapsed_time: float) -> dict:
         """Create result dictionary"""
-        elapsed = time.time() - start_time
         tokens = self.token_tracker.get_totals()
 
         return {
             'original_code': original_code,
             'generated_code': generated_code or '',
             'compiler_output': compiler_output,
-            'elapsed_time': elapsed,
+            'elapsed_time': elapsed_time,
             'prompt_tkns': tokens['prompt_tkns'],
             'response_tkns': tokens['response_tkns']
         }

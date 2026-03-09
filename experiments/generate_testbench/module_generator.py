@@ -159,7 +159,7 @@ def extract_variable_names(signals_list: list):
     return signals_names
 
 def generate_final_module(timescale: str, clock_reset_initial_section: str, instantiate_section: str, initial_stimuli_section: str):
-    TEMPLATE = (f'`{timescale}'
+    TEMPLATE = (f'`{timescale}\n\n'
                 f'module tb;\n\n'
                 f'{clock_reset_initial_section}'
                 f'{instantiate_section}'

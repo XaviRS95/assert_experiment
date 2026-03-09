@@ -76,7 +76,7 @@ def query_ollama(
 
 
 def check_code_syntax(code: str):
-    endpoint = 'http://localhost:8003/api/syntax_checker'
+    endpoint = 'http://localhost:8002/api/syntax_checker'
     payload = {
         'code': code
     }
