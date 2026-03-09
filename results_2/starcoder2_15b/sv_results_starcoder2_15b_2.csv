@@ -9,7 +9,7 @@ original_code,generated_code,iverilog_output,time(s),prompt_tkns,output_tkns
             default: y = 0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772770516.2212312,0,0
+endmodule",,NON_VALID_OUTPUT,1772770516.2212312,0,0
 "module case_example2(input logic [3:0] a, output logic [1:0] y);
     always_comb begin
         case(a)
@@ -19,7 +19,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772770516.2212312,0,0
             default: y = 2'b11;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772770518.4389517,0,0
+endmodule",,NON_VALID_OUTPUT,1772770518.4389515,0,0
 "module case2(input logic [2:0] sel, output logic z);
     always_comb begin
         case(sel)
@@ -31,7 +31,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772770518.4389517,0,0
             default: z = 0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772770518.5939848,0,0
+endmodule",,NON_VALID_OUTPUT,1772770518.5939848,0,0
 "module case3(input logic [1:0] sel, input logic a, b, c, d, output logic y);
     always_comb begin
         case(sel)
@@ -41,7 +41,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772770518.5939848,0,0
             2'b11: y = d;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772770533.591531,0,0
+endmodule",,NON_VALID_OUTPUT,1772770533.591531,0,0
 "module case4(input logic [3:0] in, output logic out);
     always_comb begin
         case(in)
@@ -53,7 +53,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772770533.591531,0,0
         endcase
     end
 endmodule",\n{code},"** Error: (vlog-13069) prueba.sv(1): near ""\n{code} "": syntax error, unexpected end of source code.
-** Error: prueba.sv(1): (vlog-13205) Syntax error found in the scope following '\n{code} '. Is there a missing '::'?",1772770533.7871737,2867,157
+** Error: prueba.sv(1): (vlog-13205) Syntax error found in the scope following '\n{code} '. Is there a missing '::'?",1772770533.7871735,2867,157
 "module case5(input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
     always_comb begin
         case(op)
@@ -63,7 +63,7 @@ endmodule",\n{code},"** Error: (vlog-13069) prueba.sv(1): near ""\n{code} "": sy
             2'b11: result = a | b;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772770540.1140757,0,0
+endmodule",,NON_VALID_OUTPUT,1772770540.1140757,0,0
 "module case6(input logic [1:0] state, output logic [2:0] light);
     always_comb begin
         case(state)
@@ -73,7 +73,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772770540.1140757,0,0
             default: light = 3'b100;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771029.856745,0,0
+endmodule",,NON_VALID_OUTPUT,1772771029.856745,0,0
 "module case8(input logic [3:0] in, output logic [1:0] out);
     always_comb begin
         case(in)
@@ -84,7 +84,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771029.856745,0,0
             default: out = 2'b00;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771032.0648427,0,0
+endmodule",,NON_VALID_OUTPUT,1772771032.0648427,0,0
 "module case9(input logic [3:0] digit, output logic [6:0] seg);
     always_comb begin
         case(digit)
@@ -101,7 +101,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771032.0648427,0,0
             default: seg = 7'b0000000;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771032.295477,0,0
+endmodule",,NON_VALID_OUTPUT,1772771032.295477,0,0
 "module case10(input logic [2:0] pattern, output logic match);
     always_comb begin
         case(pattern)
@@ -111,7 +111,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771032.295477,0,0
             default: match = 0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771032.585658,0,0
+endmodule",,NON_VALID_OUTPUT,1772771032.585658,0,0
 "module case11(input logic toggle, output logic state);
     always_comb begin
         case(toggle)
@@ -119,7 +119,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771032.585658,0,0
             1'b1: state = 1;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771040.4305384,0,0
+endmodule",,NON_VALID_OUTPUT,1772771040.4305384,0,0
 "module case12(input logic [2:0] in, output logic [7:0] out);
     always_comb begin
         case(in)
@@ -133,7 +133,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771040.4305384,0,0
             3'b111: out = 8'b10000000;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771040.6015344,0,0
+endmodule",,NON_VALID_OUTPUT,1772771040.6015344,0,0
 "module case14(input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
     always_comb begin
         case(op)
@@ -182,7 +182,7 @@ endmodule;","** Error: prueba.sv(4): (vlog-2730) Undefined variable: 'clk'.
             2'd2: mod3 = 2'b10;
         endcase
     end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772771075.6734285,2860,3054
+endmodule",,NON_VALID_OUTPUT,1772771075.6734283,2860,3054
 "module case17(input logic [1:0] state, output logic [1:0] next);
     always_comb begin
         case(state)
@@ -193,7 +193,7 @@ endmodule",,CODE_BLOCK_NOT_FOUND,1772771075.6734285,2860,3054
             default: next = 2'b00; // safe default
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771197.8579931,0,0
+endmodule",,NON_VALID_OUTPUT,1772771197.8579931,0,0
 "module case18(input logic [3:0] key, output logic [6:0] seg);
     always_comb begin
         case(key)
@@ -204,7 +204,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771197.8579931,0,0
             default: seg = 7'b0000000;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771200.08695,0,0
+endmodule",,NON_VALID_OUTPUT,1772771200.08695,0,0
 "module case21(input logic [1:0] counter, input logic reset, output logic [1:0] next_count);
     always_comb begin
         case({reset, counter})
@@ -216,7 +216,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771200.08695,0,0
             default: next_count = 2'b00;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771200.2750316,0,0
+endmodule",,NON_VALID_OUTPUT,1772771200.2750316,0,0
 "module case27(input logic [3:0] temp, output logic warning);
     always_comb begin
         case(temp)
@@ -236,7 +236,7 @@ endmodule","property p_mux_assign;
             default: flag = 0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771225.9211864,0,0
+endmodule",,NON_VALID_OUTPUT,1772771225.9211864,0,0
 "module case32(input logic [3:0] temp, output logic warning);
     always_comb begin
         case(temp)
@@ -270,7 +270,7 @@ endmodule","module case32(input logic [3:0] temp, output logic warning);
             default: alarm = 0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771235.3533897,0,0
+endmodule",,NON_VALID_OUTPUT,1772771235.3533895,0,0
 "module case35(input logic [3:0] digit, output logic display);
     always_comb begin
         case(digit)
@@ -279,7 +279,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771235.3533897,0,0
             default: display = 0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771280.3083699,0,0
+endmodule",,NON_VALID_OUTPUT,1772771280.30837,0,0
 "module case40(input logic [3:0] req, output logic [1:0] grant);
     always_comb begin
         case(req)
@@ -290,7 +290,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771280.3083699,0,0
             default: grant = 2'b00;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771298.6713717,0,0
+endmodule",,NON_VALID_OUTPUT,1772771298.6713717,0,0
 "module case41(input int temp, output logic warning);
     always_comb begin
         case(temp)
@@ -300,7 +300,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771298.6713717,0,0
             default: warning = 1; // out of range
         endcase
     end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772771299.7111297,2854,214
+endmodule",,NON_VALID_OUTPUT,1772771299.7111297,2854,214
 "module case42(input int score, output logic [1:0] grade);
     always_comb begin
         case(score)
@@ -311,7 +311,7 @@ endmodule",,CODE_BLOCK_NOT_FOUND,1772771299.7111297,2854,214
             default: grade = 2'b00; // invalid
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771308.2640834,0,0
+endmodule",,NON_VALID_OUTPUT,1772771308.2640834,0,0
 "module case43(input int temp, output logic [1:0] fan_speed);
     always_comb begin
         case(temp)
@@ -322,7 +322,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771308.2640834,0,0
             default: fan_speed = 0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771308.454793,0,0
+endmodule",,NON_VALID_OUTPUT,1772771308.454793,0,0
 "module case44(input int load, output logic [2:0] power);
     always_comb begin
         case(load)
@@ -333,7 +333,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771308.454793,0,0
             default: power = 3'b000;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771308.6351197,0,0
+endmodule",,NON_VALID_OUTPUT,1772771308.6351197,0,0
 "module case48(input int hp, output logic [1:0] status);
     always_comb begin
         case(hp)
@@ -344,7 +344,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771308.6351197,0,0
             default: status = 2'b00;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771308.8339357,0,0
+endmodule",,NON_VALID_OUTPUT,1772771308.8339355,0,0
 "module fsm51(
     input logic clk, reset,
     output logic state_out
@@ -371,7 +371,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771308.8339357,0,0
 
     // Output logic (Moore)
     assign state_out = (state == S1);
-endmodule",,NO_SV_MODULE_FOUND,1772771309.0717368,0,0
+endmodule",,NON_VALID_OUTPUT,1772771309.0717368,0,0
 "module fsm52(
     input logic clk, reset, in_bit,
     output logic detected
@@ -394,7 +394,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771309.0717368,0,0
     end
 
     assign detected = (state == S2);
-endmodule",,NO_SV_MODULE_FOUND,1772771310.308377,0,0
+endmodule",,NON_VALID_OUTPUT,1772771310.308377,0,0
 "module fsm53(
     input logic clk, reset,
     output logic [2:0] light
@@ -424,7 +424,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771310.308377,0,0
             default: light = 3'b100;
         endcase
     end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772771310.541939,2987,514
+endmodule",,NON_VALID_OUTPUT,1772771310.541939,2987,514
 "module fsm54(
     input logic clk, reset,
     output logic [1:0] count
@@ -448,7 +448,7 @@ endmodule",,CODE_BLOCK_NOT_FOUND,1772771310.541939,2987,514
     end
 
     assign count = state;
-endmodule",,NO_SV_MODULE_FOUND,1772771331.1200018,0,0
+endmodule",,NON_VALID_OUTPUT,1772771331.1200018,0,0
 "module fsm55(
     input logic clk, reset, code_entered,
     output logic unlock
@@ -471,7 +471,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771331.1200018,0,0
     end
 
     assign unlock = (state == UNLOCKED);
-endmodule",,NO_SV_MODULE_FOUND,1772771331.3702927,0,0
+endmodule",,NON_VALID_OUTPUT,1772771331.370293,0,0
 "module fsm56(
     input logic clk, reset, coin,
     output logic dispense
@@ -494,7 +494,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771331.3702927,0,0
     end
 
     assign dispense = (state == S2);
-endmodule",,NO_SV_MODULE_FOUND,1772771331.6336234,0,0
+endmodule",,NON_VALID_OUTPUT,1772771331.6336234,0,0
 "module fsm57(
     input logic clk, reset, start,
     output logic a, b
@@ -524,7 +524,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771331.6336234,0,0
             default: begin a=0; b=0; end
         endcase
     end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772771331.8513105,2996,1332
+endmodule",,NON_VALID_OUTPUT,1772771331.8513105,2996,1332
 "module fsm59(
     input logic clk, reset, trigger,
     output logic done
@@ -583,7 +583,7 @@ endmodule",\n{code}\n,"** Error: (vlog-13069) prueba.sv(1): near ""\n{code}\n ""
             default: detected = 0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771395.630888,0,0
+endmodule",,NON_VALID_OUTPUT,1772771395.630888,0,0
 "module case61(
     input logic sel,
     input logic a, b,
@@ -595,7 +595,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771395.630888,0,0
             1'b1: y = b;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771395.9171233,0,0
+endmodule",,NON_VALID_OUTPUT,1772771395.9171233,0,0
 "module case62(
     input logic [1:0] sel,
     input logic [3:0] data,
@@ -609,7 +609,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771395.9171233,0,0
             2'b11: y = data[3];
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771401.0481608,0,0
+endmodule",,NON_VALID_OUTPUT,1772771401.0481608,0,0
 "module case63(
     input logic [1:0] op,
     input logic [3:0] a, b,
@@ -623,7 +623,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771401.0481608,0,0
             2'b11: result = a | b;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771401.2094421,0,0
+endmodule",,NON_VALID_OUTPUT,1772771401.209442,0,0
 "module case64(
     input logic [3:0] req,
     output logic [1:0] grant
@@ -637,7 +637,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771401.2094421,0,0
             default: grant = 2'b00;
         endcase
     end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772771410.5512404,2897,2296
+endmodule",,NON_VALID_OUTPUT,1772771410.5512404,2897,2296
 "module case65(
     input logic [3:0] val,
     output logic match
@@ -648,7 +648,7 @@ endmodule",,CODE_BLOCK_NOT_FOUND,1772771410.5512404,2897,2296
             default: match = 0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771502.374445,0,0
+endmodule",,NON_VALID_OUTPUT,1772771502.374445,0,0
 "module case67(
     input logic [1:0] gray,
     output logic [1:0] bin
@@ -727,7 +727,7 @@ endmodule","module ex1_mux_case (
             2'b11: leds = 4'b1000;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771827.8875716,0,0
+endmodule",,NON_VALID_OUTPUT,1772771827.8875716,0,0
 "module case70(
     input logic [1:0] op,
     input logic [3:0] a, b,
@@ -741,7 +741,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771827.8875716,0,0
             2'b11: result = a / (b != 0 ? b : 1);
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771830.0698864,0,0
+endmodule",,NON_VALID_OUTPUT,1772771830.0698864,0,0
 "module seq_case71(
     input logic clk, reset,
     output logic [1:0] count
@@ -758,7 +758,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771830.0698864,0,0
                 default: count <= 2'b00;
             endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771830.2618456,0,0
+endmodule",,NON_VALID_OUTPUT,1772771830.2618456,0,0
 "module seq_case72(
     input logic clk, reset,
     output logic [1:0] state
@@ -788,7 +788,7 @@ endmodule","'):
                 default: q <= {q[2:0], serial_in}; // shift left
             endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771894.3349,0,0
+endmodule",,NON_VALID_OUTPUT,1772771894.3349,0,0
 "module seq_case74(
     input logic clk, reset, in_bit,
     output logic detected
@@ -811,7 +811,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771894.3349,0,0
     end
 
     assign detected = (state == S2);
-endmodule",,NO_SV_MODULE_FOUND,1772771949.9803915,0,0
+endmodule",,NON_VALID_OUTPUT,1772771949.9803915,0,0
 "module seq_case75(
     input logic clk, reset, enable,
     output logic [3:0] count
@@ -826,7 +826,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771949.9803915,0,0
                 default: count <= 4'b0000;
             endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771952.2289255,0,0
+endmodule",,NON_VALID_OUTPUT,1772771952.2289257,0,0
 "module seq_case76(
     input logic clk, reset, start,
     output logic a, b
@@ -856,7 +856,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771952.2289255,0,0
             default: begin a<=0; b<=0; end
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771960.510339,0,0
+endmodule",,NON_VALID_OUTPUT,1772771960.510339,0,0
 "module seq_case79(
     input logic clk, reset, start,
     output logic x, y
@@ -886,7 +886,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771960.510339,0,0
             default: x<=0; y<=0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771960.8039467,0,0
+endmodule",,NON_VALID_OUTPUT,1772771960.8039467,0,0
 "module seq_case80(
     input logic clk, reset, sensor,
     output logic alarm
@@ -916,7 +916,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772771960.8039467,0,0
             default: alarm <= 0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772771961.087872,0,0
+endmodule",,NON_VALID_OUTPUT,1772771961.087872,0,0
 "module nested_case_1(input logic [1:0] op, func, input logic [7:0] a,b, output logic [7:0] y);
 always_comb begin
   case(op)
@@ -931,7 +931,7 @@ always_comb begin
     default: y = 8'h00;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772771967.5119455,0,0
+endmodule",,NON_VALID_OUTPUT,1772771967.5119455,0,0
 "module nested_case_2(input logic [2:0] mode, sel, output logic [3:0] y);
 always_comb begin
   case(mode)
@@ -946,7 +946,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772771979.6477413,0,0
+endmodule",,NON_VALID_OUTPUT,1772771979.6477413,0,0
 "module nested_case_3(input logic [1:0] a,b,c, output logic y);
 always_comb begin
   case(a)
@@ -960,7 +960,7 @@ always_comb begin
     default: y = 1;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772771996.0187178,0,0
+endmodule",,NON_VALID_OUTPUT,1772771996.0187178,0,0
 "module nested_case_4(input logic [3:0] op, input logic [1:0] sub, output logic [3:0] y);
 always_comb begin
   case(op)
@@ -975,7 +975,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772771996.1744478,0,0
+endmodule",,NON_VALID_OUTPUT,1772771996.1744478,0,0
 "module nested_case_5(input logic [1:0] s1,s2, output logic y);
 always_comb begin
   case(s1)
@@ -990,7 +990,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772007.0798192,0,0
+endmodule",,NON_VALID_OUTPUT,1772772007.0798192,0,0
 "module nested_case_6(input logic [2:0] a,b, output logic [2:0] y);
 always_comb begin
   case(a)
@@ -1026,7 +1026,7 @@ always_comb begin
     default: y = 2'b11;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772075.6121697,0,0
+endmodule",,NON_VALID_OUTPUT,1772772075.6121695,0,0
 "module nested_case_8(input logic [3:0] a, input logic [1:0] b, output logic y);
 always_comb begin
   case(a)
@@ -1039,7 +1039,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772075.8056064,0,0
+endmodule",,NON_VALID_OUTPUT,1772772075.8056064,0,0
 "module nested_case_9(input logic [1:0] x,y, output logic z);
 always_comb begin
   case(x)
@@ -1052,7 +1052,7 @@ always_comb begin
     default: z = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772075.9913764,0,0
+endmodule",,NON_VALID_OUTPUT,1772772075.9913764,0,0
 "module nested_case_10(input logic [2:0] a,b, output logic y);
 always_comb begin
   case(a)
@@ -1065,7 +1065,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772076.12826,0,0
+endmodule",,NON_VALID_OUTPUT,1772772076.12826,0,0
 "module ff_case_1(input logic clk, rst, toggle, output logic state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 0;
@@ -1076,7 +1076,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772772076.3176832,2859,836
+endmodule",,NON_VALID_OUTPUT,1772772076.3176832,2859,836
 "module ff_case_2(input logic clk, rst, start, done, output logic [1:0] state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 2'b00;
@@ -1088,7 +1088,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772109.5972624,0,0
+endmodule",,NON_VALID_OUTPUT,1772772109.5972624,0,0
 "module ff_case_3(input logic clk, rst, err, output logic bad);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) bad <= 0;
@@ -1099,7 +1099,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772117.4081755,0,0
+endmodule",,NON_VALID_OUTPUT,1772772117.4081757,0,0
 "module ff_case_4(input logic clk, rst, input logic [1:0] mode, output logic [3:0] cnt);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) cnt <= 0;
@@ -1112,7 +1112,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772117.5933118,0,0
+endmodule",,NON_VALID_OUTPUT,1772772117.5933118,0,0
 "module ff_case_5(input logic clk, rst, load, input logic [7:0] d, output logic [7:0] q);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) q <= 0;
@@ -1123,7 +1123,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772117.7834926,0,0
+endmodule",,NON_VALID_OUTPUT,1772772117.7834926,0,0
 "module ff_case_6(input logic clk, rst, timer, output logic [1:0] light);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) light <= 2'b00;
@@ -1229,7 +1229,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772772258.0031743,2860,2671
+endmodule",,NON_VALID_OUTPUT,1772772258.0031743,2860,2671
 "module ff_case_10(input logic clk, rst, fail, output logic [1:0] state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 2'b00;
@@ -1242,7 +1242,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772364.7707775,0,0
+endmodule",,NON_VALID_OUTPUT,1772772364.7707777,0,0
 "module multi_case_1(input logic [1:0] sel, output logic en, valid);
 always_comb begin
   case(sel)
@@ -1252,7 +1252,7 @@ always_comb begin
     default: begin en = 0; valid = 0; end
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772450.093713,0,0
+endmodule",,NON_VALID_OUTPUT,1772772450.093713,0,0
 "module multi_case_2(input logic [1:0] op, output logic we, mode);
 always_comb begin
   case(op)
@@ -1296,7 +1296,7 @@ always_comb begin
     default: begin ready = 0; valid = 0; end
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772478.0166438,0,0
+endmodule",,NON_VALID_OUTPUT,1772772478.0166438,0,0
 "module multi_case_4(input logic [1:0] code, output logic err, halt);
 always_comb begin
   case(code)
@@ -1306,7 +1306,7 @@ always_comb begin
     default: begin err = 0; halt = 0; end
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772547.1099453,0,0
+endmodule",,NON_VALID_OUTPUT,1772772547.1099453,0,0
 "module multi_case_5(input logic [2:0] cmd, output logic rd, wr, busy);
 always_comb begin
   case(cmd)
@@ -1327,7 +1327,7 @@ always_comb begin
     default: begin core_on=0; io_on=0; end
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772577.6708493,0,0
+endmodule",,NON_VALID_OUTPUT,1772772577.670849,0,0
 "module multi_case_7(input logic [1:0] level, output logic full, empty);
 always_comb begin
   case(level)
@@ -1336,7 +1336,7 @@ always_comb begin
     default: begin empty=0; full=0; end
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772623.7167742,0,0
+endmodule",,NON_VALID_OUTPUT,1772772623.7167742,0,0
 "module multi_case_8(input logic [1:0] resp, output logic ok, retry, fail);
 always_comb begin
   case(resp)
@@ -1346,7 +1346,7 @@ always_comb begin
     default: begin ok=0; retry=0; fail=0; end
   endcase
 end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772772628.1988428,2884,2876
+endmodule",,NON_VALID_OUTPUT,1772772628.1988428,2884,2876
 "module multi_case_9(input logic [1:0] st, output logic valid, dirty);
 always_comb begin
   case(st)
@@ -1356,7 +1356,7 @@ always_comb begin
     default: begin valid=0; dirty=0; end
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772743.2755644,0,0
+endmodule",,NON_VALID_OUTPUT,1772772743.2755644,0,0
 "module multi_case_10(input logic [1:0] g, output logic gnt0, gnt1);
 always_comb begin
   case(g)
@@ -1365,7 +1365,7 @@ always_comb begin
     default: begin gnt0=0; gnt1=0; end
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772764.431435,0,0
+endmodule",,NON_VALID_OUTPUT,1772772764.431435,0,0
 "module slice_case_1(input logic [1:0] a, input logic b, output logic y);
 always_comb begin
   case({a,b})
@@ -1404,7 +1404,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772772804.7698295,2844,210
+endmodule",,NON_VALID_OUTPUT,1772772804.7698295,2844,210
 "module slice_case_3(input logic [1:0] a,b, output logic y);
 always_comb begin
   case({a[1],b})
@@ -1412,7 +1412,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772813.1627817,0,0
+endmodule",,NON_VALID_OUTPUT,1772772813.1627817,0,0
 "module slice_case_4(input logic [2:0] op, input logic z, output logic go);
 always_comb begin
   case({op[1:0],z})
@@ -1421,7 +1421,7 @@ always_comb begin
     default: go = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772818.5033238,0,0
+endmodule",,NON_VALID_OUTPUT,1772772818.5033238,0,0
 "module slice_case_5(input logic [7:0] addr, output logic hit);
 always_comb begin
   case({addr[7],addr[2:0]})
@@ -1430,7 +1430,7 @@ always_comb begin
     default: hit = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772818.6825683,0,0
+endmodule",,NON_VALID_OUTPUT,1772772818.6825683,0,0
 "module slice_case_6(input logic [3:0] ctrl, input logic en, output logic ok);
 always_comb begin
   case({ctrl[3:2],en})
@@ -1439,7 +1439,7 @@ always_comb begin
     default: ok = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772830.7952151,0,0
+endmodule",,NON_VALID_OUTPUT,1772772830.7952151,0,0
 "module slice_case_7(input logic [1:0] flags, input logic mode, output logic y);
 always_comb begin
   case({flags,mode})
@@ -1448,7 +1448,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772772830.973257,0,0
+endmodule",,NON_VALID_OUTPUT,1772772830.973257,0,0
 "module slice_case_8(input logic [4:0] x, output logic y);
 always_comb begin
   case({x[4],x[1:0]})
@@ -1477,7 +1477,7 @@ always_comb begin
     default: stop = 0;
   endcase
 end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772772928.7518458,2842,2651
+endmodule",,NON_VALID_OUTPUT,1772772928.7518458,2842,2651
 "module slice_case_10(input logic [3:0] mode, output logic y);
 always_comb begin
   case({mode[3],mode[0]})
@@ -1486,7 +1486,7 @@ always_comb begin
     default: y = 0;
   endcase
 end
-endmodule",,NO_SV_MODULE_FOUND,1772773036.755462,0,0
+endmodule",,NON_VALID_OUTPUT,1772773036.755462,0,0
 "module proto_case_1(input logic clk, rst, req, output logic gnt);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) gnt <= 0;
@@ -1497,7 +1497,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772773055.3369343,0,0
+endmodule",,NON_VALID_OUTPUT,1772773055.3369343,0,0
 "module proto_case_2(input logic clk, rst, valid, output logic ready);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) ready <= 1;
@@ -1508,7 +1508,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772773569.150333,0,0
+endmodule",,NON_VALID_OUTPUT,1772773569.150333,0,0
 "module proto_case_3(input logic clk, rst, send, ack, output logic busy);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) busy <= 0;
@@ -1548,7 +1548,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772773586.4554987,0,0
+endmodule",,NON_VALID_OUTPUT,1772773586.4554987,0,0
 "module proto_case_5(input logic clk, rst, sop, eop, output logic in_pkt);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) in_pkt <= 0;
@@ -1582,7 +1582,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772773594.6720316,0,0
+endmodule",,NON_VALID_OUTPUT,1772773594.6720316,0,0
 "module proto_case_7(input logic clk, rst, lock_req, unlock, output logic locked);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) locked <= 0;
@@ -1593,7 +1593,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772773594.8271518,0,0
+endmodule",,NON_VALID_OUTPUT,1772773594.8271518,0,0
 "module proto_case_8(input logic clk, rst, start, finish, output logic busy);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) busy <= 0;
@@ -1604,7 +1604,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772773594.9675865,0,0
+endmodule",,NON_VALID_OUTPUT,1772773594.9675865,0,0
 "module proto_case_9(input logic clk, rst, go, done, output logic active);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) active <= 0;
@@ -1615,7 +1615,7 @@ always_ff @(posedge clk or posedge rst) begin
     endcase
   end
 end
-endmodule",,NO_SV_MODULE_FOUND,1772773595.1174228,0,0
+endmodule",,NON_VALID_OUTPUT,1772773595.1174228,0,0
 "module router_fsm (
     input  logic clk,
     input  logic rst_n,
@@ -1712,7 +1712,7 @@ endmodule","module router_fsm_properties (
             SYS: writeback = 0;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772773604.9814858,0,0
+endmodule",,NON_VALID_OUTPUT,1772773604.9814858,0,0
 "module phy_link (
     input logic clk,
     input logic [3:0] mode,
@@ -1730,7 +1730,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772773604.9814858,0,0
 
     always_ff @(posedge clk)
         training <= (speed != 2'b00);
-endmodule",,CODE_BLOCK_NOT_FOUND,1772773605.3346796,2940,81
+endmodule",,NON_VALID_OUTPUT,1772773605.3346796,2940,81
 "module mem_ctrl (
     input logic clk,
     input logic [1:0] cmd,
@@ -1759,7 +1759,7 @@ endmodule",,CODE_BLOCK_NOT_FOUND,1772773605.3346796,2940,81
             default: err <= 1;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772773608.7095313,0,0
+endmodule",,NON_VALID_OUTPUT,1772773608.7095313,0,0
 "module dma_engine (
     input logic clk,
     input logic [1:0] size,
@@ -1786,7 +1786,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772773608.7095313,0,0
             end
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772773608.9463484,0,0
+endmodule",,NON_VALID_OUTPUT,1772773608.9463484,0,0
 "module instr_decoder (
     input  logic [31:0] instr,
     output logic        is_branch,
@@ -1849,7 +1849,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772773608.9463484,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772773615.154238,0,0
+endmodule",,NON_VALID_OUTPUT,1772773615.154238,0,0
 "module axi_read_fsm (
     input  logic        clk,
     input  logic        rst_n,
@@ -1914,7 +1914,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772773615.154238,0,0
         endcase
     end
 
-endmodule",,CODE_BLOCK_NOT_FOUND,1772773647.212763,3133,6766
+endmodule",,NON_VALID_OUTPUT,1772773647.212763,3133,6766
 "module packet_parser (
     input  logic [63:0] header,
     output logic        is_ipv4,
@@ -1946,7 +1946,7 @@ endmodule",,CODE_BLOCK_NOT_FOUND,1772773647.212763,3133,6766
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772773919.4701767,0,0
+endmodule",,NON_VALID_OUTPUT,1772773919.4701767,0,0
 "module power_ctrl (
     input  logic [2:0] mode,
     output logic       clk_en,
@@ -1986,7 +1986,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772773919.4701767,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772773972.2152328,0,0
+endmodule",,NON_VALID_OUTPUT,1772773972.2152328,0,0
 "module scheduler_ctrl (
     input  logic [7:0] ctrl_word,
     output logic       high_prio,
@@ -2025,7 +2025,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772773972.2152328,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772773980.018541,0,0
+endmodule",,NON_VALID_OUTPUT,1772773980.018541,0,0
 "module dma_channel_arbiter (
     input  logic [3:0] ch_req,
     output logic [1:0] grant,
@@ -2059,7 +2059,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772773980.018541,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772773980.323999,0,0
+endmodule",,NON_VALID_OUTPUT,1772773980.323999,0,0
 "module coherence_cmd_decode (
     input  logic [4:0] cmd,
     output logic       req_shared,
@@ -2089,7 +2089,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772773980.323999,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772773980.6114862,0,0
+endmodule",,NON_VALID_OUTPUT,1772773980.6114862,0,0
 "module pcie_tlp_decoder (
     input  logic [7:0] tlp_type,
     output logic       is_mem,
@@ -2319,7 +2319,7 @@ class SystemVerilogAssertionGenerationTrainingSet(SystemVerilogAssertionGenerati
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774326.5811183,0,0
+endmodule",,NON_VALID_OUTPUT,1772774326.5811183,0,0
 "module mem_burst_ctrl (
     input  logic [1:0] burst_type,
     output logic [3:0] burst_len,
@@ -2342,7 +2342,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774326.5811183,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774330.1318464,0,0
+endmodule",,NON_VALID_OUTPUT,1772774330.1318464,0,0
 "module gpu_exec_select (
     input  logic [15:0] opcode,
     output logic        use_alu,
@@ -2365,7 +2365,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774330.1318464,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774330.395126,0,0
+endmodule",,NON_VALID_OUTPUT,1772774330.395126,0,0
 "module cpu_full_decoder (
     input  logic [31:0] instr,
     output logic        reg_write,
@@ -2441,7 +2441,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774330.395126,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774332.5790298,0,0
+endmodule",,NON_VALID_OUTPUT,1772774332.5790298,0,0
 "module packet_classifier (
     input  logic [31:0] hdr,
     output logic        fast_path,
@@ -2495,7 +2495,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774332.5790298,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774333.2110763,0,0
+endmodule",,NON_VALID_OUTPUT,1772774333.2110765,0,0
 "module storage_cmd_proc (
     input  logic [7:0] cmd,
     input  logic [3:0] feature,
@@ -2540,7 +2540,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774333.2110763,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774333.6557715,0,0
+endmodule",,NON_VALID_OUTPUT,1772774333.6557715,0,0
 "module thermal_policy (
     input  logic [1:0] mode,
     input  logic [2:0] temp_level,
@@ -2580,7 +2580,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774333.6557715,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774346.779657,0,0
+endmodule",,NON_VALID_OUTPUT,1772774346.779657,0,0
 "module interconnect_router (
     input  logic [3:0] master_id,
     input  logic [1:0] txn_type,
@@ -2620,7 +2620,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774346.779657,0,0
         endcase
     end
 
-endmodule",,CODE_BLOCK_NOT_FOUND,1772774347.1320333,3073,195
+endmodule",,NON_VALID_OUTPUT,1772774347.132033,3073,195
 "module obi_txn_decoder (
     input  logic        req,
     input  logic        we,
@@ -2668,7 +2668,7 @@ endmodule",,CODE_BLOCK_NOT_FOUND,1772774347.1320333,3073,195
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774355.1316743,0,0
+endmodule",,NON_VALID_OUTPUT,1772774355.1316743,0,0
 "module alert_handler_ctrl (
     input  logic [1:0] alert_class,
     input  logic [1:0] esc_state,
@@ -2709,7 +2709,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774355.1316743,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774358.1176896,0,0
+endmodule",,NON_VALID_OUTPUT,1772774358.1176896,0,0
 "module lifecycle_gate (
     input  logic [2:0] lc_state,
     input  logic [1:0] transition,
@@ -2754,7 +2754,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774358.1176896,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774358.470816,0,0
+endmodule",,NON_VALID_OUTPUT,1772774358.470816,0,0
 "module tl_addr_router (
     input  logic [31:0] addr,
     input  logic [2:0]  opcode,
@@ -2790,7 +2790,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774358.470816,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774358.8176157,0,0
+endmodule",,NON_VALID_OUTPUT,1772774358.8176155,0,0
 "module reg_access_ctrl (
     input  logic [7:0]  periph_id,
     input  logic [7:0]  offset,
@@ -2830,7 +2830,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774358.8176157,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774362.0343676,0,0
+endmodule",,NON_VALID_OUTPUT,1772774362.0343676,0,0
 "module obi_err_resp (
     input  logic [1:0] err_src,
     input  logic       priv,
@@ -2861,7 +2861,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774362.0343676,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774362.3800654,0,0
+endmodule",,NON_VALID_OUTPUT,1772774362.3800654,0,0
 "module obi_addr_check (
     input  logic [31:0] addr,
     input  logic        we,
@@ -2907,7 +2907,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774362.3800654,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774362.6709652,0,0
+endmodule",,NON_VALID_OUTPUT,1772774362.6709652,0,0
 "module rstmgr_policy (
     input  logic [2:0] reset_cause,
     input  logic [2:0] lc_state,
@@ -2947,7 +2947,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774362.6709652,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774493.2310455,0,0
+endmodule",,NON_VALID_OUTPUT,1772774493.2310455,0,0
 "module tlul_access_filter (
     input  logic [2:0] opcode,
     input  logic [2:0] param,
@@ -2991,7 +2991,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774493.2310455,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774506.7831752,0,0
+endmodule",,NON_VALID_OUTPUT,1772774506.7831752,0,0
 "module otp_ctrl_decode (
     input  logic [3:0] cmd,
     input  logic [1:0] part,
@@ -3083,7 +3083,7 @@ endmodule","module otp_ctrl_decode  (
 ** Error (suppressible): prueba.sv(26): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(31): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(36): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(41): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772774518.3800879,3059,961
+** Error (suppressible): prueba.sv(41): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772774518.380088,3059,961
 "module alert_aggregator (
     input  logic [3:0] src,
     input  logic [1:0] sev,
@@ -3258,7 +3258,7 @@ endmodule","module obi_write_resp (
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774599.992663,0,0
+endmodule",,NON_VALID_OUTPUT,1772774599.992663,0,0
 "module tlul_access_ctrl (
     input  logic        tl_i_a_valid,
     input  logic [2:0]  tl_i_a_opcode,
@@ -3307,7 +3307,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774599.992663,0,0
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774649.500904,0,0
+endmodule",,NON_VALID_OUTPUT,1772774649.500904,0,0
 "module tlul_addr_decode (
     input  logic        tl_i_a_valid,
     input  logic [31:0] tl_i_a_address,
@@ -3352,7 +3352,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774649.500904,0,0
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774651.9944108,0,0
+endmodule",,NON_VALID_OUTPUT,1772774651.9944108,0,0
 "module alert_handler_core (
     input  logic [1:0] alert_class_i,
     input  logic [1:0] esc_state_i,
@@ -3386,7 +3386,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774651.9944108,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774652.4395447,0,0
+endmodule",,NON_VALID_OUTPUT,1772774652.439545,0,0
 "module lc_ctrl_perm_check (
     input  logic [2:0] lc_state_i,
     input  logic [1:0] lc_transition_i,
@@ -3424,7 +3424,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774652.4395447,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774652.7515998,0,0
+endmodule",,NON_VALID_OUTPUT,1772774652.7515998,0,0
 "module obi_host_resp_gen (
     input  logic [1:0] obi_result_i,
     input  logic       obi_priv_i,
@@ -3455,7 +3455,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774652.7515998,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774667.7401855,0,0
+endmodule",,NON_VALID_OUTPUT,1772774667.7401855,0,0
 "module reg_if_write_filter (
     input  logic        we_i,
     input  logic [11:0] addr_i,
@@ -3479,7 +3479,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774667.7401855,0,0
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774668.0296962,0,0
+endmodule",,NON_VALID_OUTPUT,1772774668.0296962,0,0
 "module tl_a_perm_check (
     input  logic        a_valid,
     input  logic [2:0]  a_opcode,
@@ -3524,7 +3524,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774668.0296962,0,0
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774668.301045,0,0
+endmodule",,NON_VALID_OUTPUT,1772774668.301045,0,0
 "module tl_d_resp_gen (
     input  logic        d_valid,
     input  logic [2:0]  d_opcode,
@@ -3549,7 +3549,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774668.301045,0,0
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774668.7151408,0,0
+endmodule",,NON_VALID_OUTPUT,1772774668.7151408,0,0
 "module axil_aw_decode (
     input  logic        awvalid,
     input  logic [31:0] awaddr,
@@ -3587,7 +3587,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774668.7151408,0,0
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774677.0663466,0,0
+endmodule",,NON_VALID_OUTPUT,1772774677.0663466,0,0
 "module axil_r_resp (
     input  logic        rvalid,
     input  logic [1:0]  rresp,
@@ -3653,7 +3653,7 @@ endmodule","case  (**parameters**)
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774732.174225,0,0
+endmodule",,NON_VALID_OUTPUT,1772774732.174225,0,0
 "module wb_err_policy (
     input  logic [1:0] err_src,
     output logic       retry,
@@ -3672,7 +3672,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774732.174225,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772774734.5196686,0,0
+endmodule",,NON_VALID_OUTPUT,1772774734.5196686,0,0
 "module litex_csr_filter (
     input  logic        csr_we,
     input  logic [13:0] csr_addr,
@@ -3696,7 +3696,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772774734.5196686,0,0
         end
     end
 
-endmodule",,CODE_BLOCK_NOT_FOUND,1772776365.0684624,2963,2460
+endmodule",,NON_VALID_OUTPUT,1772776365.0684624,2963,2460
 "module litex_bus_resp (
     input  logic valid,
     input  logic error,
@@ -3716,7 +3716,7 @@ endmodule",,CODE_BLOCK_NOT_FOUND,1772776365.0684624,2963,2460
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772776465.5477173,0,0
+endmodule",,NON_VALID_OUTPUT,1772776465.547717,0,0
 "module piton_l2_coh_ctrl (
     input  logic [2:0] msg_type_i,
     input  logic [1:0] line_state_i,
@@ -3781,7 +3781,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772776465.5477173,0,0
         endcase
     end
 
-endmodule",,CODE_BLOCK_NOT_FOUND,1772776467.7681065,3347,6025
+endmodule",,NON_VALID_OUTPUT,1772776467.7681065,3347,6025
 "module piton_dir_state (
     input  logic [1:0] state_i,
     input  logic [2:0] event_i,
@@ -3828,7 +3828,7 @@ endmodule",,CODE_BLOCK_NOT_FOUND,1772776467.7681065,3347,6025
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772776708.4215057,0,0
+endmodule",,NON_VALID_OUTPUT,1772776708.4215057,0,0
 "module chisel_priority_mux (
     input  logic [3:0] sel_i,
     input  logic [7:0] in0_i,
@@ -3850,7 +3850,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772776708.4215057,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772776711.7257545,0,0
+endmodule",,NON_VALID_OUTPUT,1772776711.7257545,0,0
 "module chisel_fsm_ctrl (
     input  logic [3:0] state_i,
     input  logic       fire_i,
@@ -3883,7 +3883,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772776711.7257545,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772776712.0100424,0,0
+endmodule",,NON_VALID_OUTPUT,1772776712.0100424,0,0
 "module axil_to_tlul_opcode (
     input  logic awvalid,
     input  logic arvalid,
@@ -3911,7 +3911,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772776712.0100424,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772776712.2590601,0,0
+endmodule",,NON_VALID_OUTPUT,1772776712.25906,0,0
 "module tlul_to_obi_req (
     input  logic        tl_a_valid,
     input  logic [2:0]  tl_a_opcode,
@@ -3940,7 +3940,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772776712.2590601,0,0
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772776728.2202435,0,0
+endmodule",,NON_VALID_OUTPUT,1772776728.2202437,0,0
 "module obi_to_axil_resp (
     input  logic [1:0] obi_resp_i,
     output logic [1:0] axil_rresp_o,
@@ -4046,7 +4046,7 @@ endmodule","module obi_to_axil_resp_assertions(
         end
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772776763.4570508,0,0
+endmodule",,NON_VALID_OUTPUT,1772776763.4570508,0,0
 "module chisel_deep_fsm (
     input  logic [7:0] event_i,
     input  logic       ready_i,
@@ -4095,7 +4095,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772776763.4570508,0,0
         endcase
     end
 
-endmodule",,NO_SV_MODULE_FOUND,1772776787.5804214,0,0
+endmodule",,NON_VALID_OUTPUT,1772776787.5804214,0,0
 "module axil_tl_obi_bridge (
     input  logic        awvalid_i,
     input  logic        arvalid_i,
@@ -4310,7 +4310,7 @@ endmodule",<|task_prefix|>,"** Error: (vlog-13069) prueba.sv(1): near ""<"": syn
             end
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772776831.7269862,0,0
+endmodule",,NON_VALID_OUTPUT,1772776831.7269862,0,0
 "module chisel_event_dispatch (
     input  logic [7:0] evt_i,
     input  logic [3:0] fsm_state_i,
@@ -4360,7 +4360,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772776831.7269862,0,0
             default: error_o = 1'b1;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772776832.2076216,0,0
+endmodule",,NON_VALID_OUTPUT,1772776832.2076216,0,0
 "module multi_proto_arbiter (
     input  logic tl_valid_i,
     input  logic axi_awvalid_i,
@@ -4402,7 +4402,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772776832.2076216,0,0
             default: error_o = 1'b1;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772776876.328492,0,0
+endmodule",,NON_VALID_OUTPUT,1772776876.328492,0,0
 "module sec_lc_multi_gate (
     input  logic sec_req_i,
     input  logic [2:0] lc_state_i,
@@ -4459,7 +4459,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772776876.328492,0,0
             endcase
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772776878.8432603,0,0
+endmodule",,NON_VALID_OUTPUT,1772776878.8432603,0,0
 "module multi_core_cache_arb (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -4500,7 +4500,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772776878.8432603,0,0
             end
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772776879.2793853,0,0
+endmodule",,NON_VALID_OUTPUT,1772776879.279385,0,0
 "module piton_l2_evict_ctrl (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -4572,7 +4572,7 @@ endmodule","module piton_l2_evict_ctrl_properties (
         end
         //...
 
-    endmodule",OK,1772776879.7766616,3277,3976
+    endmodule",NON_VALID_OUTPUT,1772776879.7766616,3277,3976
 "module tl_axi_obi_bridge (
     input  logic tl_valid_i,
     input  logic [2:0] tl_opcode_i,
@@ -4639,7 +4639,7 @@ endmodule","module piton_l2_evict_ctrl_properties (
             obi_req_o    = 1'b0;
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772777038.480911,0,0
+endmodule",,NON_VALID_OUTPUT,1772777038.480911,0,0
 "module multi_core_bus_arb (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -4811,7 +4811,7 @@ endmodule",\n{self.code}\n,"** Error: (vlog-13069) prueba.sv(1): near ""\n{self.
             default: out_o = 8'h00;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772777086.8065817,0,0
+endmodule",,NON_VALID_OUTPUT,1772777086.8065815,0,0
 "module piton_l2_coh_evict (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -4855,7 +4855,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772777086.8065817,0,0
             end
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772777087.198288,0,0
+endmodule",,NON_VALID_OUTPUT,1772777087.198288,0,0
 "module tl_axi_obi_bridge_sec (
     input  logic tl_valid_i,
     input  logic [2:0] tl_opcode_i,
@@ -4918,7 +4918,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772777087.198288,0,0
             obi_req_o    = 1'b0;
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772777087.731668,0,0
+endmodule",,NON_VALID_OUTPUT,1772777087.731668,0,0
 "module chisel_priority_fsm (
     input  logic [7:0] evt_i,
     input  logic [3:0] state_i,
@@ -5045,7 +5045,7 @@ endmodule","** Error (suppressible): prueba.sv(17): (vlog-1957) The sva directiv
             endcase
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772777187.4888668,0,0
+endmodule",,NON_VALID_OUTPUT,1772777187.4888668,0,0
 "module multi_core_bus_ctrl (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -5185,7 +5185,7 @@ endmodule","module multi_core_bus_ctrl_assertions(
             end
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772777306.096674,0,0
+endmodule",,NON_VALID_OUTPUT,1772777306.096674,0,0
 "module axi_tl_obi_sec (
     input  logic axi_awvalid_i,
     input  logic axi_arvalid_i,
@@ -5239,7 +5239,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772777306.096674,0,0
         endcase
 
         // OBI ? AXI response
-        unique case (obi_r_",,NO_SV_MODULE_FOUND,1772777308.6282885,0,0
+        unique case (obi_r_",,NON_VALID_OUTPUT,1772777308.6282885,0,0
 "module chisel_event_fsm (
     input  logic [7:0] evt_i,
     input  logic [3:0] state_i,
@@ -5277,7 +5277,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772777306.096674,0,0
             default: error_o = 1'b1;
         endcase
     end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772777309.2749329,3192,2198
+endmodule",,NON_VALID_OUTPUT,1772777309.2749329,3192,2198
 "module sec_lc_multi_lvl (
     input  logic sec_req_i,
     input  logic [2:0] lc_state_i,
@@ -5323,7 +5323,7 @@ endmodule",,CODE_BLOCK_NOT_FOUND,1772777309.2749329,3192,2198
             endcase
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772777397.5252085,0,0
+endmodule",,NON_VALID_OUTPUT,1772777397.5252085,0,0
 "module multi_core_bus_arb (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -5481,7 +5481,7 @@ endmodule","module piton_l2_coh_evict_arb_assertions (input logic [3:0] req_i, i
             axi_rresp_o  = 2'b10;
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772777413.8626652,0,0
+endmodule",,NON_VALID_OUTPUT,1772777413.8626652,0,0
 "module chisel_event_fsm_prio (
     input  logic [7:0] evt_i,
     input  logic [3:0] state_i,
@@ -5519,7 +5519,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772777413.8626652,0,0
             default: error_o = 1'b1;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772777414.539331,0,0
+endmodule",,NON_VALID_OUTPUT,1772777414.539331,0,0
 "module sec_lc_gate_lvl (
     input  logic sec_req_i,
     input  logic [2:0] lc_state_i,
@@ -5646,7 +5646,7 @@ endmodule","module sec_lc_gate_lvl (
             end
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772777480.676701,0,0
+endmodule",,NON_VALID_OUTPUT,1772777480.676701,0,0
 "module piton_l2_evict_coh_priv (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -5685,7 +5685,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772777480.676701,0,0
             end
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772779111.7044334,0,0
+endmodule",,NON_VALID_OUTPUT,1772779111.7044334,0,0
 "module tl_axi_obi_sec (
     input  logic tl_valid_i,
     input  logic [2:0] tl_opcode_i,
@@ -5748,7 +5748,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772779111.7044334,0,0
             axi_rresp_o  = 2'b10;
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772779114.8584778,0,0
+endmodule",,NON_VALID_OUTPUT,1772779114.8584778,0,0
 "module chisel_event_fsm_alert (
     input  logic [7:0] evt_i,
     input  logic [3:0] state_i,
@@ -5787,7 +5787,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772779114.8584778,0,0
             default: error_o = 1'b1;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772779115.466757,0,0
+endmodule",,NON_VALID_OUTPUT,1772779115.466757,0,0
 "module sec_lc_gate_alert (
     input  logic sec_req_i,
     input  logic [2:0] lc_state_i,
@@ -5830,7 +5830,7 @@ endmodule",,NO_SV_MODULE_FOUND,1772779115.466757,0,0
             endcase
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772779115.950262,0,0
+endmodule",,NON_VALID_OUTPUT,1772779115.950262,0,0
 "module multi_core_bus_arb_alert (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -6041,7 +6041,7 @@ endmodule","** Error: prueba.sv(115): (vlog-13282) 'p_nack_default_assign' alrea
 ** Error: prueba.sv(133): (vlog-13282) 'p_nack_default_assign' already declared in this scope.
 ** Error: prueba.sv(142): (vlog-13282) 'p_nack_default_assign' already declared in this scope.
 ** Error: prueba.sv(151): (vlog-13282) 'p_nack_default_assign' already declared in this scope.
-** Error: prueba.sv(160): (vlog-13282) 'p_nack_default_assign' already declared in this scope.",1772779116.4776955,3236,2260
+** Error: prueba.sv(160): (vlog-13282) 'p_nack_default_assign' already declared in this scope.",1772779116.4776957,3236,2260
 "module piton_l2_repl_priv (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -6073,7 +6073,7 @@ endmodule","** Error: prueba.sv(115): (vlog-13282) 'p_nack_default_assign' alrea
             end
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772779207.281152,0,0
+endmodule",,NON_VALID_OUTPUT,1772779207.281152,0,0
 "module axi_tl_bridge_fsm (
     input  logic axi_awvalid_i,
     input  logic axi_arvalid_i,
@@ -6157,7 +6157,7 @@ endmodule","module axi_tl_bridge_fsm (
             end
         end
     end
-endmodule",,CODE_BLOCK_NOT_FOUND,1772779222.8518584,3127,2834
+endmodule",,NON_VALID_OUTPUT,1772779222.8518584,3127,2834
 "module chisel_prio_mux_masked (
     input  logic [3:0] sel_i,
     input  logic [7:0] in0_i, in1_i, in2_i, in3_i,
@@ -6176,7 +6176,7 @@ endmodule",,CODE_BLOCK_NOT_FOUND,1772779222.8518584,3127,2834
             default: out_o = 8'h00;
         endcase
     end
-endmodule",,NO_SV_MODULE_FOUND,1772779336.5507624,0,0
+endmodule",,NON_VALID_OUTPUT,1772779336.5507624,0,0
 "module sec_lc_gate_priv_mask (
     input  logic sec_req_i,
     input  logic [2:0] lc_state_i,
@@ -6200,4 +6200,4 @@ endmodule",,NO_SV_MODULE_FOUND,1772779336.5507624,0,0
             endcase
         end
     end
-endmodule",,NO_SV_MODULE_FOUND,1772779358.820236,0,0
+endmodule",,NON_VALID_OUTPUT,1772779358.820236,0,0
