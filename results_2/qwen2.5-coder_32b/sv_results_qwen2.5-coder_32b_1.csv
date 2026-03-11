@@ -32,7 +32,7 @@ endmodule","module case_example1(input logic [1:0] a, output logic y);
     // Assertion to check the property
     a_case_behavior: assert property(p_case_behavior) else $error(""Output does not match expected behavior for input %b"", a);
 
-endmodule",OK,1772740993.1373045,170,345
+endmodule",OK,1772740993.1373043,170,345
 "module case_example2(input logic [3:0] a, output logic [1:0] y);
     always_comb begin
         case(a)
@@ -145,7 +145,7 @@ endmodule","module case3(input logic [1:0] sel, input logic a, b, c, d, output l
     assert property (p_output_assignment)
         else $error(""Output assignment mismatch!"");
 
-endmodule","** Error: (vlog-13069) prueba.sv(23): near ""&&"": syntax error, unexpected &&, expecting ""SystemVerilog keyword 'endproperty'"".",1772741089.8955975,167,425
+endmodule","** Error: (vlog-13069) prueba.sv(23): near ""&&"": syntax error, unexpected &&, expecting ""SystemVerilog keyword 'endproperty'"".",1772741089.8955977,167,425
 "module case4(input logic [3:0] in, output logic out);
     always_comb begin
         case(in)
@@ -455,7 +455,7 @@ endmodule","module case11(input logic toggle, output logic state);
 
     a_toggle_1_state_1: assert property(p_toggle_1_state_1)
         else $error(""Assertion failed: When toggle is 1, state should be 1"");
-endmodule",OK,1772741346.3592381,132,311
+endmodule",OK,1772741346.359238,132,311
 "module case12(input logic [2:0] in, output logic [7:0] out);
     always_comb begin
         case(in)
@@ -554,7 +554,7 @@ endmodule","module case14(input logic [1:0] op,
 endmodule","** Error (suppressible): prueba.sv(34): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(35): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(36): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(37): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772741421.8314857,195,400
+** Error (suppressible): prueba.sv(37): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772741421.8314855,195,400
 "module case15(input logic [3:0] num, output logic [1:0] mod3);
     always_comb begin
         case(num % 3)
@@ -633,7 +633,7 @@ endmodule","** Error: prueba.sv(15): (vlog-2730) Undefined variable: 'reset'.
 ** Error: prueba.sv(14): (vlog-2730) Undefined variable: 'clk'.
 ** Error (suppressible): prueba.sv(23): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error: prueba.sv(15): (vlog-2730) Undefined variable: 'reset'.
-** Error: prueba.sv(14): (vlog-2730) Undefined variable: 'clk'.",1772741490.0427399,194,340
+** Error: prueba.sv(14): (vlog-2730) Undefined variable: 'clk'.",1772741490.04274,194,340
 "module case18(input logic [3:0] key, output logic [6:0] seg);
     always_comb begin
         case(key)
@@ -808,7 +808,7 @@ endmodule","module case31(input logic [3:0] value, output logic flag);
     assert property (p_odd_numbers);
     assert property (p_even_numbers_or_invalid);
 
-endmodule",OK,1772741636.9329019,152,228
+endmodule",OK,1772741636.932902,152,228
 "module case32(input logic [3:0] temp, output logic warning);
     always_comb begin
         case(temp)
@@ -923,7 +923,7 @@ endmodule","module case35(input logic [3:0] digit, output logic display);
         endcase
     end
 endmodule","** Error (suppressible): prueba.sv(15): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(18): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772741709.1677017,193,330
+** Error (suppressible): prueba.sv(18): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772741709.1677015,193,330
 "module case40(input logic [3:0] req, output logic [1:0] grant);
     always_comb begin
         case(req)
@@ -1042,7 +1042,7 @@ endmodule","module case41(
 
 endmodule","** Error: (vlog-13069) prueba.sv(29): near ""10"": syntax error, unexpected INTEGER NUMBER.
 ** Error: (vlog-13069) prueba.sv(30): near ""20"": syntax error, unexpected INTEGER NUMBER.
-** Error: (vlog-13069) prueba.sv(31): near ""30"": syntax error, unexpected INTEGER NUMBER.",1772741795.0395257,172,363
+** Error: (vlog-13069) prueba.sv(31): near ""30"": syntax error, unexpected INTEGER NUMBER.",1772741795.0395255,172,363
 "module case42(input int score, output logic [1:0] grade);
     always_comb begin
         case(score)
@@ -2580,7 +2580,7 @@ endmodule","module seq_case75(
     endproperty
 
     a_disable_hold: assert property(p_disable_hold);
-endmodule",OK,1772742779.0829523,195,456
+endmodule",OK,1772742779.0829525,195,456
 "module seq_case76(
     input logic clk, reset, start,
     output logic a, b
@@ -3116,7 +3116,7 @@ endmodule","** Error (suppressible): prueba.sv(40): (vlog-1957) The sva directiv
 ** Error (suppressible): prueba.sv(43): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(46): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(49): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(52): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772743096.4401875,205,685
+** Error (suppressible): prueba.sv(52): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772743096.4401877,205,685
 "module nested_case_5(input logic [1:0] s1,s2, output logic y);
 always_comb begin
   case(s1)
@@ -3824,7 +3824,7 @@ endmodule","module ff_case_9(input logic clk, rst, inc, output logic [2:0] cnt);
   assert property (increment_prop)
     else $error(""Counter did not increment correctly when inc was asserted"");
 
-endmodule",OK,1772743605.6030421,169,283
+endmodule",OK,1772743605.603042,169,283
 "module ff_case_10(input logic clk, rst, fail, output logic [1:0] state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 2'b00;
@@ -4019,7 +4019,7 @@ endmodule","** Error: prueba.sv(6): (vlog-2730) Undefined variable: 'reset'.
 ** Error (suppressible): prueba.sv(22): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(23): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error: prueba.sv(6): (vlog-2730) Undefined variable: 'reset'.
-** Error: prueba.sv(6): (vlog-2730) Undefined variable: 'clk'.",1772743755.4295235,171,396
+** Error: prueba.sv(6): (vlog-2730) Undefined variable: 'clk'.",1772743755.4295237,171,396
 "module multi_case_4(input logic [1:0] code, output logic err, halt);
 always_comb begin
   case(code)
@@ -4129,7 +4129,7 @@ endmodule","** Error: prueba.sv(8): (vlog-2730) Undefined variable: 'reset'.
 ** Error (suppressible): prueba.sv(24): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(25): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error: prueba.sv(8): (vlog-2730) Undefined variable: 'reset'.
-** Error: prueba.sv(8): (vlog-2730) Undefined variable: 'clk'.",1772743824.8730037,204,499
+** Error: prueba.sv(8): (vlog-2730) Undefined variable: 'clk'.",1772743824.8730035,204,499
 "module multi_case_6(input logic [1:0] pwr, output logic core_on, io_on);
 always_comb begin
   case(pwr)
@@ -4399,7 +4399,7 @@ endmodule","module multi_case_10(input logic [1:0] g, output logic gnt0, gnt1);
   assert property (p_gnt1) else $error(""Assertion failed: gnt1 should be high when g is 2'b10"");
 
 endmodule","** Error: prueba.sv(23): (vlog-2730) Undefined variable: 'reset_n'.
-** Error: prueba.sv(23): (vlog-2730) Undefined variable: 'clk'.",1772744007.0437021,182,389
+** Error: prueba.sv(23): (vlog-2730) Undefined variable: 'clk'.",1772744007.043702,182,389
 "module slice_case_1(input logic [1:0] a, input logic b, output logic y);
 always_comb begin
   case({a,b})
@@ -4983,7 +4983,7 @@ endmodule","module proto_case_4(input logic clk, rst, give, take,
   assert property (p_credit_stable_on_give_and_take_high) else 
     $error(""Credit changed when both give and take were high"");
 
-endmodule","** Error: (vlog-13069) prueba.sv(40): near ""at"": syntax error, unexpected IDENTIFIER.",1772744411.1740093,183,376
+endmodule","** Error: (vlog-13069) prueba.sv(40): near ""at"": syntax error, unexpected IDENTIFIER.",1772744411.174009,183,376
 "module proto_case_5(input logic clk, rst, sop, eop, output logic in_pkt);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) in_pkt <= 0;
@@ -5058,7 +5058,7 @@ assert property(no_consecutive_retries) else
 assert property(retry_on_fail) else
   $error(""Retry did not occur after a fail!"");
 
-endmodule",OK,1772744460.4394615,165,201
+endmodule",OK,1772744460.4394617,165,201
 "module proto_case_7(input logic clk, rst, lock_req, unlock, output logic locked);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) locked <= 0;
@@ -5435,7 +5435,7 @@ endmodule","** Error: prueba.sv(11): (vlog-2730) Undefined variable: 'reset'.
 ** Error (suppressible): prueba.sv(38): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(39): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error: prueba.sv(11): (vlog-2730) Undefined variable: 'reset'.
-** Error: prueba.sv(11): (vlog-2730) Undefined variable: 'clk'.",1772744637.7823381,333,624
+** Error: prueba.sv(11): (vlog-2730) Undefined variable: 'clk'.",1772744637.782338,333,624
 "module phy_link (
     input logic clk,
     input logic [3:0] mode,
@@ -6203,7 +6203,7 @@ endmodule","module power_ctrl (
     // Assertion for OFF mode
     assert property (off_mode_check) else $error(""In OFF mode, all outputs should be low"");
 
-endmodule",OK,1772745007.4905303,319,778
+endmodule",OK,1772745007.4905305,319,778
 "module scheduler_ctrl (
     input  logic [7:0] ctrl_word,
     output logic       high_prio,
@@ -8288,7 +8288,7 @@ endmodule","module reg_access_ctrl (
     a_gpio_read_write: assert property(p_gpio_read_write) else $error(""GPIO read/write mismatch"");
 
 endmodule","** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'rst_n'.
-** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'clk'.",1772746060.8525267,343,794
+** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'clk'.",1772746060.852527,343,794
 "module obi_err_resp (
     input  logic [1:0] err_src,
     input  logic       priv,
@@ -8519,7 +8519,7 @@ endmodule","module obi_addr_check (
     end
 
 endmodule","** Error: prueba.sv(14): (vlog-2730) Undefined variable: 'reset_n'.
-** Error: prueba.sv(14): (vlog-2730) Undefined variable: 'clk'.",1772746183.4166853,364,562
+** Error: prueba.sv(14): (vlog-2730) Undefined variable: 'clk'.",1772746183.416685,364,562
 "module rstmgr_policy (
     input  logic [2:0] reset_cause,
     input  logic [2:0] lc_state,
@@ -8629,7 +8629,7 @@ endmodule","module rstmgr_policy (
     a_warm_reset_on_security_violation_high_lcstate: assert property (p_warm_reset_on_security_violation_high_lcstate);
     a_escalate_on_invalid_conditions: assert property (p_escalate_on_invalid_conditions);
 
-endmodule",OK,1772746230.4221377,360,711
+endmodule",OK,1772746230.4221375,360,711
 "module tlul_access_filter (
     input  logic [2:0] opcode,
     input  logic [2:0] param,
@@ -10824,7 +10824,7 @@ endmodule","module chisel_fsm_ctrl (
     assert property (p_state_15_assert);
     assert property (p_default_stall_assert);
 
-endmodule",OK,1772747359.8467197,276,556
+endmodule",OK,1772747359.8467195,276,556
 "module axil_to_tlul_opcode (
     input  logic awvalid,
     input  logic arvalid,
@@ -10896,7 +10896,7 @@ endmodule","module axil_to_tlul_opcode (
     assert property (p_arvalid_only_get_op)
         else $error(""Assertion failed: arvalid alone should result in Get operation"");
 endmodule","** Error: prueba.sv(30): (vlog-2730) Undefined variable: 'rst_n'.
-** Error: prueba.sv(30): (vlog-2730) Undefined variable: 'clk'.",1772747406.1587021,260,433
+** Error: prueba.sv(30): (vlog-2730) Undefined variable: 'clk'.",1772747406.158702,260,433
 "module tlul_to_obi_req (
     input  logic        tl_a_valid,
     input  logic [2:0]  tl_a_opcode,
@@ -13086,7 +13086,7 @@ endmodule","module tl_axi_obi_bridge_sec (
         end
     end
 endmodule","** Error: prueba.sv(18): (vlog-2730) Undefined variable: 'reset_n'.
-** Error: prueba.sv(18): (vlog-2730) Undefined variable: 'clk'.",1772748619.0826101,643,978
+** Error: prueba.sv(18): (vlog-2730) Undefined variable: 'clk'.",1772748619.08261,643,978
 "module chisel_priority_fsm (
     input  logic [7:0] evt_i,
     input  logic [3:0] state_i,
@@ -13483,7 +13483,7 @@ endmodule","module piton_l2_evict_coh (
         end
     end
 endmodule","** Error: prueba.sv(14): (vlog-2730) Undefined variable: 'rst_n'.
-** Error: prueba.sv(14): (vlog-2730) Undefined variable: 'clk'.",1772748852.1395779,494,755
+** Error: prueba.sv(14): (vlog-2730) Undefined variable: 'clk'.",1772748852.139578,494,755
 "module axi_tl_obi_sec (
     input  logic axi_awvalid_i,
     input  logic axi_arvalid_i,
@@ -14532,7 +14532,7 @@ endmodule","module multi_core_bus_ctrl_lvl (
             end
         end
     end
-endmodule","** Error: (vlog-13069) prueba.sv(21): near ""("": syntax error, unexpected '(', expecting ""SystemVerilog keyword 'endproperty'"".",1772749508.8155453,429,528
+endmodule","** Error: (vlog-13069) prueba.sv(21): near ""("": syntax error, unexpected '(', expecting ""SystemVerilog keyword 'endproperty'"".",1772749508.815545,429,528
 "module piton_l2_evict_coh_priv (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -14878,7 +14878,7 @@ endmodule","** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'reset'.
 ** Error: prueba.sv(53): Illegal SVA expression in Verilog expression.
 ** Error (suppressible): prueba.sv(53): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'reset'.
-** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'clk'.",1772749695.8701801,472,719
+** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'clk'.",1772749695.87018,472,719
 "module sec_lc_gate_alert (
     input  logic sec_req_i,
     input  logic [2:0] lc_state_i,

@@ -277,7 +277,7 @@ endmodule","module case4(input logic [3:0] in, output logic out);
     // Clock and reset signals for the properties
     logic clk, reset;
     
-endmodule",OK,1772735918.1171687,156,409
+endmodule",OK,1772735918.117169,156,409
 "module case5(input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
     always_comb begin
         case(op)
@@ -1667,7 +1667,7 @@ endmodule","module fsm51(
     cover property(p_output_sync);
     cover property(p_output_reset);
     
-endmodule",OK,1772736049.1529527,218,439
+endmodule",OK,1772736049.152953,218,439
 "module fsm52(
     input logic clk, reset, in_bit,
     output logic detected
@@ -2079,7 +2079,7 @@ endmodule","module fsm56(
     
     assert property(p_valid_states);
     
-endmodule","** Error: (vlog-13069) prueba.sv(31): near ""&&"": syntax error, unexpected &&, expecting ""SystemVerilog keyword 'endproperty'"".",1772736080.2770805,221,409
+endmodule","** Error: (vlog-13069) prueba.sv(31): near ""&&"": syntax error, unexpected &&, expecting ""SystemVerilog keyword 'endproperty'"".",1772736080.2770803,221,409
 "module fsm57(
     input logic clk, reset, start,
     output logic a, b
@@ -2990,7 +2990,7 @@ endmodule","module seq_case72(
 
 endmodule","** Error: prueba.sv(24): (vlog-2730) Undefined variable: 'false'.
 ** Error (suppressible): prueba.sv(31): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error: prueba.sv(24): (vlog-2730) Undefined variable: 'false'.",1772736154.1752877,182,364
+** Error: prueba.sv(24): (vlog-2730) Undefined variable: 'false'.",1772736154.1752875,182,364
 "module seq_case73(
     input logic clk, reset, serial_in,
     output logic [3:0] q
@@ -3184,7 +3184,7 @@ endmodule","module seq_case75(
     assert property(p_count_hold);
     assert property(p_count_range);
 
-endmodule",OK,1772736168.8574963,174,291
+endmodule",OK,1772736168.8574965,174,291
 "module seq_case76(
     input logic clk, reset, start,
     output logic a, b
@@ -3979,7 +3979,7 @@ assert property(p_case_b_default);
 assert property(p_case_default);
 
 endmodule","** Error: prueba.sv(21): (vlog-2730) Undefined variable: 'reset_n'.
-** Error: prueba.sv(21): (vlog-2730) Undefined variable: 'clk'.",1772736232.9254003,148,296
+** Error: prueba.sv(21): (vlog-2730) Undefined variable: 'clk'.",1772736232.9254005,148,296
 "module nested_case_9(input logic [1:0] x,y, output logic z);
 always_comb begin
   case(x)
@@ -4248,7 +4248,7 @@ endmodule","module ff_case_3(input logic clk, rst, err, output logic bad);
   assert property(@(posedge clk) disable iff (rst) 
     (err && bad == 0) |-> bad == 1);
   
-endmodule",OK,1772736253.6089885,144,273
+endmodule",OK,1772736253.6089883,144,273
 "module ff_case_4(input logic clk, rst, input logic [1:0] mode, output logic [3:0] cnt);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) cnt <= 0;
@@ -4596,7 +4596,7 @@ endmodule","module ff_case_9(
     assert property(p_cnt_stable) else $error(""Counter should remain stable when inc is low and cnt != 7"");
     
 endmodule","** Error: (vlog-13069) prueba.sv(26): near "">"": syntax error, unexpected '>', expecting '('.
-** Error: (vlog-13069) prueba.sv(38): near ""=="": syntax error, unexpected ==, expecting '('.",1772736281.9602175,148,354
+** Error: (vlog-13069) prueba.sv(38): near ""=="": syntax error, unexpected ==, expecting '('.",1772736281.9602177,148,354
 "module ff_case_10(input logic clk, rst, fail, output logic [1:0] state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 2'b00;
@@ -4862,7 +4862,7 @@ endmodule","module multi_case_4(input logic [1:0] code, output logic err, halt);
     
     assert property(p_err_implies_halt);
     
-endmodule","** Error: (vlog-13069) prueba.sv(23): near ""("": syntax error, unexpected '(', expecting ""SystemVerilog keyword 'endproperty'"".",1772736305.7978547,170,385
+endmodule","** Error: (vlog-13069) prueba.sv(23): near ""("": syntax error, unexpected '(', expecting ""SystemVerilog keyword 'endproperty'"".",1772736305.797855,170,385
 "module multi_case_5(input logic [2:0] cmd, output logic rd, wr, busy);
 always_comb begin
   case(cmd)
@@ -9910,7 +9910,7 @@ endmodule","module otp_ctrl_decode (
     
     assert property (p_lock_valid);
 
-endmodule","** Error: (vlog-13069) prueba.sv(45): near ""mutually_exclusive"": syntax error, unexpected IDENTIFIER, expecting ';'.",1772736659.4535925,328,715
+endmodule","** Error: (vlog-13069) prueba.sv(45): near ""mutually_exclusive"": syntax error, unexpected IDENTIFIER, expecting ';'.",1772736659.4535923,328,715
 "module alert_aggregator (
     input  logic [3:0] src,
     input  logic [1:0] sev,
@@ -10244,7 +10244,7 @@ endmodule","module debug_access_gate (
         (dbg_req && lc_state != 3'b000 && lc_state != 3'b001) |-> violation);
 
 endmodule","** Error: prueba.sv(33): (vlog-2730) Undefined variable: 'rst_n'.
-** Error: prueba.sv(33): (vlog-2730) Undefined variable: 'clk'.",1772736685.8189719,238,641
+** Error: prueba.sv(33): (vlog-2730) Undefined variable: 'clk'.",1772736685.818972,238,641
 "module tlul_access_ctrl (
     input  logic        tl_i_a_valid,
     input  logic [2:0]  tl_i_a_opcode,
@@ -11003,7 +11003,7 @@ endmodule","module tl_a_perm_check (
     
     assert property (p_deny_valid);
 
-endmodule",OK,1772736740.5736647,356,844
+endmodule",OK,1772736740.573665,356,844
 "module tl_d_resp_gen (
     input  logic        d_valid,
     input  logic [2:0]  d_opcode,
@@ -11264,7 +11264,7 @@ endmodule","module axil_r_resp (
     assert property (p_rresp_validity);
 
 endmodule","** Error: prueba.sv(27): (vlog-2730) Undefined variable: 'rst_n'.
-** Error: prueba.sv(27): (vlog-2730) Undefined variable: 'clk'.",1772736763.1887841,202,397
+** Error: prueba.sv(27): (vlog-2730) Undefined variable: 'clk'.",1772736763.188784,202,397
 "module wb_slave_decode (
     input  logic        wb_cyc_i,
     input  logic        wb_stb_i,
@@ -12189,7 +12189,7 @@ endmodule","module tlul_to_obi_req (
     assert property (p_put_opcodes);
     assert property (p_valid_combination);
 
-endmodule","** Error: (vlog-13069) prueba.sv(43): near ""@"": syntax error, unexpected '@', expecting ""SystemVerilog keyword 'endproperty'"".",1772736827.7040033,252,499
+endmodule","** Error: (vlog-13069) prueba.sv(43): near ""@"": syntax error, unexpected '@', expecting ""SystemVerilog keyword 'endproperty'"".",1772736827.704003,252,499
 "module obi_to_axil_resp (
     input  logic [1:0] obi_resp_i,
     output logic [1:0] axil_rresp_o,
@@ -12970,7 +12970,7 @@ endmodule","module piton_l2_repl (
 
 endmodule","** Error: prueba.sv(43): (vlog-2730) Undefined variable: 'i'.
 ** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'rst_n'.
-** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'clk'.",1772736882.0793645,465,911
+** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'clk'.",1772736882.0793643,465,911
 "module chisel_event_dispatch (
     input  logic [7:0] evt_i,
     input  logic [3:0] fsm_state_i,
@@ -13666,7 +13666,7 @@ endmodule","module piton_l2_evict_ctrl (
 
 endmodule","** Error: prueba.sv(49): (vlog-2730) Undefined variable: 'i'.
 ** Error: prueba.sv(48): (vlog-2730) Undefined variable: 'rst_n'.
-** Error: prueba.sv(48): (vlog-2730) Undefined variable: 'clk'.",1772736934.5062017,487,953
+** Error: prueba.sv(48): (vlog-2730) Undefined variable: 'clk'.",1772736934.5062015,487,953
 "module tl_axi_obi_bridge (
     input  logic tl_valid_i,
     input  logic [2:0] tl_opcode_i,
@@ -13824,7 +13824,7 @@ endmodule","module tl_axi_obi_bridge (
             obi_req_o    = 1'b0;
         end
     end
-endmodule","** Error: (vlog-13069) prueba.sv(30): near ""@"": syntax error, unexpected '@', expecting ""SystemVerilog keyword 'endproperty'"".",1772736946.3449383,674,981
+endmodule","** Error: (vlog-13069) prueba.sv(30): near ""@"": syntax error, unexpected '@', expecting ""SystemVerilog keyword 'endproperty'"".",1772736946.3449385,674,981
 "module multi_core_bus_arb (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -14609,7 +14609,7 @@ endmodule","module chisel_priority_fsm (
     assert property (p_valid_events);
 
 endmodule","** Error: (vlog-13069) prueba.sv(40): near ""mutually_exclusive"": syntax error, unexpected IDENTIFIER, expecting ';'.
-** Error: (vlog-13069) prueba.sv(84): near ""("": syntax error, unexpected '(', expecting ""SystemVerilog keyword 'endproperty'"".",1772737007.6336315,411,844
+** Error: (vlog-13069) prueba.sv(84): near ""("": syntax error, unexpected '(', expecting ""SystemVerilog keyword 'endproperty'"".",1772737007.6336317,411,844
 "module sec_lc_gate_nested (
     input  logic sec_req_i,
     input  logic [2:0] lc_state_i,
@@ -16158,7 +16158,7 @@ endmodule","module multi_core_bus_ctrl_lvl (
     end
     
 endmodule","** Error: (vlog-13069) prueba.sv(60): near ""int"": syntax error, unexpected ""SystemVerilog keyword 'int'"", expecting IDENTIFIER or genvar.
-** Error: prueba.sv(60): (vlog-13205) Syntax error found in the scope following 'i'. Is there a missing '::'?",1772737145.0744715,408,721
+** Error: prueba.sv(60): (vlog-13205) Syntax error found in the scope following 'i'. Is there a missing '::'?",1772737145.0744717,408,721
 "module piton_l2_evict_coh_priv (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -17074,7 +17074,7 @@ endmodule","module multi_core_cache_arb_lvl (
 
 endmodule","** Error: prueba.sv(35): (vlog-2730) Undefined variable: 'i'.
 ** Error: prueba.sv(34): (vlog-2730) Undefined variable: 'rst_n'.
-** Error: prueba.sv(34): (vlog-2730) Undefined variable: 'clk'.",1772737222.5743861,357,631
+** Error: prueba.sv(34): (vlog-2730) Undefined variable: 'clk'.",1772737222.574386,357,631
 "module chisel_prio_mux_masked (
     input  logic [3:0] sel_i,
     input  logic [7:0] in0_i, in1_i, in2_i, in3_i,
@@ -17223,4 +17223,4 @@ endmodule","module sec_lc_gate_priv_mask (
     assert property (p_violation_logic);
 
 endmodule","** Error: (vlog-13069) prueba.sv(28): near ""&&"": syntax error, unexpected &&, expecting ""SystemVerilog keyword 'endproperty'"".
-** Error: (vlog-13069) prueba.sv(49): near ""&&"": syntax error, unexpected &&, expecting ""SystemVerilog keyword 'endproperty'"".",1772737238.0208337,283,523
+** Error: (vlog-13069) prueba.sv(49): near ""&&"": syntax error, unexpected &&, expecting ""SystemVerilog keyword 'endproperty'"".",1772737238.0208335,283,523

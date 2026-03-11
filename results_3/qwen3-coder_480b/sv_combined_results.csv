@@ -29481,7 +29481,7 @@ endmodule","** Error: (vlog-13069) prueba.sv(49): near ""foreach"": syntax error
 ** Error: (vlog-13069) prueba.sv(118): near ""foreach"": syntax error, unexpected ""SystemVerilog keyword 'foreach'"".
 ** Error: (vlog-13069) prueba.sv(130): near ""foreach"": syntax error, unexpected ""SystemVerilog keyword 'foreach'"".
 ** Error: (vlog-13069) prueba.sv(142): near ""foreach"": syntax error, unexpected ""SystemVerilog keyword 'foreach'"".
-** Error: (vlog-13069) prueba.sv(154): near ""foreach"": syntax error, unexpected ""SystemVerilog keyword 'foreach'"".",183.7776181697845,482,1755,,NO_SV_MODULE_FOUND,387.190393447876,0,0,"module piton_l2_coh_evict_asserts  (input logic [3:0] req_i,
+** Error: (vlog-13069) prueba.sv(154): near ""foreach"": syntax error, unexpected ""SystemVerilog keyword 'foreach'"".",183.7776181697845,482,1755,,NON_VALID_OUTPUT,387.190393447876,0,0,"module piton_l2_coh_evict_asserts  (input logic [3:0] req_i,
 input logic [1:0] line_state_i [3:0],
 input logic [1:0] lru_i [3:0],
 input logic [2:0] msg_type_i [3:0],
@@ -34296,7 +34296,7 @@ endmodule
     endproperty
     assert property (nack_only_when_req_active) else $error(""Nack can only be asserted when request is active"");
 
-endmodule",OK,122.91099953651428,474,1084,,NO_SV_MODULE_FOUND,191.3837118148804,0,0,"module piton_l2_evict_coh_priv_asserts  (input logic [3:0] req_i,
+endmodule",OK,122.91099953651428,474,1084,,NON_VALID_OUTPUT,191.3837118148804,0,0,"module piton_l2_evict_coh_priv_asserts  (input logic [3:0] req_i,
 input logic [1:0] line_state_i [3:0],
 input logic [1:0] lru_i [3:0],
 input logic [2:0] msg_type_i [3:0],

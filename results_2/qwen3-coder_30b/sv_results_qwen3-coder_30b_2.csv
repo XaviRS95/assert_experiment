@@ -1065,7 +1065,7 @@ endmodule","** Error (suppressible): prueba.sv(9): (vlog-1957) The sva directive
 ** Error (suppressible): prueba.sv(14): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(19): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(24): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(29): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737337.0230935,2582,260
+** Error (suppressible): prueba.sv(29): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737337.0230937,2582,260
 "module case43(input int temp, output logic [1:0] fan_speed);
     always_comb begin
         case(temp)
@@ -1110,7 +1110,7 @@ endmodule","** Error (suppressible): prueba.sv(9): (vlog-1957) The sva directive
 ** Error (suppressible): prueba.sv(14): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(19): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(24): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(29): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737340.6846159,2569,269
+** Error (suppressible): prueba.sv(29): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737340.684616,2569,269
 "module case44(input int load, output logic [2:0] power);
     always_comb begin
         case(load)
@@ -3269,7 +3269,7 @@ endmodule","module nested_case_7_assertions(
 
 endmodule","** Error (suppressible): prueba.sv(11): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(16): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(21): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737521.8846467,2547,194
+** Error (suppressible): prueba.sv(21): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737521.884647,2547,194
 "module nested_case_8(input logic [3:0] a, input logic [1:0] b, output logic y);
 always_comb begin
   case(a)
@@ -3749,7 +3749,7 @@ endmodule","module ff_case_9_assertions(
     endproperty
     assert property (p_cnt_default_no_inc);
 
-endmodule",OK,1772737563.0638707,2543,249
+endmodule",OK,1772737563.063871,2543,249
 "module ff_case_10(input logic clk, rst, fail, output logic [1:0] state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 2'b00;
@@ -4656,7 +4656,7 @@ endmodule","module slice_case_9_assertions(
 
 endmodule","** Error (suppressible): prueba.sv(10): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(15): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(20): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737645.5604923,2528,190
+** Error (suppressible): prueba.sv(20): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737645.5604925,2528,190
 "module slice_case_10(input logic [3:0] mode, output logic y);
 always_comb begin
   case({mode[3],mode[0]})
@@ -5019,7 +5019,7 @@ endmodule","module proto_case_9_assertions(
     endproperty
     assert property (p_active_reset);
 
-endmodule",OK,1772737678.0228775,2544,201
+endmodule",OK,1772737678.0228777,2544,201
 "module router_fsm (
     input  logic clk,
     input  logic rst_n,
@@ -5313,7 +5313,7 @@ endmodule","module phy_link_assertions (
     endproperty
     assert property (p_training_idle);
 
-endmodule",OK,1772737701.4342015,2616,353
+endmodule",OK,1772737701.4342017,2616,353
 "module mem_ctrl (
     input logic clk,
     input logic [1:0] cmd,
@@ -7172,7 +7172,7 @@ endmodule","** Error (suppressible): prueba.sv(13): (vlog-1957) The sva directiv
 ** Error (suppressible): prueba.sv(28): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(33): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(38): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(43): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737843.1988819,2728,570
+** Error (suppressible): prueba.sv(43): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737843.198882,2728,570
 "module obi_txn_decoder (
     input  logic        req,
     input  logic        we,
@@ -7270,7 +7270,7 @@ endmodule","** Error (suppressible): prueba.sv(13): (vlog-1957) The sva directiv
 ** Error (suppressible): prueba.sv(28): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(33): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(38): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(43): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737851.6624115,2755,474
+** Error (suppressible): prueba.sv(43): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737851.6624117,2755,474
 "module alert_handler_ctrl (
     input  logic [1:0] alert_class,
     input  logic [1:0] esc_state,
@@ -7471,7 +7471,7 @@ endmodule","** Error (suppressible): prueba.sv(11): (vlog-1957) The sva directiv
 ** Error (suppressible): prueba.sv(36): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(41): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(46): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(51): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737867.0940259,2743,573
+** Error (suppressible): prueba.sv(51): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737867.094026,2743,573
 "module tl_addr_router (
     input  logic [31:0] addr,
     input  logic [2:0]  opcode,
@@ -7807,7 +7807,7 @@ endmodule","** Error (suppressible): prueba.sv(15): (vlog-1957) The sva directiv
 ** Error (suppressible): prueba.sv(30): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(35): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(40): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(45): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737893.6904395,2738,437
+** Error (suppressible): prueba.sv(45): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772737893.6904397,2738,437
 "module rstmgr_policy (
     input  logic [2:0] reset_cause,
     input  logic [2:0] lc_state,
@@ -9195,7 +9195,7 @@ endmodule","module wb_err_policy_assertions (
 
 endmodule","** Error (suppressible): prueba.sv(10): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(15): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(20): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738010.1983283,2566,175
+** Error (suppressible): prueba.sv(20): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738010.1983285,2566,175
 "module litex_csr_filter (
     input  logic        csr_we,
     input  logic [13:0] csr_addr,
@@ -9709,7 +9709,7 @@ endmodule","** Error (suppressible): prueba.sv(11): (vlog-1957) The sva directiv
 ** Error (suppressible): prueba.sv(16): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(21): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(26): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(31): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738048.6099799,2650,339
+** Error (suppressible): prueba.sv(31): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738048.60998,2650,339
 "module axil_to_tlul_opcode (
     input  logic awvalid,
     input  logic arvalid,
@@ -9839,7 +9839,7 @@ endmodule","module tlul_to_obi_req_assertions (
 endmodule","** Error (suppressible): prueba.sv(11): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(16): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(21): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(26): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738058.6776521,2647,334
+** Error (suppressible): prueba.sv(26): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738058.677652,2647,334
 "module obi_to_axil_resp (
     input  logic [1:0] obi_resp_i,
     output logic [1:0] axil_rresp_o,
@@ -10197,7 +10197,7 @@ endmodule","** Error (suppressible): prueba.sv(20): (vlog-1957) The sva directiv
 ** Error (suppressible): prueba.sv(62): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(68): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(74): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(80): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738089.3158107,2800,1121
+** Error (suppressible): prueba.sv(80): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738089.315811,2800,1121
 "module axil_tl_obi_bridge (
     input  logic        awvalid_i,
     input  logic        arvalid_i,
@@ -15168,7 +15168,7 @@ endmodule","** Error (suppressible): prueba.sv(18): (vlog-1957) The sva directiv
 ** Error (suppressible): prueba.sv(98): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(103): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(108): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(113): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738787.1102703,3014,1342
+** Error (suppressible): prueba.sv(113): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738787.1102705,3014,1342
 "module chisel_event_fsm_alert (
     input  logic [7:0] evt_i,
     input  logic [3:0] state_i,
@@ -15827,7 +15827,7 @@ endmodule","** Error (suppressible): prueba.sv(20): (vlog-1957) The sva directiv
 ** Error (suppressible): prueba.sv(141): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(146): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(151): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(156): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738865.0867143,2778,2419
+** Error (suppressible): prueba.sv(156): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738865.0867145,2778,2419
 "module axi_tl_bridge_fsm (
     input  logic axi_awvalid_i,
     input  logic axi_arvalid_i,
@@ -16148,7 +16148,7 @@ endmodule","** Error (suppressible): prueba.sv(11): (vlog-1957) The sva directiv
 ** Error (suppressible): prueba.sv(21): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(26): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(31): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(36): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738948.7166827,2649,366
+** Error (suppressible): prueba.sv(36): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772738948.716683,2649,366
 "module sec_lc_gate_priv_mask (
     input  logic sec_req_i,
     input  logic [2:0] lc_state_i,

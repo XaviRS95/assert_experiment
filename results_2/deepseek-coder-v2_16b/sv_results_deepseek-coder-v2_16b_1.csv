@@ -102,7 +102,7 @@ endmodule","module case2(input logic [2:0] sel, output logic z);
             default: z = 0;
         endcase
     end
-endmodule",OK,1772731716.9060073,186,334
+endmodule",NON_VALID_OUTPUT,1772731716.9060073,186,334
 "module case3(input logic [1:0] sel, input logic a, b, c, d, output logic y);
     always_comb begin
         case(sel)
@@ -221,7 +221,7 @@ endmodule","module case6(input logic [1:0] state, output logic [2:0] light);
             default: light = 3'b100;
         endcase
     end
-endmodule",OK,1772731736.6212144,186,288
+endmodule",NON_VALID_OUTPUT,1772731736.6212144,186,288
 "module case8(input logic [3:0] in, output logic [1:0] out);
     always_comb begin
         case(in)
@@ -242,7 +242,7 @@ endmodule","module case8(input logic [3:0] in, output logic [1:0] out);
             default: out = 2'b00;
         endcase
     end
-endmodule",OK,1772731739.4812062,201,328
+endmodule",NON_VALID_OUTPUT,1772731739.4812062,201,328
 "module case9(input logic [3:0] digit, output logic [6:0] seg);
     always_comb begin
         case(digit)
@@ -332,7 +332,7 @@ endmodule","module case11(input logic toggle, output logic state);
             1'b1: state = 1;
         endcase
     end
-endmodule",OK,1772731756.6487668,127,268
+endmodule",NON_VALID_OUTPUT,1772731756.6487668,127,268
 "module case12(input logic [2:0] in, output logic [7:0] out);
     always_comb begin
         case(in)
@@ -359,7 +359,7 @@ endmodule","module case12(input logic [2:0] in, output logic [7:0] out);
             3'b111: out = 8'b10000000;
         endcase
     end
-endmodule",OK,1772731759.274091,305,662
+endmodule",NON_VALID_OUTPUT,1772731759.274091,305,662
 "module case14(input logic [1:0] op, input logic [3:0] a, b, output logic [3:0] result);
     always_comb begin
         case(op)
@@ -521,7 +521,7 @@ endmodule","module case18_testbench();
         // End simulation
         $finish;
     end
-endmodule",OK,1772731785.7825303,215,428
+endmodule",NON_VALID_OUTPUT,1772731785.7825303,215,428
 "module case21(input logic [1:0] counter, input logic reset, output logic [1:0] next_count);
     always_comb begin
         case({reset, counter})
@@ -544,7 +544,7 @@ endmodule","module case21(input logic [1:0] counter, input logic reset, output l
             default: next_count = 2'b00;
         endcase
     end
-endmodule",OK,1772731790.1143293,239,709
+endmodule",NON_VALID_OUTPUT,1772731790.114329,239,709
 "module case27(input logic [3:0] temp, output logic warning);
     always_comb begin
         case(temp)
@@ -579,7 +579,7 @@ endmodule","module case27(input logic [3:0] temp, output logic warning);
         else $error(""Warning logic does not match expected behavior"");
 
 endmodule","** Error (suppressible): prueba.sv(15): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error (suppressible): prueba.sv(23): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772731797.5450737,196,644
+** Error (suppressible): prueba.sv(23): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.",1772731797.5450735,196,644
 "module case31(input logic [3:0] value, output logic flag);
     always_comb begin
         case(value)
@@ -631,7 +631,7 @@ endmodule","module case32(input  logic [3:0] temp, output logic warning);
             default:                 warning = 0;
         endcase
     end
-endmodule",OK,1772731807.9716477,196,272
+endmodule",NON_VALID_OUTPUT,1772731807.9716475,196,272
 "module case34(input logic [3:0] level, output logic alarm);
     always_comb begin
         case(level)
@@ -680,7 +680,7 @@ module case34_tb();
 
         $finish;
     end
-endmodule",OK,1772731810.7036963,212,625
+endmodule",OK,1772731810.7036965,212,625
 "module case35(input logic [3:0] digit, output logic display);
     always_comb begin
         case(digit)
@@ -830,7 +830,7 @@ module testbench();
 endmodule","** Error: (vlog-13069) prueba.sv(4): near ""49"": syntax error, unexpected INTEGER NUMBER.
 ** Error: (vlog-13069) prueba.sv(5): near ""69"": syntax error, unexpected INTEGER NUMBER.
 ** Error: (vlog-13069) prueba.sv(6): near ""89"": syntax error, unexpected INTEGER NUMBER.
-** Error: (vlog-13069) prueba.sv(7): near ""100"": syntax error, unexpected INTEGER NUMBER.",1772731837.6921895,204,814
+** Error: (vlog-13069) prueba.sv(7): near ""100"": syntax error, unexpected INTEGER NUMBER.",1772731837.6921897,204,814
 "module case43(input int temp, output logic [1:0] fan_speed);
     always_comb begin
         case(temp)
@@ -2384,7 +2384,7 @@ endmodule","module seq_case79(
             default: begin x <= 0; y <= 0; end
         endcase
     end
-endmodule",OK,1772732012.7167897,319,737
+endmodule",NON_VALID_OUTPUT,1772732012.7167895,319,737
 "module seq_case80(
     input logic clk, reset, sensor,
     output logic alarm
@@ -2823,7 +2823,7 @@ endmodule","module nested_case_8(input logic [3:0] a, input logic [1:0] b, outpu
       default: y = 0;
     endcase
   end
-endmodule",OK,1772732069.386933,169,316
+endmodule",NON_VALID_OUTPUT,1772732069.386933,169,316
 "module nested_case_9(input logic [1:0] x,y, output logic z);
 always_comb begin
   case(x)
@@ -2890,7 +2890,7 @@ endmodule","module nested_case_10(input logic [2:0] a, b, output logic y);
       default: y = 0;
     endcase
   end
-endmodule",OK,1772732078.1182919,166,571
+endmodule",NON_VALID_OUTPUT,1772732078.118292,166,571
 "module ff_case_1(input logic clk, rst, toggle, output logic state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 0;
@@ -2926,7 +2926,7 @@ endmodule","module ff_case_1(input logic clk, rst, toggle, output logic state);
   assert property (p_state_transition)
     else $error(""State transition does not follow toggle signal correctly"");
 
-endmodule",OK,1772732083.8595715,168,556
+endmodule",OK,1772732083.8595717,168,556
 "module ff_case_2(input logic clk, rst, start, done, output logic [1:0] state);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) state <= 2'b00;
@@ -3096,7 +3096,7 @@ endmodule","module ff_case_5(input logic clk, rst, load, input logic [7:0] d, ou
       endcase
     end
   end
-endmodule",OK,1772732109.6936278,172,392
+endmodule",NON_VALID_OUTPUT,1772732109.6936278,172,392
 "module ff_case_6(input logic clk, rst, timer, output logic [1:0] light);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) light <= 2'b00;
@@ -3485,7 +3485,7 @@ endmodule","module multi_case_4(input logic [1:0] code, output logic err, halt);
       default: begin err = 0; halt = 0; end
     endcase
   end : case_block
-endmodule",OK,1772732165.4838266,186,252
+endmodule",NON_VALID_OUTPUT,1772732165.4838266,186,252
 "module multi_case_5(input logic [2:0] cmd, output logic rd, wr, busy);
 always_comb begin
   case(cmd)
@@ -3724,7 +3724,7 @@ endmodule","module slice_case_1(input logic [1:0] a, input logic b, output logic
       default: y = 0;
     endcase
   end
-endmodule",OK,1772732201.040411,151,555
+endmodule",NON_VALID_OUTPUT,1772732201.040411,151,555
 "module slice_case_2(input logic [3:0] x, output logic y);
 always_comb begin
   case({x[3:2],x[0]})
@@ -3867,7 +3867,7 @@ endmodule","** Error: prueba.sv(12): (vlog-2730) Undefined variable: 'clk'.
 ** Error: prueba.sv(16): (vlog-2730) Undefined variable: 'clk'.
 ** Error (suppressible): prueba.sv(20): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
 ** Error (suppressible): prueba.sv(21): (vlog-1957) The sva directive is not sensitive to a clock. Unclocked directives are not supported.
-** Error: prueba.sv(12): (vlog-2730) Undefined variable: 'clk'.",1772732227.5035279,156,709
+** Error: prueba.sv(12): (vlog-2730) Undefined variable: 'clk'.",1772732227.503528,156,709
 "module slice_case_6(input logic [3:0] ctrl, input logic en, output logic ok);
 always_comb begin
   case({ctrl[3:2],en})
@@ -4115,7 +4115,7 @@ endmodule","module proto_case_2(input logic clk, rst, valid, output logic ready)
   assert property (@(posedge clk) disable iff (rst) (state == READY || state == NOT_READY))
     else $error(""State transition error in proto_case_2 module"");
 
-endmodule",OK,1772732265.0930781,164,677
+endmodule",OK,1772732265.093078,164,677
 "module proto_case_3(input logic clk, rst, send, ack, output logic busy);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) busy <= 0;
@@ -4149,7 +4149,7 @@ endmodule","module proto_case_3(input logic clk, rst, send, ack, output logic bu
       endcase
     end
   end
-endmodule",OK,1772732271.9948177,170,471
+endmodule",OK,1772732271.9948175,170,471
 "module proto_case_4(input logic clk, rst, give, take, output logic [1:0] credit);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) credit <= 2;
@@ -4369,7 +4369,7 @@ module proto_case_8_assertions(input logic clk, rst, start, finish, input logic 
     @(posedge clk) disable iff (rst) (busy |-> ##[1:2] busy == 0);
   endproperty
   assert property(p2) else $error(""Assertion failed: busy did not become low when finish was asserted while busy was high."");
-endmodule",OK,1772732297.3649247,170,528
+endmodule",OK,1772732297.364925,170,528
 "module proto_case_9(input logic clk, rst, go, done, output logic active);
 always_ff @(posedge clk or posedge rst) begin
   if (rst) active <= 0;
@@ -4667,7 +4667,7 @@ endmodule","module phy_link (
 
     always_ff @(posedge clk)
         training <= (speed != 2'b00);
-endmodule",OK,1772732325.8742595,248,486
+endmodule",OK,1772732325.8742597,248,486
 "module mem_ctrl (
     input logic clk,
     input logic [1:0] cmd,
@@ -4928,7 +4928,7 @@ endmodule","module instr_decoder (
             default: illegal = 1'b1;
         endcase
     end
-endmodule",OK,1772732345.3061447,625,705
+endmodule",NON_VALID_OUTPUT,1772732345.3061447,625,705
 "module axi_read_fsm (
     input  logic        clk,
     input  logic        rst_n,
@@ -5057,7 +5057,7 @@ endmodule","module axi_read_fsm (
         endcase
     end
 
-endmodule",OK,1772732353.6639552,480,513
+endmodule",NON_VALID_OUTPUT,1772732353.6639552,480,513
 "module packet_parser (
     input  logic [63:0] header,
     output logic        is_ipv4,
@@ -5120,7 +5120,7 @@ endmodule","module packet_parser (
         endcase
     end
 
-endmodule",OK,1772732359.330976,348,392
+endmodule",NON_VALID_OUTPUT,1772732359.330976,348,392
 "module power_ctrl (
     input  logic [2:0] mode,
     output logic       clk_en,
@@ -5297,7 +5297,7 @@ endmodule","module scheduler_ctrl (
 
 endmodule","** Error: (vlog-13069) prueba.sv(7): near ""class"": syntax error, unexpected class, expecting IDENTIFIER or TYPE_IDENTIFIER or NETTYPE_IDENTIFIER or '='.
 ** Error: (vlog-13069) prueba.sv(10): near ""class"": syntax error, unexpected class.
-** Error: (vlog-13069) prueba.sv(17): near ""class"": syntax error, unexpected class.",1772732370.0506353,386,412
+** Error: (vlog-13069) prueba.sv(17): near ""class"": syntax error, unexpected class.",1772732370.050635,386,412
 "module dma_channel_arbiter (
     input  logic [3:0] ch_req,
     output logic [1:0] grant,
@@ -5432,7 +5432,7 @@ endmodule","module coherence_cmd_decode (
         endcase
     end
 
-endmodule",OK,1772732380.0575967,338,318
+endmodule",NON_VALID_OUTPUT,1772732380.0575967,338,318
 "module pcie_tlp_decoder (
     input  logic [7:0] tlp_type,
     output logic       is_mem,
@@ -5476,7 +5476,7 @@ endmodule","module pcie_tlp_decoder (
             default: unsupported = 1'b1;
         endcase
     end
-endmodule",OK,1772732383.4218762,304,384
+endmodule",NON_VALID_OUTPUT,1772732383.4218762,304,384
 "module cdc_ctrl_fsm (
     input  logic clk,
     input  logic rst_n,
@@ -5623,7 +5623,7 @@ endmodule","module cdc_ctrl_fsm (
                      p_req_clear)
         else $error(""Req not cleared properly after DONE state"");
 
-endmodule",OK,1772732387.4087675,422,946
+endmodule",OK,1772732387.4087677,422,946
 "module irq_priority_resolver (
     input  logic [7:0] irq_pending,
     input  logic [7:0] irq_enable,
@@ -5689,7 +5689,7 @@ endmodule","module irq_priority_resolver (
     a_valid_irq: assert property (p_valid_irq) else $error(""Invalid IRQ ID when irq_valid is high"");
 
 endmodule","** Error: prueba.sv(32): (vlog-2730) Undefined variable: 'resetn'.
-** Error: prueba.sv(32): (vlog-2730) Undefined variable: 'clk'.",1772732398.1302047,462,644
+** Error: prueba.sv(32): (vlog-2730) Undefined variable: 'clk'.",1772732398.130205,462,644
 "module mem_burst_ctrl (
     input  logic [1:0] burst_type,
     output logic [3:0] burst_len,
@@ -5987,7 +5987,7 @@ endmodule","module cpu_full_decoder (
             default: illegal = 1'b1;
         endcase
     end
-endmodule",OK,1772732419.2289186,745,966
+endmodule",NON_VALID_OUTPUT,1772732419.2289186,745,966
 "module packet_classifier (
     input  logic [31:0] hdr,
     output logic        fast_path,
@@ -6402,7 +6402,7 @@ endmodule","module interconnect_router (
     assert property (p_reject_masterF) else $error(""Assertion failed: master F should only handle read transactions and others are rejected"");
 
 endmodule","** Error: prueba.sv(12): (vlog-2730) Undefined variable: 'rstn'.
-** Error: prueba.sv(12): (vlog-2730) Undefined variable: 'clk'.",1772732459.5160193,397,975
+** Error: prueba.sv(12): (vlog-2730) Undefined variable: 'clk'.",1772732459.516019,397,975
 "module obi_txn_decoder (
     input  logic        req,
     input  logic        we,
@@ -6497,7 +6497,7 @@ endmodule","module obi_txn_decoder (
         end
     end
 
-endmodule",OK,1772732470.5495226,412,549
+endmodule",NON_VALID_OUTPUT,1772732470.5495226,412,549
 "module alert_handler_ctrl (
     input  logic [1:0] alert_class,
     input  logic [1:0] esc_state,
@@ -6577,7 +6577,7 @@ endmodule","module alert_handler_ctrl (
             default: reset_req = 1'b1;
         endcase
     end
-endmodule",OK,1772732476.5033298,405,1037
+endmodule",NON_VALID_OUTPUT,1772732476.5033298,405,1037
 "module lifecycle_gate (
     input  logic [2:0] lc_state,
     input  logic [1:0] transition,
@@ -6765,7 +6765,7 @@ endmodule","module tl_addr_router (
         endcase
     end
 
-endmodule",OK,1772732499.2712467,350,313
+endmodule",NON_VALID_OUTPUT,1772732499.271247,350,313
 "module reg_access_ctrl (
     input  logic [7:0]  periph_id,
     input  logic [7:0]  offset,
@@ -6928,7 +6928,7 @@ endmodule","module obi_err_resp (
         endcase
     end
 
-endmodule",OK,1772732512.0948145,296,357
+endmodule",NON_VALID_OUTPUT,1772732512.0948143,296,357
 "module obi_addr_check (
     input  logic [31:0] addr,
     input  logic        we,
@@ -7022,7 +7022,7 @@ endmodule","module obi_addr_check (
             end
         endcase
     end
-endmodule",OK,1772732515.824854,396,509
+endmodule",NON_VALID_OUTPUT,1772732515.824854,396,509
 "module rstmgr_policy (
     input  logic [2:0] reset_cause,
     input  logic [2:0] lc_state,
@@ -8066,7 +8066,7 @@ endmodule","module obi_host_resp_gen (
         endcase
     end
 
-endmodule",OK,1772732612.6436543,353,384
+endmodule",NON_VALID_OUTPUT,1772732612.6436543,353,384
 "module reg_if_write_filter (
     input  logic        we_i,
     input  logic [11:0] addr_i,
@@ -8332,7 +8332,7 @@ endmodule","module tl_d_resp_gen (
     a_valid_opcode_denied: assert property (p_valid_opcode_denied) else $error(""Assertion failed: valid opcode with denied should lead to error or change in denied signal"");
 
 endmodule","** Error: prueba.sv(27): (vlog-2730) Undefined variable: 'resetn'.
-** Error: prueba.sv(27): (vlog-2730) Undefined variable: 'clk'.",1772732638.4672759,241,581
+** Error: prueba.sv(27): (vlog-2730) Undefined variable: 'clk'.",1772732638.467276,241,581
 "module axil_aw_decode (
     input  logic        awvalid,
     input  logic [31:0] awaddr,
@@ -8485,7 +8485,7 @@ endmodule","module axil_r_resp (
         end
     end
 
-endmodule",OK,1772732652.8333697,233,200
+endmodule",NON_VALID_OUTPUT,1772732652.8333695,233,200
 "module wb_slave_decode (
     input  logic        wb_cyc_i,
     input  logic        wb_stb_i,
@@ -8897,7 +8897,7 @@ endmodule","module piton_l2_coh_ctrl (
         endcase
     end
 
-endmodule",OK,1772732684.013028,672,1230
+endmodule",NON_VALID_OUTPUT,1772732684.013028,672,1230
 "module piton_dir_state (
     input  logic [1:0] state_i,
     input  logic [2:0] event_i,
@@ -8990,7 +8990,7 @@ endmodule","module piton_dir_state (
         endcase
     end
 
-endmodule",OK,1772732699.590489,462,919
+endmodule",NON_VALID_OUTPUT,1772732699.590489,462,919
 "module chisel_priority_mux (
     input  logic [3:0] sel_i,
     input  logic [7:0] in0_i,
@@ -9107,7 +9107,7 @@ endmodule","module chisel_fsm_ctrl (
         endcase
     end
 
-endmodule",OK,1772732717.5286121,313,436
+endmodule",NON_VALID_OUTPUT,1772732717.528612,313,436
 "module axil_to_tlul_opcode (
     input  logic awvalid,
     input  logic arvalid,
@@ -9240,7 +9240,7 @@ endmodule","module tlul_to_obi_req_with_assertions(
 
     // Assertions (props) can be added here if needed
 
-endmodule",OK,1772732728.1559284,314,402
+endmodule",NON_VALID_OUTPUT,1772732728.1559284,314,402
 "module obi_to_axil_resp (
     input  logic [1:0] obi_resp_i,
     output logic [1:0] axil_rresp_o,
@@ -9532,7 +9532,7 @@ module chisel_deep_fsm (
         endcase
     end
 
-endmodule","** Error: (vlog-13069) prueba.sv(1): near ""input"": syntax error, unexpected input, expecting ')'.",1772732752.6261547,486,986
+endmodule","** Error: (vlog-13069) prueba.sv(1): near ""input"": syntax error, unexpected input, expecting ')'.",1772732752.626155,486,986
 "module axil_tl_obi_bridge (
     input  logic        awvalid_i,
     input  logic        arvalid_i,
@@ -9778,7 +9778,7 @@ endmodule","module sec_lc_gate (
         end
     end
 
-endmodule",OK,1772732779.989217,433,913
+endmodule",NON_VALID_OUTPUT,1772732779.989217,433,913
 "module piton_l2_repl (
     input  logic [3:0] req_i,            // request from 4 cores
     input  logic [1:0] line_state_i [3:0], // MESI states per core
@@ -10005,7 +10005,7 @@ endmodule","module chisel_event_dispatch (
     assert property (p_default_error) else $error(""Default error on invalid states"");
 
 endmodule","** Error: prueba.sv(11): (vlog-2730) Undefined variable: 'resetn'.
-** Error: prueba.sv(11): (vlog-2730) Undefined variable: 'clk'.",1772732803.5761945,532,1536
+** Error: prueba.sv(11): (vlog-2730) Undefined variable: 'clk'.",1772732803.5761943,532,1536
 "module multi_proto_arbiter (
     input  logic tl_valid_i,
     input  logic axi_awvalid_i,
@@ -10239,7 +10239,7 @@ endmodule","module sec_lc_multi_gate (
             endcase
         end
     end
-endmodule",OK,1772732837.302487,550,617
+endmodule",NON_VALID_OUTPUT,1772732837.302487,550,617
 "module multi_core_cache_arb (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -11571,7 +11571,7 @@ endmodule","module piton_l2_evict_coh (
     assert property (p_nack_multiple) else $error(""All nacks are not asserted for multiple requests"");
 
 endmodule","** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'resetn'.
-** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'clk'.",1772732978.0573807,576,1011
+** Error: prueba.sv(42): (vlog-2730) Undefined variable: 'clk'.",1772732978.057381,576,1011
 "module axi_tl_obi_sec (
     input  logic axi_awvalid_i,
     input  logic axi_arvalid_i,
@@ -12258,7 +12258,7 @@ endmodule","module tl_axi_obi_bridge_err (
             axi_rresp_o  = 2'b10;
         end
     end
-endmodule",OK,1772733053.9169972,822,841
+endmodule",NON_VALID_OUTPUT,1772733053.9169972,822,841
 "module chisel_event_fsm_prio (
     input  logic [7:0] evt_i,
     input  logic [3:0] state_i,
@@ -12450,7 +12450,7 @@ endmodule","module sec_lc_gate_lvl (
             endcase
         end
     end
-endmodule",OK,1772733076.4243848,552,644
+endmodule",NON_VALID_OUTPUT,1772733076.4243848,552,644
 "module multi_core_bus_ctrl_lvl (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -12520,7 +12520,7 @@ endmodule","module multi_core_bus_ctrl_lvl (
         end
     end
 
-endmodule",OK,1772733083.810247,503,1304
+endmodule",NON_VALID_OUTPUT,1772733083.810247,503,1304
 "module piton_l2_evict_coh_priv (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -12746,7 +12746,7 @@ endmodule","module tl_axi_obi_sec (
             axi_rresp_o  = 2'b10;
         end
     end
-endmodule",OK,1772733110.853439,784,757
+endmodule",NON_VALID_OUTPUT,1772733110.853439,784,757
 "module chisel_event_fsm_alert (
     input  logic [7:0] evt_i,
     input  logic [3:0] state_i,
@@ -13009,7 +13009,7 @@ endmodule","module multi_core_bus_arb_alert (
             end
         end
     end
-endmodule",OK,1772733140.2033515,542,1037
+endmodule",NON_VALID_OUTPUT,1772733140.2033515,542,1037
 "module piton_l2_repl_priv (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -13076,7 +13076,7 @@ endmodule","module piton_l2_repl_priv (
 
     // Properties and Assertions can be added here following SystemVerilog-AMS or similar syntax for assertions
 
-endmodule",OK,1772733152.5231593,461,582
+endmodule",NON_VALID_OUTPUT,1772733152.5231593,461,582
 "module axi_tl_bridge_fsm (
     input  logic axi_awvalid_i,
     input  logic axi_arvalid_i,
@@ -13144,7 +13144,7 @@ endmodule","module axi_tl_bridge_fsm (
         end
     end
 endmodule","** Error: prueba.sv(13): (vlog-2730) Undefined variable: 'resetn'.
-** Error: prueba.sv(13): (vlog-2730) Undefined variable: 'clk'.",1772733158.9499059,333,672
+** Error: prueba.sv(13): (vlog-2730) Undefined variable: 'clk'.",1772733158.949906,333,672
 "module multi_core_cache_arb_lvl (
     input  logic [3:0] req_i,
     input  logic [1:0] line_state_i [3:0],
@@ -13205,7 +13205,7 @@ endmodule","module multi_core_cache_arb_lvl (
             end
         end
     end
-endmodule",OK,1772733166.1403654,439,509
+endmodule",NON_VALID_OUTPUT,1772733166.1403654,439,509
 "module chisel_prio_mux_masked (
     input  logic [3:0] sel_i,
     input  logic [7:0] in0_i, in1_i, in2_i, in3_i,
@@ -13309,4 +13309,4 @@ endmodule","module sec_lc_gate_priv_mask (
             endcase
         end
     end
-endmodule",OK,1772733182.6739697,356,372
+endmodule",NON_VALID_OUTPUT,1772733182.6739695,356,372
