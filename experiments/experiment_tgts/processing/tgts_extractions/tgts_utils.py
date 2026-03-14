@@ -130,13 +130,11 @@ def remove_reset_signal(clause: str, reset_signal: str) -> str:
 
     return result
 
-def generate_async_reset_assert(reset_signal_activation: str, final_check: str) -> str:
+def generate_async_reset_assert(reset_signal: str, reset_sensitivy_activation:str, final_check: str) -> str:
     """Generate async reset assertion block"""
-    return (f"always_comb begin\n"
-            f"    if ({reset_signal_activation}) begin\n"
-            f"        {get_alpha_uuid()}: assert ({final_check});\n"
-            f"    end\n"
-            f"end")
+    id = get_alpha_uuid()
+    async_reset = f'{id}: assert property (@({reset_sensitivy_activation}) {reset_signal} |-> {final_check} ) else $error("Error in asynchronous reset {id}");'
+    return async_reset
 
 
 def generate_sequential_property(sensitivity_list: dict, disable_iff: str,
