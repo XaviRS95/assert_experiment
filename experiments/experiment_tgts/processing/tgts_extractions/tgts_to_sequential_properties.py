@@ -44,8 +44,7 @@ def sequential_properties_from_tgts(tgts_rules: list, sensitivity_list: dict) ->
         if (clauses == "ASYNC_RST_CHECK" and
                 reset_info['reset_signal_activation']):
             assertion = generate_async_reset_assert(
-                reset_signal= reset_info['reset_signal_activation'],
-                reset_sensitivy_activation = sensitivity_list['rst'],
+                reset_sensitivity_activation= sensitivity_list['rst'],
                 final_check = final_check
             )
         else:
