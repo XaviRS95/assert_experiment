@@ -139,25 +139,29 @@ def get_combinational_sensitivity_list(test_module: str)-> dict:
 
 
 
+TIMESCALE = '`timescale 1ns/1ns'
+CLK_HALF_PERIOD = 5
+RESET_DELAY = 30
+TIMEOUT_LIMIT = 20000
+COMB_TOTAL_TESTS = 100
+SEQ_TOTAL_TESTS = 100
+POST_COMPLETION_DELAY = 100
+total_test_blocks = 3
 
+#TODO RECUERDA QUE EL RESET NO NECESITA ALWAYS BEGIN, DIRECTAMENTE LO ACTIVAS CADA X Y SOLUCIONADO.
 
-
-
-
-
-
-new_testbench_template = '''
-`timescale 1na/1ns
+new_testbench_template = f'''
+{TIMESCALE}
 
 module tb_coordinated #(
     // Simulation control parameters
-    parameter int CLK_HALF_PERIOD = 5,        // Half clock period (for #5 clk = ~clk)
-    parameter int RESET_DELAY = 30,           // Reset duration in time units
-    parameter int TIMEOUT_LIMIT = 20000,      // Timeout limit in time units
-    parameter int COMB_TOTAL_TESTS = 100,     // Number of combinational tests
-    parameter int SEQ_TOTAL_TESTS = 100,      // Number of sequential tests
-    parameter int POST_COMPLETION_DELAY = 100, // Delay after completion before $finish
-    parameter int TOTAL_TEST_BLOCKS = 3 //Total number of blocks (sequential and combinational) that need to be tested and wait for finish).
+    parameter int CLK_HALF_PERIOD = {CLK_HALF_PERIOD},        // Half clock period (for #5 clk = ~clk)
+    parameter int RESET_DELAY = {RESET_DELAY},           // Reset duration in time units
+    parameter int TIMEOUT_LIMIT = {TIMEOUT_LIMIT},      // Timeout limit in time units
+    parameter int COMB_TOTAL_TESTS = {COMB_TOTAL_TESTS},     // Number of combinational tests
+    parameter int SEQ_TOTAL_TESTS = {SEQ_TOTAL_TESTS},      // Number of sequential tests
+    parameter int POST_COMPLETION_DELAY = {POST_COMPLETION_DELAY}, // Delay after completion before $finish
+    parameter int TOTAL_TEST_BLOCKS = {total_test_blocks} //Total number of blocks (sequential and combinational) that need to be tested and wait for finish).
 )(
     // No ports needed for top-level testbench
 );
@@ -168,8 +172,7 @@ module tb_coordinated #(
     logic state_out;
     
     // Completion tracking
-    bit blocks_done = 0;
-    
+    int blocks_done = 0;
     
     // Clock generation - using parameter
     initial begin: clock_gen
@@ -182,7 +185,6 @@ module tb_coordinated #(
         reset = 1;
         #(RESET_DELAY) reset = 0;
     end
-    
     
     // ====================================================
     // DUT INSTANTIATION
@@ -216,7 +218,7 @@ module tb_coordinated #(
         for(int i=0; i<COMB_TOTAL_TESTS; i++) begin
             @(*); // Wait for any variable change
             #1;   // Small delay for settling
-
+            // STIMULATE VARIABLES HERE
         end
         
         blocks_done = blocks_done + 1;
@@ -229,7 +231,7 @@ module tb_coordinated #(
         
         for(int i=0; i<SEQ_TOTAL_TESTS; i++) begin
             @(posedge clk);
-
+                // STIMULATE VARIABLES HERE
         end
         
         blocks_done = blocks_done + 1;
