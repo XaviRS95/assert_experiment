@@ -72,7 +72,7 @@ def extract_sensitivity_list_variables(dut_module: str)-> list:
 def extract_property_details(test_module: str)-> list:
     # 1. Regex to find property blocks
     # Captures: Name, Activation, and the Body of the property
-    prop_pattern = r'property\s+(\w+);.*?@\((.*?)\)(.*?)endproperty'
+    prop_pattern = r'property\s+\w+;.*?@\((.*?)\)(.*?)endproperty'
     matches = re.finditer(prop_pattern, test_module, re.DOTALL)
 
     # SystemVerilog keywords/built-ins to ignore when extracting variables
@@ -81,7 +81,6 @@ def extract_property_details(test_module: str)-> list:
     results = []
 
     for match in matches:
-        name = match.group(1)
         activation = match.group(2).strip()
         body = match.group(3).strip()
 
@@ -97,7 +96,6 @@ def extract_property_details(test_module: str)-> list:
                 variables.add(word)
 
         results.append({
-            "property_name": name,
             "activation": activation,
             "variables": sorted(list(variables))
         })
@@ -123,7 +121,7 @@ print(group_sequential_tests(dut_module=dut_module, test_module=test_module))
 
 
 
-def get_combinational_sensitivity_list(test_module: str)-> dict:
+def get_sensitivity_list(test_module: str)-> tuple:
     PATTERN = r'@\((.*?)\)'
     combinational_sensitivity_list = []
     sequential_sensitivity_list = []
@@ -132,10 +130,41 @@ def get_combinational_sensitivity_list(test_module: str)-> dict:
     matches = re.findall(PATTERN, test_module)
 
     for event in matches:
-        if 'posedge' in event:
-            sequential_sensitivity_list.append(event.replace('posedge', '').strip())
-        elif 'negedge' in event:
-            combinational_sensitivity_list.append(event.replace('negedge', '').strip())
+        if 'posedge' in event or 'negedge' in event:
+            sequential_sensitivity_list.append(event.strip())
+        else:
+            combinational_sensitivity_list.append(event.strip())
+
+    return combinational_sensitivity_list, sequential_sensitivity_list
+
+
+def generate_sequential_blocks(variables_per_sensitivity: dict, )-> list:
+
+    sequential_blocks = []
+
+    #get variable memory stimulations.
+    #stimulus = get_stimulus(variables_per_sensitivity.keys())
+    stimulus = ''
+
+
+    for key, value in variables_per_sensitivity.items():
+        sequential_template = (f'\tinitial begin'
+                               f'\t\t// Wait for reset to complete'
+                               f'\t\t#(RESET_DELAY + 5);'
+                               f'\t\tfor(int i=0; i<SEQ_TOTAL_TESTS; i++) begin'
+                               f'\t\t\t@({key});'
+                               f'{stimulus}'
+                               f'\t\tend'
+                               f'\t\tblocks_done = blocks_done + 1;'
+                               f'\tend'
+                               f''
+                               f''
+                               f'')
+
+
+def generate_blocks():
+    pass
+
 
 
 
