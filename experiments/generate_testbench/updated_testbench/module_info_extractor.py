@@ -146,3 +146,119 @@ def get_combinational_sensitivity_list(test_module: str)-> dict:
 
 
 
+new_testbench_template = '''
+`timescale 1na/1ns
+
+module tb_coordinated #(
+    // Simulation control parameters
+    parameter int CLK_HALF_PERIOD = 5,        // Half clock period (for #5 clk = ~clk)
+    parameter int RESET_DELAY = 30,           // Reset duration in time units
+    parameter int TIMEOUT_LIMIT = 20000,      // Timeout limit in time units
+    parameter int COMB_TOTAL_TESTS = 100,     // Number of combinational tests
+    parameter int SEQ_TOTAL_TESTS = 100,      // Number of sequential tests
+    parameter int POST_COMPLETION_DELAY = 100, // Delay after completion before $finish
+    parameter int TOTAL_TEST_BLOCKS = 3 //Total number of blocks (sequential and combinational) that need to be tested and wait for finish).
+)(
+    // No ports needed for top-level testbench
+);
+    
+    // Common signals
+    logic clk;
+    logic reset;
+    logic state_out;
+    
+    // Completion tracking
+    bit blocks_done = 0;
+    
+    
+    // Clock generation - using parameter
+    initial begin: clock_gen
+        clk = 0;
+        forever #(CLK_HALF_PERIOD) clk = ~clk;
+    end
+    
+    // Reset sequence - using parameter
+    initial begin: reset_seq
+        reset = 1;
+        #(RESET_DELAY) reset = 0;
+    end
+    
+    
+    // ====================================================
+    // DUT INSTANTIATION
+    // ====================================================
+
+    fsm51 dut (
+        .clk(clk),
+        .reset(reset),
+        .state_out(state_out)
+    );
+    
+    // ====================================================
+    // ASSERT MODULE BINDING
+    // ====================================================
+    
+    bind fsm51 assert_module assert_inst (
+        .clk(clk),
+        .reset(reset),
+        .state_out(state_out)
+    );
+    
+    // ====================================================
+    // TEST BLOCKS STIMULATIONS
+    // ====================================================
+    
+    // COMBINATIONAL TESTS
+    initial begin: comb_tests
+        // Wait for reset to complete
+        #(RESET_DELAY + 5);
+        
+        for(int i=0; i<COMB_TOTAL_TESTS; i++) begin
+            @(*); // Wait for any variable change
+            #1;   // Small delay for settling
+
+        end
+        
+        blocks_done = blocks_done + 1;
+    end
+    
+    // SEQUENTIAL TESTS
+    initial begin: seq_tests
+        // Wait for reset to complete
+        #(RESET_DELAY + 5);
+        
+        for(int i=0; i<SEQ_TOTAL_TESTS; i++) begin
+            @(posedge clk);
+
+        end
+        
+        blocks_done = blocks_done + 1;
+    end
+    
+    // ====================================================
+    // SIMULATION END TRIGGER
+    // ====================================================
+    
+    initial begin: monitor
+        // Wait until both test suites are done
+        wait(blocks_done == (TOTAL_TEST_BLOCKS));
+        
+        // Extra time for any final assertions to trigger
+        #(POST_COMPLETION_DELAY);
+        
+        $display("[%0t] Simulation complete - $finish called", $time);
+        $finish;
+    end
+    
+    // ====================================================
+    // TIMEOUT PROTECTION
+    // ====================================================
+    initial begin: timeout
+        #(TIMEOUT_LIMIT);
+        $display("❌ TIMEOUT ERROR at %0t", $time);
+        $display("   Timeout limit: %0d", TIMEOUT_LIMIT);
+        $finish;
+    end
+      
+endmodule
+'''
