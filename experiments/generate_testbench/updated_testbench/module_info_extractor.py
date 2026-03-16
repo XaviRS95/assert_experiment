@@ -47,13 +47,15 @@ property pkampmbdkjhnkofcbkaeomhcbfcbkllm;
 endproperty
 assert property (pkampmbdkjhnkofcbkaeomhcbfcbkllm);
 
-
 endmodule
-
 '''
 
-def extract_sensitivity_list_variables(dut_module: str)-> list:
-
+def extract_sequential_sensitivity_list_variables(dut_module: str)-> list:
+    '''
+    Identifies the signals used in the sensitivity list of all sequential blocks from the original module.
+    :param dut_module:
+    :return:
+    '''
     block_pattern = r'(always_ff|always_latch)\s*@\s*\((.*?)\)'
     raw_lists = re.findall(block_pattern, dut_module, re.DOTALL)
 
@@ -65,35 +67,49 @@ def extract_sensitivity_list_variables(dut_module: str)-> list:
         elements = re.split(r'\s+or\s+|\s*,\s*', list_content.strip())
         all_elements.extend(elements)
 
-    final_sensitivity_list = list(set(all_elements))
+    sequential_sensitivity_list = list(set(all_elements))
     # Return unique elements, cleaned of any trailing/leading whitespace
-    return final_sensitivity_list
+    return sequential_sensitivity_list
 
-def extract_property_details(test_module: str)-> list:
-    # 1. Regex to find property blocks
-    # Captures: Name, Activation, and the Body of the property
+def get_combinational_sensitivity_lists(test_module: str, sequential_sensitivity_list: list)-> tuple:
+    '''
+    Extracts the sensitivity list from all testing that are combinational (do not rely on clock nor reset activations)
+    :param test_module:
+    :param sequential_sensitivity_list:
+    :return:
+    '''
+    PATTERN = r'@\((.*?)\)'
+    combinational_sensitivity_list = []
+
+    # Find all matches
+    matches = re.findall(PATTERN, test_module)
+
+    for event in matches:
+        if event not in sequential_sensitivity_list:
+            combinational_sensitivity_list.append(event.strip())
+
+    return combinational_sensitivity_list, sequential_sensitivity_list
+
+def group_activations_with_ports_names(test_module: str)-> list:
+    '''
+    Extracts the sensitivity list that activates each port from all the tests.
+    This is crucial to later understand what ports stimulate under what sensitivity lists,
+    to build each stimulating testing block.
+    :param test_module:
+    :return:
+    '''
     prop_pattern = r'property\s+\w+;.*?@\((.*?)\)(.*?)endproperty'
     matches = re.finditer(prop_pattern, test_module, re.DOTALL)
-
-    # SystemVerilog keywords/built-ins to ignore when extracting variables
-    reserved = {'posedge', 'negedge', 'disable', 'iff', 'past', 'input', 'logic'}
 
     results = []
 
     for match in matches:
-        activation = match.group(2).strip()
-        body = match.group(3).strip()
+        activation = match.group(1).strip()
+        body = match.group(2).strip()
 
-        # 2. Extract variable names from the body
-        # Matches words starting with a letter, ignoring numbers and special chars
-        # We look for words like 'value', 'en', 'rst'
-        all_words = re.findall(r'\b[a-zA-Z_]\w*\b', body)
-
-        # Filter out keywords and the $ from $past
         variables = set()
-        for word in all_words:
-            if word.lower() not in reserved:
-                variables.add(word)
+
+        #TODO EXTRACT THE PORTS NAMES FROM THE LEFT HAND SIDE AND THE RIGHT HAND SIDE.
 
         results.append({
             "activation": activation,
@@ -102,44 +118,72 @@ def extract_property_details(test_module: str)-> list:
 
     return results
 
-def group_sequential_tests(dut_module:str, test_module: str) -> dict:
+def group_activations_with_signal_names(dut_module:str, test_module: str) -> tuple:
+    '''
+    Groups the ports with their activation variables.
+    :param dut_module:
+    :param test_module:
+    :return:
+    '''
 
-    sensitivity_list_variables = extract_sensitivity_list_variables(dut_module=dut_module)
+    #All the sequential blocks activation combinations are stored.
+    sequential_sensitivity_list_variables = extract_sequential_sensitivity_list_variables(dut_module=dut_module)
 
-    property_details = extract_property_details(test_module=test_module)
+    # All the combinations of the combinational blocks activation are stored.
+    combinational_sensitivity_lists_variables = get_combinational_sensitivity_lists(test_module = test_module, sequential_sensitivity_list=sequential_sensitivity_list_variables)
 
-    grouped_variables_by_testing = dict.fromkeys(sensitivity_list_variables, [])
+    #Groups all the activations with the ports that are involved in that block.
+    activations_with_ports_names = group_activations_with_ports_names(test_module=test_module)
 
-    for property in property_details:
-        if property['activation'] in grouped_variables_by_testing:
-            grouped_variables_by_testing[property['activation']].append(property['variables'])
+    combinational_grouped_variables_by_testing = dict.fromkeys(combinational_sensitivity_lists_variables, [])
+    sequential_grouped_variables_by_testing = dict.fromkeys(sequential_sensitivity_list_variables, [])
 
-    return grouped_variables_by_testing
+    for activation in activations_with_ports_names:
+        #Check if it's an activation condition previously recognized
+        if activation['activation'] in sequential_grouped_variables_by_testing:
+            sequential_grouped_variables_by_testing[activation['activation']] += activation['variables']
+        elif activation['activation'] in combinational_grouped_variables_by_testing:
+            combinational_grouped_variables_by_testing[activation['activation']] = list(set(combinational_grouped_variables_by_testing[activation['activation']]))
 
+    return combinational_grouped_variables_by_testing, sequential_grouped_variables_by_testing
 
-print(group_sequential_tests(dut_module=dut_module, test_module=test_module))
-
-
-
-def get_sensitivity_list(test_module: str)-> tuple:
-    PATTERN = r'@\((.*?)\)'
-    combinational_sensitivity_list = []
-    sequential_sensitivity_list = []
-
-    # Find all matches
-    matches = re.findall(PATTERN, test_module)
-
-    for event in matches:
-        if 'posedge' in event or 'negedge' in event:
-            sequential_sensitivity_list.append(event.strip())
-        else:
-            combinational_sensitivity_list.append(event.strip())
-
-    return combinational_sensitivity_list, sequential_sensitivity_list
+#print(group_activations_with_signal_names(dut_module=dut_module, test_module=test_module))
 
 
-def generate_sequential_blocks(variables_per_sensitivity: dict, )-> list:
+def generate_combinational_blocks(activations_with_ports: dict) -> list:
+    '''
 
+    :param activations_with_ports:
+    :return:
+    '''
+    combinational_blocks = []
+
+    # get variable memory stimulations.
+    # stimulus = get_stimulus(variables_per_sensitivity.keys())
+    stimulus = ''
+
+    for key, value in activations_with_ports.items():
+        sequential_template = (f'\tinitial begin\n'
+                               f'\t\t// Wait for reset to complete\n'
+                               f'\t\t#(RESET_DELAY + 5);\n'
+                               f'\t\tfor(int i=0; i<COMB_TOTAL_TESTS; i++) begin\n'
+                               f'\t\t\t@({key});\n'
+                               f'{stimulus}'
+                               f'\t\tend\n'
+                               f'\t\tblocks_done = blocks_done + 1;\n'
+                               f'\tend\n')
+
+        combinational_blocks.append(sequential_template)
+
+    return combinational_blocks
+
+
+def generate_sequential_blocks(activations_with_ports: dict)-> list:
+    '''
+
+    :param activations_with_ports:
+    :return:
+    '''
     sequential_blocks = []
 
     #get variable memory stimulations.
@@ -147,24 +191,39 @@ def generate_sequential_blocks(variables_per_sensitivity: dict, )-> list:
     stimulus = ''
 
 
-    for key, value in variables_per_sensitivity.items():
-        sequential_template = (f'\tinitial begin'
-                               f'\t\t// Wait for reset to complete'
-                               f'\t\t#(RESET_DELAY + 5);'
-                               f'\t\tfor(int i=0; i<SEQ_TOTAL_TESTS; i++) begin'
-                               f'\t\t\t@({key});'
+    for key, value in activations_with_ports.items():
+        sequential_template = (f'\tinitial begin\n'
+                               f'\t\t// Wait for reset to complete\n'
+                               f'\t\t#(RESET_DELAY + 5);\n'
+                               f'\t\tfor(int i=0; i<SEQ_TOTAL_TESTS; i++) begin\n'
+                               f'\t\t\t@({key});\n'
                                f'{stimulus}'
-                               f'\t\tend'
-                               f'\t\tblocks_done = blocks_done + 1;'
-                               f'\tend'
-                               f''
-                               f''
-                               f'')
+                               f'\t\tend\n'
+                               f'\t\tblocks_done = blocks_done + 1;\n'
+                               f'\tend\n')
+
+        sequential_blocks.append(sequential_template)
+
+    return sequential_blocks
+
 
 
 def generate_blocks():
-    pass
+    combinational_activations, sequential_activations = group_activations_with_signal_names(dut_module = dut_module, test_module = test_module)
+    combinational_blocks = "\n\n".join(generate_combinational_blocks(activations_with_ports=combinational_activations))
+    sequential_blocks = "\n\n".join(generate_sequential_blocks(activations_with_ports=sequential_activations))
 
+    stimulus_blocks_section = (f'// ====================================================\n'
+                               f'// TEST BLOCKS STIMULATIONS\n'
+                               f'// ====================================================\n'
+                               f'\n'
+                               f'// COMBINATIONAL TESTS\n'
+                               f'{combinational_blocks}\n'
+                               f'\n'
+                               f'// SEQUENTIAL TESTS\n'
+                               f'{sequential_blocks}\n')
+
+    return stimulus_blocks_section
 
 
 
