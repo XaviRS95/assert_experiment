@@ -99,7 +99,6 @@ def main():
                                              instantiate_section=full_instantiate_section,
                                              initial_stimuli_section=initial_stimuli_section)
 
-        print(final_module)
 
         testbench_test_results = try_testbench(dut_module = row['original_code'],
                                              assert_module = row['generated_code'],

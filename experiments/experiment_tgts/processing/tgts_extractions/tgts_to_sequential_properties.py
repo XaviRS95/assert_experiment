@@ -26,7 +26,6 @@ def sequential_properties_from_tgts(tgts_rules: list, sensitivity_list: dict) ->
         if constains_delays(text=clauses):
             clauses = remove_clock_cycle_notation(clauses)
 
-
         # Process check expression
         checks = clean_logical_operators(rule['check'])
         final_check = checks
@@ -45,8 +44,8 @@ def sequential_properties_from_tgts(tgts_rules: list, sensitivity_list: dict) ->
         if (clauses == "ASYNC_RST_CHECK" and
                 reset_info['reset_signal_activation']):
             assertion = generate_async_reset_assert(
-                reset_info['reset_signal_activation'],
-                final_check
+                reset_sensitivity_activation= sensitivity_list['rst'],
+                final_check = final_check
             )
         else:
             assertion = generate_sequential_property(
