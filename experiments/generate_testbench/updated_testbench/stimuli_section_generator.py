@@ -1,67 +1,35 @@
+from module_info_extractor import separate_grouped_activations_in_seq_or_comb, group_activations_with_ports_names
 import re
 
+def generate_activation_with_full_type_list(full_type_signals: list, separated_activations: dict)-> dict:
+    '''
+    Obtains for each activation the full type of all the port variables inside of it.
+    This is used to later generate the stimuli for each one of them.
+    :param full_type_signals: full_type_signals = normalize_ports_with_range(input_signals=signals)
+    :param separated_activations: Either the combinational or sequential separated activation.
+    :return:
+    '''
+    new_separated_activations = dict.fromkeys(separated_activations.keys(), [])
 
-def generate_reset_initial_info(reset_trigger:str, reset_signal: str, initial_reset_time: int)-> str:
+    for activation, ports_names in separated_activations.items():
+        for signal in ports_names:
+            for full_type_signal in full_type_signals:
+                space_separated_signal = full_type_signal.split(' ')
+                if signal == space_separated_signal[-1]:
+                    new_separated_activations[activation].append(full_type_signal)
 
-    TEMPLATE = '\n'
+    return new_separated_activations
 
-    if reset_signal and reset_trigger:
-        reset_info = {
-            'reset_assert_value': "0",
-            'reset_deassert_value': "1",
-            'reset_wait_edge': "posedge reset",  # Wait for low→high
-        }
 
-        if "posedge" in reset_trigger:
-            reset_info['reset_assert_value'] = "1"
-            reset_info['reset_deassert_value'] = "0"
-            reset_info['reset_wait_edge'] = "negedge reset"  # Wait for high→low
-
-        TEMPLATE = (f'\tinitial begin\n'
-                    f'\t\t{reset_signal} = {reset_info["reset_assert_value"]};\n'
-                    f'\t\t#{initial_reset_time};\n'
-                    f'\t\t{reset_signal} = {reset_info["reset_deassert_value"]};\n'
-                    f'\tend\n')
-
-    return TEMPLATE
-
-def generate_clock_reset_initial_section(initial_reset_info: str, clock_signal:str= '', reset_signal:str= '', clock_period:int=0):
-    template = ''
-
-    #Generates the section of clock_signal if there is a clock in the module.
-    if clock_signal:
-        template += f'\tlogic {clock_signal} = 0;\n'
-        if clock_period > 0:
-            template += f'\talways #{clock_period} {clock_signal} = ~{clock_signal};\n'
-
-    #Generates the reset section for if there is a reset section.
-    if reset_signal:
-        template += f'\tlogic {reset_signal};\n'
-
-    if initial_reset_info:
-        template += f'{initial_reset_info}\n'
-
-    return template
-
-def declare_dut_signals(signals: str)-> str:
-    clean_signals = signals.replace('input ', '').replace('output ', '')
-    return clean_signals
-
-def generate_instantiate_section(module_name: str, signals_list: list, section_type: str):
-
-    dut_module = f'\t{module_name} {section_type} (\n'
-    signals = ''
-
-    for i in range(len(signals_list)):
-        signals += f'\t\t.{signals_list[i]}({signals_list[i]}){"," if i < len(signals_list) - 1 else ""}\n'
-
-    dut_module += signals
-    dut_module +=  f'\t);\n'
-
-    return dut_module
 
 def generate_signal_stimulus(signals: list, clock_signal: str, reset_signal:str) -> str:
-    """Generate stimulus assignments for input signals only with enhanced type support"""
+    '''
+    Generate stimulus assignments for input signals only with enhanced type support
+    :param signals: Full type signals that include inpyt|output and the datatype
+    :param clock_signal:
+    :param reset_signal:
+    :return:
+    '''
 
     # Extended list of SystemVerilog data types
     SV_TYPES = {
@@ -178,7 +146,12 @@ def generate_signal_stimulus(signals: list, clock_signal: str, reset_signal:str)
     return template
 
 def parse_signal_declaration(signal):
-    """Enhanced parser for SystemVerilog signal declarations"""
+    '''
+    Enhanced parser for SystemVerilog signal declarations
+    :param signal:
+    :return:
+    '''
+
     # Remove leading/trailing whitespace
     signal = signal.strip()
 
@@ -230,74 +203,85 @@ def parse_signal_declaration(signal):
     return None, None, None
 
 
+def generate_combinational_blocks(full_type_signals: list, activations_with_ports: dict, clock_signal: str, reset_signal: str) -> list:
+    '''
 
-def generate_initial_stimulus(num_of_tests:int, signal_stimulus: str, clock_activation:str=''):
+    :param activations_with_ports:
+    :return:
+    '''
+    combinational_blocks = []
 
-    clock_activation = "@(" + clock_activation + ");" if clock_activation else ''
+    activation_with_full_type_list = generate_activation_with_full_type_list(full_type_signals = full_type_signals, separated_activations=activations_with_ports)
 
-    TEMPLATE = (f'\tinitial begin',
-                f'\t\tfor(int i=0; i<{num_of_tests};i++) begin',
-                f'\t\t\t{clock_activation}',
-                f'{signal_stimulus}',
-                f'\t\t\t#1ps;\n'
-                f'\t\t\t#5ns;\n'
-                f'\t\tend',
-                f'\t\t#10ns;',
-                f'\t\t$display("Test complete!");',
-                f'\tend')
+    for key, value in activation_with_full_type_list.items():
 
-    return '\n'.join(TEMPLATE)
+        stimulus = generate_signal_stimulus(signals=activation_with_full_type_list[key], reset_signal=reset_signal, clock_signal=clock_signal)
 
-def extract_variable_names(signals_list: list):
-    signals_names = []
+        sequential_template = (f'\tinitial begin\n'
+                               f'\t\t// Wait for reset to complete\n'
+                               f'\t\t#(RESET_DELAY + 5);\n'
+                               f'\t\tfor(int i=0; i<COMB_TOTAL_TESTS; i++) begin\n'
+                               f'\t\t\t@({key});\n'
+                               f'{stimulus}'
+                               f'\t\tend\n'
+                               f'\t\tblocks_done = blocks_done + 1;\n'
+                               f'\tend\n')
 
-    for signal in signals_list:
-        signals_names.append(signal.split(' ')[-1])
+        combinational_blocks.append(sequential_template)
 
-    return signals_names
+    return combinational_blocks
 
-def generate_final_module(timescale: str, clock_reset_initial_section: str, instantiate_section: str, initial_stimuli_section: str):
-    TEMPLATE = (f'`{timescale}\n\n'
-                f'module tb;\n\n'
-                f'{clock_reset_initial_section}'
-                f'{instantiate_section}'
-                f'{initial_stimuli_section}'
-                f'\nendmodule')
 
-    return ''.join(TEMPLATE)
+def generate_sequential_blocks(full_type_signals: list, activations_with_ports: dict, clock_signal: str, reset_signal: str)-> list:
+    '''
 
-def generate_full_instantiate_section(clean_signals: list, dut_section: str, assert_section: str, clock_signal:str = '', reset_signal: str = ''):
+    :param activations_with_ports:
+    :return:
+    '''
+    sequential_blocks = []
 
-    clean_signals = [signal.replace("input ", "").replace("output ", "") for signal in clean_signals]
+    activation_with_full_type_list = generate_activation_with_full_type_list(full_type_signals = full_type_signals, separated_activations=activations_with_ports)
 
-    #Eliminate clock and reset signal from the list if they exist
-    if clock_signal:
-        clean_signals = [signal for signal in clean_signals if clock_signal not in signal]
+    for key, value in activations_with_ports.items():
 
-    if reset_signal:
-        clean_signals = [signal for signal in clean_signals if reset_signal not in signal]
+        stimulus = generate_signal_stimulus(signals=activation_with_full_type_list[key], reset_signal=reset_signal,
+                                            clock_signal=clock_signal)
 
-    clean_signals = '\n'.join([f'\t{signal};' for signal in clean_signals])
+        sequential_template = (f'\tinitial begin\n'
+                               f'\t\t// Wait for reset to complete\n'
+                               f'\t\t#(RESET_DELAY + 5);\n'
+                               f'\t\tfor(int i=0; i<SEQ_TOTAL_TESTS; i++) begin\n'
+                               f'\t\t\t@({key});\n'
+                               f'{stimulus}'
+                               f'\t\tend\n'
+                               f'\t\tblocks_done = blocks_done + 1;\n'
+                               f'\tend\n')
 
-    return clean_signals + '\n\n' + dut_section + '\n' + assert_section
+        sequential_blocks.append(sequential_template)
 
-def genetate_dut_assert_sections(signals: list, dut_module_name: str, assert_module_name: str) -> dict:
+    return sequential_blocks
 
-    signals_names = extract_variable_names(signals_list = signals)
 
-    dut_section = generate_instantiate_section(
-        module_name=dut_module_name,
-        signals_list=signals_names,
-        section_type='dut'
-    )
 
-    assert_section = generate_instantiate_section(
-        module_name=assert_module_name,
-        signals_list=signals_names,
-        section_type='assertions'
-    )
+def generate_blocks(dut_module: str, test_module: str):
+    '''
+    Main function to generate the combinational and sequential stimuli blocks
+    :param dut_module:
+    :param test_module:
+    :return:
+    '''
+    combinational_activations, sequential_activations = separate_grouped_activations_in_seq_or_comb(dut_module = dut_module, test_module = test_module)
+    combinational_blocks = "\n\n".join(generate_combinational_blocks(activations_with_ports=combinational_activations))
+    sequential_blocks = "\n\n".join(generate_sequential_blocks(activations_with_ports=sequential_activations))
 
-    return {
-        'dut_section': dut_section,
-        'assert_section': assert_section
-    }
+    stimulus_blocks_section = (f'// ====================================================\n'
+                               f'// TEST BLOCKS STIMULATIONS\n'
+                               f'// ====================================================\n'
+                               f'\n'
+                               f'// COMBINATIONAL TESTS\n'
+                               f'{combinational_blocks}\n'
+                               f'\n'
+                               f'// SEQUENTIAL TESTS\n'
+                               f'{sequential_blocks}\n')
+
+    return stimulus_blocks_section

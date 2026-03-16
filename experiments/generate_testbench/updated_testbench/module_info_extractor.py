@@ -1,54 +1,123 @@
 import re
 
-from experiments.experiment_tgts.processing.tgts_extractions.tgts_to_sequential_properties import \
-    sequential_properties_from_tgts
 
-dut_module = '''
-module case_range_1(input logic clk, rst, en, output logic [3:0] value);
-always_ff @(posedge clk or posedge rst) begin
-  if (rst) value <= 0;
-  else begin
-    case(value) inside
-      [0:3]: if (en) value <= value + 1;
-      [4:7]: if (en) value <= value - 1;
-      [8:11]: value <= 4'b0101;
-      [12:15]: value <= 0;
-    endcase
-  end
-end
-endmodule
-'''
+def get_module_name(module: str):
+    # Look for 'module' followed by the name
+    match = re.search(r'module\s+(\w+)', module)
+    return match.group(1) if match else None
 
-test_module = '''
-module case_range_1_asserts  (input logic clk, rst, en, input logic [3:0] value);
+def extract_ports_names(signals_list: list):
+    '''
+    Auxiliar function that extracts the names of the signals used in the dut and assert modules.
+    :param signals_list:
+    :return:
+    '''
+    signals_names = []
+    for signal in signals_list:
+        signals_names.append(signal.split(' ')[-1])
 
-property kpgfghmoemeckgaoakkmbhjooinkbmkg;
-	@(posedge rst) value == 4'b0000;
-endproperty
-assert property (kpgfghmoemeckgaoakkmbhjooinkbmkg);
+    return signals_names
 
-property lnhdgpokgdhgkbfabaocidmdmkogjfce;
-    @(posedge clk) disable iff(rst) ((value >= 4'd0) && (value <= 4'd3) && (en == 1'b1)) |=> (value == ($past(value) + 1));
-endproperty
-assert property (lnhdgpokgdhgkbfabaocidmdmkogjfce);
+def generate_instantiate_section(module_name: str, signals_list: list, section_type: str):
+    '''
+    Generates the binding of the dut and assert modules with their port signals.
+    :param module_name:
+    :param signals_list:
+    :param section_type:
+    :return:
+    '''
+    dut_module = f'\t{module_name} {section_type} (\n'
+    signals = ''
+    for i in range(len(signals_list)):
+        signals += f'\t\t.{signals_list[i]}({signals_list[i]}){"," if i < len(signals_list) - 1 else ""}\n'
 
-property mifjoipicmkjkcnebgbnhkjofhijnlbm;
-    @(posedge clk) disable iff(rst) ((value >= 4'd4) && (value <= 4'd7) && (en == 1'b1)) |=> (value == ($past(value) - 1));
-endproperty
-assert property (mifjoipicmkjkcnebgbnhkjofhijnlbm);
+    dut_module += signals
+    dut_module +=  f'\t);\n'
 
-property doakfoclahnikohmpcpgecihpbmgkjnm;
-    @(posedge clk) disable iff(rst) ((value >= 4'd8) && (value <= 4'd11)) |=> (value == 4'b0101);
-endproperty
-assert property (doakfoclahnikohmpcpgecihpbmgkjnm);
+    return dut_module
 
-property pkampmbdkjhnkofcbkaeomhcbfcbkllm;
-    @(posedge clk) disable iff(rst) ((value >= 4'd12) && (value <= 4'd15)) |=> (value == 4'b0000);
-endproperty
-assert property (pkampmbdkjhnkofcbkaeomhcbfcbkllm);
+def get_port_signals(module: str):
+    # Captures everything between 'module name (...);'
+    # Handles multi-line port lists
+    port_block = re.search(r'module\s+\w+\s*\((.*?)\)\s*;', module, re.DOTALL)
+    if not port_block:
+        return []
 
-endmodule
-'''
+    # Split by comma and clean up whitespace/newlines
+    raw_ports = port_block.group(1).split(',')
+    clean_ports = [re.sub(r'\s+', ' ', p).strip() for p in raw_ports]
+    return [p for p in clean_ports if p]
+
+def get_triggers(module: str):
+    # Find all always blocks and capture their trigger/type
+
+    # 1. Capture sequential blocks: always_ff @(...) or always_latch @(...)
+    seq_matches = re.finditer(r'always_(?:ff|latch) @(.*) begin', module)
+
+    clk_trigger = ''
+    rst_trigger = ''
+
+    for m in seq_matches:
+        trigger = m.group(1).strip().replace('(','').replace(')','').split(' or ')
+        if trigger:
+            clk_trigger = trigger[0]
+            if len(trigger) > 1:
+                rst_trigger = trigger[1]
+        continue
+
+    return clk_trigger, rst_trigger
+
+def normalize_ports_with_range(input_signals: list)-> list:
+    '''
+    Includes the input|output type and the port type for all the variables.
+    :param input_signals:
+    :return:
+    '''
+    # Remove outer module parentheses/semicolon
+
+    normalized = []
+
+    # Persistent State
+    curr_dir = "input"
+    curr_type = "logic"
+    curr_range = ""
+
+    for part in input_signals:
+        part = part.strip()
+        if not part: continue
+
+        # Regex breakdown:
+        # 1. (dir)?    -> Optional input/output/inout
+        # 2. (type)?   -> Optional logic/reg/wire
+        # 3. (range)?  -> Optional [3:0]
+        # 4. (name)    -> Signal name (Required)
+        pattern = r'^(?P<dir>input|output|inout)?\s*(?P<type>logic|reg|wire)?\s*(?P<range>\[.*?\])?\s*(?P<name>\w+)$'
+        match = re.search(pattern, part)
+
+        if match:
+            # Update state if a NEW direction or type is explicitly mentioned
+            # If a new direction/type appears, we usually reset the range
+            # UNLESS a new range is also provided in the same part.
+            new_dir = match.group('dir')
+            new_type = match.group('type')
+            new_range = match.group('range')
+
+            if new_dir:
+                curr_dir = new_dir
+                curr_range = ""  # Reset range on direction change
+            if new_type:
+                curr_type = new_type
+                curr_range = ""  # Reset range on type change
+            if new_range:
+                curr_range = new_range
+
+            p_name = match.group('name')
+
+            # Construct the explicit string using the current persistent state
+            full_decl = f"{curr_dir} {curr_type} {curr_range}".replace("  ", " ").strip()
+            normalized.append(f"{full_decl} {p_name}")
+
+    return normalized
 
 def extract_sequential_sensitivity_list_variables(dut_module: str)-> list:
     '''
@@ -90,7 +159,8 @@ def get_combinational_sensitivity_lists(test_module: str, sequential_sensitivity
 
     return combinational_sensitivity_list, sequential_sensitivity_list
 
-def group_activations_with_ports_names(test_module: str)-> list:
+
+def group_activations_with_ports_names(test_module: str)-> dict:
     '''
     Extracts the sensitivity list that activates each port from all the tests.
     This is crucial to later understand what ports stimulate under what sensitivity lists,
@@ -99,26 +169,54 @@ def group_activations_with_ports_names(test_module: str)-> list:
     :return:
     '''
     prop_pattern = r'property\s+\w+;.*?@\((.*?)\)(.*?)endproperty'
-    matches = re.finditer(prop_pattern, test_module, re.DOTALL)
+    matches = re.findall(prop_pattern, test_module, re.DOTALL)
 
-    results = []
+    results = {}
 
-    for match in matches:
-        activation = match.group(1).strip()
-        body = match.group(2).strip()
+    all_extracted_vars = set()
 
-        variables = set()
+    for activation, body in matches:
+        # 2. Split by implication operators |-> or |=>
+        parts = re.split(r'\|->|\|=>', body)
 
-        #TODO EXTRACT THE PORTS NAMES FROM THE LEFT HAND SIDE AND THE RIGHT HAND SIDE.
+        antecedent = parts[0]
 
-        results.append({
-            "activation": activation,
-            "variables": sorted(list(variables))
-        })
+        # 3. Split by logical && or ||
+        logical_groups = re.split(r'&&|\|\|', antecedent)
+
+        for group in logical_groups:
+            # 4. Remove parentheses to simplify the string
+            clean_group = group.replace('(', '').replace(')', '').strip()
+
+            # 5. Split by comparison operators to isolate the LHS
+            # This handles ==, >=, <=, !=, >, <
+            comparisons = re.split(r'==|>=|<=|!=|>|<', clean_group)
+            lhs = comparisons[0].strip()
+
+            # 6. Extract Variable Names
+            # We look for words starting with alpha/underscore.
+            # We specifically exclude matches that look like SV constants (e.g., 8'hFF)
+            # by checking if they are preceded by a tick (').
+
+            # Regex breakdown:
+            # (?<!['\d])  -> Negative lookbehind: Don't match if preceded by a tick or digit (filters 1'b1)
+            # \b[a-zA-Z_]\w*\b -> Standard identifier pattern
+            found_vars = re.findall(r"(?<!['\d\w])\b([a-zA-Z_]\w*)\b", lhs)
+
+            for v in found_vars:
+                all_extracted_vars.add(v)
+
+
+        if activation not in results:
+            results[activation] = list(all_extracted_vars)
+        else:
+            new_list = sorted(list(set(results[activation] + list(all_extracted_vars))))
+            results[activation] = new_list
+
 
     return results
 
-def group_activations_with_signal_names(dut_module:str, test_module: str) -> tuple:
+def separate_grouped_activations_in_seq_or_comb(dut_module:str, test_module: str) -> tuple:
     '''
     Groups the ports with their activation variables.
     :param dut_module:
@@ -138,217 +236,17 @@ def group_activations_with_signal_names(dut_module:str, test_module: str) -> tup
     combinational_grouped_variables_by_testing = dict.fromkeys(combinational_sensitivity_lists_variables, [])
     sequential_grouped_variables_by_testing = dict.fromkeys(sequential_sensitivity_list_variables, [])
 
-    for activation in activations_with_ports_names:
+    for activation in activations_with_ports_names.keys():
         #Check if it's an activation condition previously recognized
-        if activation['activation'] in sequential_grouped_variables_by_testing:
-            sequential_grouped_variables_by_testing[activation['activation']] += activation['variables']
-        elif activation['activation'] in combinational_grouped_variables_by_testing:
-            combinational_grouped_variables_by_testing[activation['activation']] = list(set(combinational_grouped_variables_by_testing[activation['activation']]))
+        if activation in combinational_grouped_variables_by_testing.keys():
+            combinational_grouped_variables_by_testing[activation] += activations_with_ports_names[activation]
+        elif activation in sequential_grouped_variables_by_testing:
+            sequential_grouped_variables_by_testing[activation] += activations_with_ports_names[activation]
+
+        #Eliminate all the repeated port names from each activation type
+        combinational_grouped_variables_by_testing[activation] = list(set(combinational_grouped_variables_by_testing[activation]))
+        sequential_grouped_variables_by_testing[activation] = list(set(sequential_grouped_variables_by_testing[activation]))
 
     return combinational_grouped_variables_by_testing, sequential_grouped_variables_by_testing
 
 #print(group_activations_with_signal_names(dut_module=dut_module, test_module=test_module))
-
-
-def generate_combinational_blocks(activations_with_ports: dict) -> list:
-    '''
-
-    :param activations_with_ports:
-    :return:
-    '''
-    combinational_blocks = []
-
-    # get variable memory stimulations.
-    # stimulus = get_stimulus(variables_per_sensitivity.keys())
-    stimulus = ''
-
-    for key, value in activations_with_ports.items():
-        sequential_template = (f'\tinitial begin\n'
-                               f'\t\t// Wait for reset to complete\n'
-                               f'\t\t#(RESET_DELAY + 5);\n'
-                               f'\t\tfor(int i=0; i<COMB_TOTAL_TESTS; i++) begin\n'
-                               f'\t\t\t@({key});\n'
-                               f'{stimulus}'
-                               f'\t\tend\n'
-                               f'\t\tblocks_done = blocks_done + 1;\n'
-                               f'\tend\n')
-
-        combinational_blocks.append(sequential_template)
-
-    return combinational_blocks
-
-
-def generate_sequential_blocks(activations_with_ports: dict)-> list:
-    '''
-
-    :param activations_with_ports:
-    :return:
-    '''
-    sequential_blocks = []
-
-    #get variable memory stimulations.
-    #stimulus = get_stimulus(variables_per_sensitivity.keys())
-    stimulus = ''
-
-
-    for key, value in activations_with_ports.items():
-        sequential_template = (f'\tinitial begin\n'
-                               f'\t\t// Wait for reset to complete\n'
-                               f'\t\t#(RESET_DELAY + 5);\n'
-                               f'\t\tfor(int i=0; i<SEQ_TOTAL_TESTS; i++) begin\n'
-                               f'\t\t\t@({key});\n'
-                               f'{stimulus}'
-                               f'\t\tend\n'
-                               f'\t\tblocks_done = blocks_done + 1;\n'
-                               f'\tend\n')
-
-        sequential_blocks.append(sequential_template)
-
-    return sequential_blocks
-
-
-
-def generate_blocks():
-    combinational_activations, sequential_activations = group_activations_with_signal_names(dut_module = dut_module, test_module = test_module)
-    combinational_blocks = "\n\n".join(generate_combinational_blocks(activations_with_ports=combinational_activations))
-    sequential_blocks = "\n\n".join(generate_sequential_blocks(activations_with_ports=sequential_activations))
-
-    stimulus_blocks_section = (f'// ====================================================\n'
-                               f'// TEST BLOCKS STIMULATIONS\n'
-                               f'// ====================================================\n'
-                               f'\n'
-                               f'// COMBINATIONAL TESTS\n'
-                               f'{combinational_blocks}\n'
-                               f'\n'
-                               f'// SEQUENTIAL TESTS\n'
-                               f'{sequential_blocks}\n')
-
-    return stimulus_blocks_section
-
-
-
-TIMESCALE = '`timescale 1ns/1ns'
-CLK_HALF_PERIOD = 5
-RESET_DELAY = 30
-TIMEOUT_LIMIT = 20000
-COMB_TOTAL_TESTS = 100
-SEQ_TOTAL_TESTS = 100
-POST_COMPLETION_DELAY = 100
-total_test_blocks = 3
-
-#TODO RECUERDA QUE EL RESET NO NECESITA ALWAYS BEGIN, DIRECTAMENTE LO ACTIVAS CADA X Y SOLUCIONADO.
-
-new_testbench_template = f'''
-{TIMESCALE}
-
-module tb_coordinated #(
-    // Simulation control parameters
-    parameter int CLK_HALF_PERIOD = {CLK_HALF_PERIOD},        // Half clock period (for #5 clk = ~clk)
-    parameter int RESET_DELAY = {RESET_DELAY},           // Reset duration in time units
-    parameter int TIMEOUT_LIMIT = {TIMEOUT_LIMIT},      // Timeout limit in time units
-    parameter int COMB_TOTAL_TESTS = {COMB_TOTAL_TESTS},     // Number of combinational tests
-    parameter int SEQ_TOTAL_TESTS = {SEQ_TOTAL_TESTS},      // Number of sequential tests
-    parameter int POST_COMPLETION_DELAY = {POST_COMPLETION_DELAY}, // Delay after completion before $finish
-    parameter int TOTAL_TEST_BLOCKS = {total_test_blocks} //Total number of blocks (sequential and combinational) that need to be tested and wait for finish).
-)(
-    // No ports needed for top-level testbench
-);
-    
-    // Common signals
-    logic clk;
-    logic reset;
-    logic state_out;
-    
-    // Completion tracking
-    int blocks_done = 0;
-    
-    // Clock generation - using parameter
-    initial begin: clock_gen
-        clk = 0;
-        forever #(CLK_HALF_PERIOD) clk = ~clk;
-    end
-    
-    // Reset sequence - using parameter
-    initial begin: reset_seq
-        reset = 1;
-        #(RESET_DELAY) reset = 0;
-    end
-    
-    // ====================================================
-    // DUT INSTANTIATION
-    // ====================================================
-
-    fsm51 dut (
-        .clk(clk),
-        .reset(reset),
-        .state_out(state_out)
-    );
-    
-    // ====================================================
-    // ASSERT MODULE BINDING
-    // ====================================================
-    
-    bind fsm51 assert_module assert_inst (
-        .clk(clk),
-        .reset(reset),
-        .state_out(state_out)
-    );
-    
-    // ====================================================
-    // TEST BLOCKS STIMULATIONS
-    // ====================================================
-    
-    // COMBINATIONAL TESTS
-    initial begin: comb_tests
-        // Wait for reset to complete
-        #(RESET_DELAY + 5);
-        
-        for(int i=0; i<COMB_TOTAL_TESTS; i++) begin
-            @(*); // Wait for any variable change
-            #1;   // Small delay for settling
-            // STIMULATE VARIABLES HERE
-        end
-        
-        blocks_done = blocks_done + 1;
-    end
-    
-    // SEQUENTIAL TESTS
-    initial begin: seq_tests
-        // Wait for reset to complete
-        #(RESET_DELAY + 5);
-        
-        for(int i=0; i<SEQ_TOTAL_TESTS; i++) begin
-            @(posedge clk);
-                // STIMULATE VARIABLES HERE
-        end
-        
-        blocks_done = blocks_done + 1;
-    end
-    
-    // ====================================================
-    // SIMULATION END TRIGGER
-    // ====================================================
-    
-    initial begin: monitor
-        // Wait until both test suites are done
-        wait(blocks_done == (TOTAL_TEST_BLOCKS));
-        
-        // Extra time for any final assertions to trigger
-        #(POST_COMPLETION_DELAY);
-        
-        $display("[%0t] Simulation complete - $finish called", $time);
-        $finish;
-    end
-    
-    // ====================================================
-    // TIMEOUT PROTECTION
-    // ====================================================
-    initial begin: timeout
-        #(TIMEOUT_LIMIT);
-        $display("❌ TIMEOUT ERROR at %0t", $time);
-        $display("   Timeout limit: %0d", TIMEOUT_LIMIT);
-        $finish;
-    end
-      
-endmodule
-'''

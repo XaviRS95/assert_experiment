@@ -52,6 +52,7 @@ def main():
 
         assert_module_name = get_module_name(module=row['generated_code'])
 
+        #Get the signals from the dut module ports list.
         signals = get_port_signals(module=row['original_code'])
 
         clk_trigger, rst_trigger = get_triggers(module=row['original_code'])
@@ -63,7 +64,6 @@ def main():
         full_type_signals = normalize_ports_with_range(input_signals=signals)
 
         # Extracts only the input signals, leaving the output signals apart.
-
         initial_reset_info = generate_reset_initial_info(reset_trigger=rst_trigger,
                                                          reset_signal=rst_signal,
                                                          initial_reset_time=INITIAL_RESET_NS)
