@@ -1,4 +1,16 @@
 modules
+"
+module case6(input logic [1:0] state, output logic [2:0] light);
+    always_comb begin
+        case(state)
+            2'b00: light = 3'b100; // Red
+            2'b01: light = 3'b010; // Yellow
+            2'b10: light = 3'b001; // Green
+            default: light = 3'b100;
+        endcase
+    end
+endmodule
+"
 "module case_example1(input logic [1:0] a, output logic y);
     always_comb begin
         case(a)

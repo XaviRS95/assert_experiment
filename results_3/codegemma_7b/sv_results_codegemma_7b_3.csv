@@ -11,9 +11,9 @@ original_code,generated_code,iverilog_output,time(s),prompt_tkns,output_tkns
     end
 endmodule","module case_example1_asserts  (input logic [1:0] a, input logic y);
 
-    
 
-    
+
+
 
     always_comb begin
     hhplpbggmfimkglmbmldjpaamlilgcjl: assert( (a == 2'b01) ? (y == 1) : 1 )  else $error(""Error in immediate assert hhplpbggmfimkglmbmldjpaamlilgcjl"");

@@ -54,7 +54,7 @@ class CombinationalAssertionGenerator:
             code_call=False
         )
 
-        immediate_asserts = tgts_to_immediate_asserts.immediate_asserts_from_tgts(
+        immediate_asserts = tgts_to_immediate_asserts.concurrent_asserts_from_tgts(
             tgts_rules=model_response['tgts_rules']
         )
 

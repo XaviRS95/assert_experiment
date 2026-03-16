@@ -207,4 +207,120 @@ def extract_reset_info(sensitivity_list: dict) -> dict:
 
     return reset_info
 
+def generate_concurrent_sensitivity_list(clauses: str)-> str:
+    """Extract variable names and bit selections from a logic clause."""
 
+    def extract_elements_from_expression(expr, flatten=False):
+        """Extract elements from an expression that may contain concatenations."""
+
+        def split_concatenation_elements(inner):
+            """Split concatenation elements handling nested braces and brackets."""
+            elements = []
+            current = ""
+            brace_depth = 0
+            bracket_depth = 0
+            paren_depth = 0
+
+            for char in inner:
+                if char == '{':
+                    brace_depth += 1
+                    current += char
+                elif char == '}':
+                    brace_depth -= 1
+                    current += char
+                elif char == '[':
+                    bracket_depth += 1
+                    current += char
+                elif char == ']':
+                    bracket_depth -= 1
+                    current += char
+                elif char == '(':
+                    paren_depth += 1
+                    current += char
+                elif char == ')':
+                    paren_depth -= 1
+                    current += char
+                elif char == ',' and brace_depth == 0 and bracket_depth == 0 and paren_depth == 0:
+                    # Only split on commas at the top level
+                    if current.strip():
+                        elements.append(current.strip())
+                    current = ""
+                else:
+                    current += char
+
+            # Add the last element
+            if current.strip():
+                elements.append(current.strip())
+
+            return elements
+
+        elements = []
+
+        # Remove any surrounding parentheses
+        expr = expr.strip()
+        while expr.startswith('('):
+            expr = expr[1:].strip()
+
+        # Remove trailing parentheses
+        while expr.endswith(')'):
+            expr = expr[:-1].strip()
+
+        # Handle concatenation { ... }
+        if expr.startswith('{') and expr.endswith('}'):
+            # Extract content inside curly braces
+            inner = expr[1:-1].strip()
+            # Split by commas, handling nested structures
+            nested_elements = split_concatenation_elements(inner)
+
+            if flatten:
+                # Recursively flatten nested concatenations
+                for elem in nested_elements:
+                    # If element is itself a concatenation, flatten it further
+                    if elem.startswith('{') and elem.endswith('}'):
+                        elements.extend(extract_elements_from_expression(elem, flatten=True))
+                    else:
+                        # Remove any remaining curly braces from the element
+                        elem = elem.strip('{}')
+                        if elem:
+                            elements.append(elem)
+            else:
+                elements.extend(nested_elements)
+        else:
+            # Single element (could be variable or bit selection)
+            if expr and expr not in ['||', '&&']:
+                elements.append(expr)
+
+        return elements
+
+    variables = []
+
+    # Remove leading NOT and clean up
+    clauses = clauses.lstrip('!').strip()
+
+    # Split by logical operators
+    parts = re.split(r'\s*(?:&&|\|\|)\s*', clauses)
+
+    for part in parts:
+        # Remove surrounding parentheses recursively
+        while part.startswith('(') and part.endswith(')'):
+            part = part[1:-1].strip()
+
+        # Skip empty parts
+        if not part:
+            continue
+
+        # Extract the expression before any comparison operator
+        for op in ['==', '!=', '<=', '>=', '<', '>']:
+            if op in part:
+                part = part.split(op)[0].strip()
+                break
+
+        # Remove leading NOT
+        part = part.lstrip('!').strip()
+
+        # Extract all elements from the expression (flatten concatenations)
+        vars_in_part = extract_elements_from_expression(part, flatten=True)
+        variables.extend(vars_in_part)
+
+    # Remove duplicates while preserving order
+    return ', '.join(list(dict.fromkeys(variables)))
