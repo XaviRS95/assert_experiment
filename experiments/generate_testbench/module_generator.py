@@ -1,303 +1,165 @@
-import re
+from clock_reset_initialize import generate_reset_initial_info, generate_clock_initial_section
+from generate_bindings import generate_dut_assert_sections
+from module_info_extractor import get_module_name, get_port_signals, get_triggers, normalize_ports_with_range, separate_grouped_activations_in_seq_or_comb
+from stimuli_section_generator import generate_blocks
+
+def generate_testbench_header(CLK_HALF_PERIOD: int,
+                              RESET_DELAY: int,
+                              TIMEOUT_LIMIT: int,
+                              COMB_TOTAL_TESTS: int,
+                              SEQ_TOTAL_TESTS: int,
+                              POST_COMPLETION_DELAY: int,
+                              total_test_blocks: int,
+
+                              ):
+    return (f'module tb #(\n'
+            f'\t// Simulation control parameters\n'
+            f'\tparameter int CLK_HALF_PERIOD = {CLK_HALF_PERIOD},        // Half clock period (for #5 clk = ~clk)\n'
+            f'\tparameter int RESET_DELAY = {RESET_DELAY},           // Reset duration in time units\n'
+            f'\tparameter int TIMEOUT_LIMIT = {TIMEOUT_LIMIT},      // Timeout limit in time units\n'
+            f'\tparameter int COMB_TOTAL_TESTS = {COMB_TOTAL_TESTS},     // Number of combinational tests\n'
+            f'\tparameter int SEQ_TOTAL_TESTS = {SEQ_TOTAL_TESTS},      // Number of sequential tests\n'
+            f'\tparameter int POST_COMPLETION_DELAY = {POST_COMPLETION_DELAY}, // Delay after completion before $finish\n'
+            f'\tparameter int TOTAL_TEST_BLOCKS = {total_test_blocks} //Total number of blocks (sequential and combinational) that need to be tested and wait for finish).\n'
+            f')(\n'
+            f'\t// No ports needed for top-level testbench\n'
+            f');\n')
 
 
-def generate_reset_initial_info(reset_trigger:str, reset_signal: str, initial_reset_time: int)-> str:
 
-    TEMPLATE = '\n'
+def generate_full_instantiate_section(full_type_signals: list, clk_initialization_section:str, reset_initialization_section:str, dut_assert_sections: dict):
+    '''
+    Generates the common signals, completion tracking signal and the binding section.
+    :param full_type_signals:
+    :param dut_assert_sections:
+    :return:
+    '''
 
-    if reset_signal and reset_trigger:
-        reset_info = {
-            'reset_assert_value': "0",
-            'reset_deassert_value': "1",
-            'reset_wait_edge': "posedge reset",  # Wait for low→high
-        }
-
-        if "posedge" in reset_trigger:
-            reset_info['reset_assert_value'] = "1"
-            reset_info['reset_deassert_value'] = "0"
-            reset_info['reset_wait_edge'] = "negedge reset"  # Wait for high→low
-
-        TEMPLATE = (f'\tinitial begin\n'
-                    f'\t\t{reset_signal} = {reset_info["reset_assert_value"]};\n'
-                    f'\t\t#{initial_reset_time};\n'
-                    f'\t\t{reset_signal} = {reset_info["reset_deassert_value"]};\n'
-                    f'\tend\n')
-
-    return TEMPLATE
-
-def generate_clock_reset_initial_section(initial_reset_info: str, clock_signal:str= '', reset_signal:str= '', clock_period:int=0):
-    template = ''
-
-    #Generates the section of clock_signal if there is a clock in the module.
-    if clock_signal:
-        template += f'\tlogic {clock_signal} = 0;\n'
-        if clock_period > 0:
-            template += f'\talways #{clock_period} {clock_signal} = ~{clock_signal};\n'
-
-    #Generates the reset section for if there is a reset section.
-    if reset_signal:
-        template += f'\tlogic {reset_signal};\n'
-
-    if initial_reset_info:
-        template += f'{initial_reset_info}\n'
-
-    return template
-
-def declare_dut_signals(signals: str)-> str:
-    clean_signals = signals.replace('input ', '').replace('output ', '')
-    return clean_signals
-
-def generate_instantiate_section(module_name: str, signals_list: list, section_type: str):
-
-    dut_module = f'\t{module_name} {section_type} (\n'
-    signals = ''
-
-    for i in range(len(signals_list)):
-        signals += f'\t\t.{signals_list[i]}({signals_list[i]}){"," if i < len(signals_list) - 1 else ""}\n'
-
-    dut_module += signals
-    dut_module +=  f'\t);\n'
-
-    return dut_module
-
-def generate_signal_stimulus(signals: list, clock_signal: str, reset_signal:str) -> str:
-    """Generate stimulus assignments for input signals only with enhanced type support"""
-
-    # Extended list of SystemVerilog data types
-    SV_TYPES = {
-        # 2-state types
-        'bit': '2-state',
-        'byte': '2-state',
-        'shortint': '2-state',
-        'int': '2-state',
-        'longint': '2-state',
-
-        # 4-state types
-        'logic': '4-state',
-        'reg': '4-state',
-        'integer': '4-state',
-        'time': '4-state',
-
-        # Net types
-        'wire': 'net',
-        'wand': 'net',
-        'wor': 'net',
-        'tri': 'net',
-        'triand': 'net',
-        'trior': 'net',
-        'trireg': 'net',
-        'tri0': 'net',
-        'tri1': 'net',
-        'uwire': 'net',
-
-        # Real types
-        'real': 'real',
-        'shortreal': 'real',
-        'realtime': 'real',
-
-        # Signed/unsigned variants
-        'signed_int': 'signed',
-        'unsigned_int': 'unsigned',
-        'signed_bit': 'signed',
-        'unsigned_bit': 'unsigned',
-        'signed_logic': 'signed',
-        'unsigned_logic': 'unsigned',
-    }
-
-    input_signals = []
-    for signal in signals:
-        if 'input ' in signal and 'output ' not in signal:
-            # Remove 'input' keyword and clean up
-            cleaned = signal.replace('input ', '').strip().rstrip(',')
-            input_signals.append(cleaned)
-
-    template = ''
-
-    for signal in input_signals:
-        # Skip clock and reset signals
-        if clock_signal and clock_signal in signal:
-            continue
-        if reset_signal and reset_signal in signal:
-            continue
-
-        sig_type, sig_name, array_info = parse_signal_declaration(signal)
-
-        if sig_name:
-            template += f"\t\t\t{sig_name} = "
-
-            # Handle different types
-            if sig_type in SV_TYPES:
-                type_category = SV_TYPES[sig_type]
-
-                # Handle array types (packed arrays)
-                if array_info:
-                    msb, lsb = int(array_info[0]), int(array_info[1])
-                    width = abs(msb - lsb) + 1
-                    max_val = (2 ** width) - 1
-
-                    if type_category in ['2-state', '4-state', 'net', 'signed', 'unsigned']:
-                        template += f"$urandom_range(0, {max_val});\n"
-
-                # Handle non-array types
-                else:
-                    if sig_type == 'bit':
-                        template += "$urandom_range(0, 1);\n"
-
-                    elif sig_type == 'byte':
-                        template += "$urandom_range(-128, 127);\n"
-
-                    elif sig_type == 'shortint':
-                        template += "$urandom_range(-32768, 32767);\n"
-
-                    elif sig_type == 'int' or sig_type == 'signed_int' or sig_type == 'unsigned_int':
-                        template += "$urandom_range(-2147483648, 2147483647);\n"
-
-                    elif sig_type == 'longint' or sig_type == 'signed_longint' or sig_type == 'unsigned_longint':
-                        template += "$urandom_range(-9223372036854775808, 9223372036854775807);\n"
-
-                    elif sig_type in ['logic', 'reg', 'wire', 'wand', 'wor', 'tri', 'triand', 'trior', 'trireg', 'tri0',
-                                      'tri1', 'uwire']:
-                        template += "$urandom_range(0, 1);\n"
-
-                    elif sig_type == 'integer':
-                        template += "$urandom_range(-2147483648, 2147483647);\n"
-
-                    elif sig_type == 'time':
-                        template += "$urandom_range(0, 2**64-1);\n"
-
-                    elif sig_type in ['real', 'shortreal', 'realtime']:
-                        template += "$urandom() / (2**31-1);  // random real\n"
-
-                    else:
-                        template += "$urandom();\n"
-            else:
-                # For unrecognized types (like user-defined structs, enums, interfaces)
-                # You might want to handle these specially
-                template += "$urandom();  // Unknown type: {sig_type}\n"
+    common_signals = [signal.replace("input ", "").replace("output ", "") for signal in full_type_signals]
+    common_signals_section = '\n'.join([f'\t{signal};' for signal in common_signals])
+    template = (f'\t\n//Common signals\n'
+                f'{common_signals_section}'
+                f'\t\t\nint blocks_done = 0;\n'
+                f'\n'
+                f'{clk_initialization_section}\n'
+                f'{reset_initialization_section}\n'
+                f"{dut_assert_sections['dut_section']}\n"
+                f"{dut_assert_sections['assert_section']}")
 
     return template
 
-def parse_signal_declaration(signal):
-    """Enhanced parser for SystemVerilog signal declarations"""
-    # Remove leading/trailing whitespace
-    signal = signal.strip()
+def generate_end_simulation_trigger():
+    '''
+    Includes the finish of the simulation for when all the stimuli blocks are finished.
+    :return:
+    '''
+    return (f'\t// ====================================================\n'
+            f'\t// SIMULATION END TRIGGER\n'
+            f'\t// ====================================================\n'
+            f'\n'
+            f'\tinitial begin: monitor\n'
+            f'\t\t// Wait until both test suites are done\n'
+            f'\t\twait(blocks_done == (TOTAL_TEST_BLOCKS));\n'
+            f'\n'
+            f'\t\t// Extra time for any final assertions to trigger\n'
+            f'\t\t#(POST_COMPLETION_DELAY);\n'
+            f'\n'
+            f'\t\t$display("[%0t] Simulation complete - $finish called", $time);\n'
+            f'\t\t$finish;\n'
+            f'\tend\n\n')
 
-    # Patterns for different declarations
-    patterns = {
-        # Basic types with optional packed dimensions: logic [7:0] sig_name
-        'basic': r'^(?P<type>[\w]+)(?:\s+)(?P<name>\w+)$',
-
-        # Packed array: logic [7:0] sig_name
-        'packed': r'^(?P<type>\w+)\s+\[\s*(?P<msb>-?\d+)\s*:\s*(?P<lsb>-?\d+)\s*\]\s+(?P<name>\w+)$',
-
-        # Unpacked array: logic sig_name [0:7]
-        'unpacked': r'^(?P<type>\w+)\s+(?P<name>\w+)\s*\[\s*(?P<msb>-?\d+)\s*:\s*(?P<lsb>-?\d+)\s*\]$',
-
-        # Multi-dimensional: logic [7:0] sig_name [0:3]
-        'multidim': r'^(?P<type>\w+)\s+\[\s*(?P<pmsb>-?\d+)\s*:\s*(?P<plsb>-?\d+)\s*\]\s+(?P<name>\w+)\s*\[\s*(?P<umsb>-?\d+)\s*:\s*(?P<ulsb>-?\d+)\s*\]$',
-
-        # Signed/unsigned: signed int sig_name
-        'signed': r'^(?P<signed>signed|unsigned)\s+(?P<type>\w+)(?:\s+)(?P<name>\w+)$',
-
-        # Signed with packed: signed [7:0] sig_name
-        'signed_packed': r'^(?P<signed>signed|unsigned)\s+\[\s*(?P<msb>-?\d+)\s*:\s*(?P<lsb>-?\d+)\s*\]\s+(?P<name>\w+)$',
-
-        # Struct/enum/interface (simplified)
-        'complex': r'^(?P<type>\w+)\s+(?P<name>\w+)$',
-    }
-
-    for pattern_name, pattern in patterns.items():
-        match = re.match(pattern, signal)
-        if match:
-            groups = match.groupdict()
-
-            if pattern_name == 'packed':
-                return groups['type'], groups['name'], (groups['msb'], groups['lsb'])
-            elif pattern_name == 'unpacked':
-                return groups['type'], groups['name'], (groups['msb'], groups['lsb'])
-            elif pattern_name == 'multidim':
-                # For multi-dimensional, return packed info
-                return groups['type'], groups['name'], (groups['pmsb'], groups['plsb'])
-            elif pattern_name == 'signed':
-                return f"{groups['signed']}_{groups['type']}", groups['name'], None
-            elif pattern_name == 'signed_packed':
-                return f"{groups['signed']}_{groups['type'] if 'type' in groups else 'logic'}", groups['name'], (
-                groups['msb'], groups['lsb'])
-            else:  # basic or complex
-                return groups['type'], groups['name'], None
-
-    # If no pattern matches
-    return None, None, None
+def generate_timeout_protection():
+    '''
+    Includes an end trigger in case the simulation enters an infinite loop because of the DUT or assert design.
+    :return:
+    '''
+    return (f'\t// ====================================================\n'
+            f'\t// TIMEOUT PROTECTION\n'
+            f'\t// ====================================================\n'
+            f'\n'
+            f'\tinitial begin: timeout\n'
+            f'\t\t#(TIMEOUT_LIMIT);\n'
+            f'\t\t$display("❌ TIMEOUT ERROR at %0t", $time);\n'
+            f'\t\t$display("   Timeout limit: %0d", TIMEOUT_LIMIT);\n'
+            f'\t\t$finish;\n'
+            f'\tend\n\n')
 
 
+#######################################################################
 
-def generate_initial_stimulus(num_of_tests:int, signal_stimulus: str, clock_activation:str=''):
 
-    clock_activation = "@(" + clock_activation + ");" if clock_activation else ''
+def generate_clk_reset_initialization(clk_signal: str, rst_signal: str, rst_trigger:str)-> tuple:
+    '''
+    Generates the clock and reset initialization sections if there are clocks and|or reset sections
+    :param clk_signal:
+    :param rst_signal:
+    :param rst_trigger:
+    :param clk_half_period:
+    :return:
+    '''
+    initial_reset_section = ''
+    initial_clock_section = ''
 
-    TEMPLATE = (f'\tinitial begin',
-                f'\t\tfor(int i=0; i<{num_of_tests};i++) begin',
-                f'\t\t\t{clock_activation}',
-                f'{signal_stimulus}',
-                f'\t\t\t#1ps;\n'
-                f'\t\t\t#5ns;\n'
-                f'\t\tend',
-                f'\t\t#10ns;',
-                f'\t\t$display("Test complete!");',
-                f'\tend')
+    if rst_signal:
+        initial_reset_section = generate_reset_initial_info(reset_trigger=rst_trigger, reset_signal=rst_signal)
+    if clk_signal:
+        initial_clock_section = generate_clock_initial_section(
+            clock_signal=clk_signal
+        )
 
-    return '\n'.join(TEMPLATE)
+    return initial_clock_section, initial_reset_section
 
-def extract_variable_names(signals_list: list):
-    signals_names = []
 
-    for signal in signals_list:
-        signals_names.append(signal.split(' ')[-1])
+def generate_testbench(timescale: str, dut_module: str, assert_module: str, CLK_HALF_PERIOD: int, RESET_DELAY: int, TIMEOUT_LIMIT: int, COMB_TOTAL_TESTS: int, SEQ_TOTAL_TESTS: int, POST_COMPLETION_DELAY: int):
 
-    return signals_names
+    # Get the signals from the dut module ports list.
+    signals = get_port_signals(module=dut_module)
 
-def generate_final_module(timescale: str, clock_reset_initial_section: str, instantiate_section: str, initial_stimuli_section: str):
-    TEMPLATE = (f'`{timescale}\n\n'
-                f'module tb;\n\n'
-                f'{clock_reset_initial_section}'
-                f'{instantiate_section}'
-                f'{initial_stimuli_section}'
-                f'\nendmodule')
+    # Finds the triggers for clock and trigger if they exist.
+    clk_trigger, rst_trigger = get_triggers(module=dut_module)
 
-    return ''.join(TEMPLATE)
+    clk_signal = clk_trigger.split(' ')[-1] if clk_trigger else ''
+    rst_signal = rst_trigger.split(' ')[-1] if rst_trigger else ''
 
-def generate_full_instantiate_section(clean_signals: list, dut_section: str, assert_section: str, clock_signal:str = '', reset_signal: str = ''):
+    dut_module_name = get_module_name(module=dut_module)
 
-    clean_signals = [signal.replace("input ", "").replace("output ", "") for signal in clean_signals]
+    assert_module_name = get_module_name(module=assert_module)
 
-    #Eliminate clock and reset signal from the list if they exist
-    if clock_signal:
-        clean_signals = [signal for signal in clean_signals if clock_signal not in signal]
+    # Adds the type of signal and input|output to those signals that don't have it.
+    full_type_signals = normalize_ports_with_range(input_signals=signals)
 
-    if reset_signal:
-        clean_signals = [signal for signal in clean_signals if reset_signal not in signal]
+    clk_initialization_section, reset_initialization_section = generate_clk_reset_initialization(clk_signal = clk_signal, rst_signal = rst_signal, rst_trigger = rst_trigger)
 
-    clean_signals = '\n'.join([f'\t{signal};' for signal in clean_signals])
+    dut_assert_sections = generate_dut_assert_sections(
+        signals=full_type_signals,
+        dut_module_name=dut_module_name,
+        assert_module_name=assert_module_name)
 
-    return clean_signals + '\n\n' + dut_section + '\n' + assert_section
+    full_instantiate_section = generate_full_instantiate_section(full_type_signals=full_type_signals,
+                                                                 clk_initialization_section=clk_initialization_section,
+                                                                 reset_initialization_section=reset_initialization_section,
+                                                                 dut_assert_sections=dut_assert_sections)
 
-def genetate_dut_assert_sections(signals: list, dut_module_name: str, assert_module_name: str) -> dict:
+    stimulus_block_section, total_test_blocks = generate_blocks(full_type_signals = full_type_signals, dut_module =  dut_module, test_module = assert_module, clock_signal = clk_signal, reset_signal = rst_signal)
 
-    signals_names = extract_variable_names(signals_list = signals)
+    testbench_header = generate_testbench_header(CLK_HALF_PERIOD = CLK_HALF_PERIOD,
+        RESET_DELAY = RESET_DELAY,
+        TIMEOUT_LIMIT = TIMEOUT_LIMIT,
+        COMB_TOTAL_TESTS = COMB_TOTAL_TESTS,
+        SEQ_TOTAL_TESTS = SEQ_TOTAL_TESTS,
+        POST_COMPLETION_DELAY = POST_COMPLETION_DELAY,
+        total_test_blocks = total_test_blocks)
 
-    dut_section = generate_instantiate_section(
-        module_name=dut_module_name,
-        signals_list=signals_names,
-        section_type='dut'
-    )
+    end_simulation_trigger = generate_end_simulation_trigger()
 
-    assert_section = generate_instantiate_section(
-        module_name=assert_module_name,
-        signals_list=signals_names,
-        section_type='assertions'
-    )
+    timeout_protection = generate_timeout_protection()
 
-    return {
-        'dut_section': dut_section,
-        'assert_section': assert_section
-    }
+    template = (f'{timescale}\n\n'
+                f'{testbench_header}\n'
+                f'{full_instantiate_section}\n'
+                f'{stimulus_block_section}\n'
+                f'{end_simulation_trigger}\n'
+                f'{timeout_protection}\n'
+                f'endmodule')
+
+    return template

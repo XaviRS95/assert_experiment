@@ -18,7 +18,7 @@ class CodeFormatter:
             return ''
 
         assertions_text = '\n\n'.join(immediate_assertions)
-        return f"always_comb begin\n    {assertions_text}\n    end"
+        return f"{assertions_text}\n"
 
     @staticmethod
     def format_properties_block(sequential_properties: list) -> str:

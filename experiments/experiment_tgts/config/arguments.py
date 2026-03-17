@@ -14,7 +14,7 @@ def parse_arguments():
     parser.add_argument(
         "--path",
         type=str,
-        default="case_easy_seq.csv",
+        default="dataset.csv",
         help="Path to the source CSV"
     )
     parser.add_argument(

@@ -1,0 +1,26 @@
+original_code,generated_code,iverilog_output,time(s),prompt_tkns,output_tkns
+"module case4(input logic [3:0] in, output logic out);
+    always_comb begin
+        case(in)
+            4'b0001: out = 1;
+            4'b0010: out = 0;
+            4'b0100: out = 1;
+            4'b1000: out = 0;
+            default: out = 0;
+        endcase
+    end
+endmodule","module case4_asserts  (input logic [3:0] in, input logic out);
+
+    
+
+    
+
+    hiibigadnnjekhiaocnmmllfemdpkjgm: assert property (@(in) (in == 4'b0001) |-> out == 1) else $error(""Error in immediate assert hiibigadnnjekhiaocnmmllfemdpkjgm"");
+kbnkhodgpgbikbcmobpichnkinmjplco: assert property (@(in) (in == 4'b0010) |-> out == 0) else $error(""Error in immediate assert kbnkhodgpgbikbcmobpichnkinmjplco"");
+nhofniaekkbkkpedpdkjifneamhaiech: assert property (@(in) (in == 4'b0100) |-> out == 1) else $error(""Error in immediate assert nhofniaekkbkkpedpdkjifneamhaiech"");
+caalbehogejbklfjadkmjfmhihcmlnha: assert property (@(in) (in == 4'b1000) |-> out == 0) else $error(""Error in immediate assert caalbehogejbklfjadkmjfmhihcmlnha"");
+
+
+    
+
+endmodule",OK,7.8186280727386475,399,119

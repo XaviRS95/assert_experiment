@@ -1,7 +1,7 @@
 from module_info_extractor import separate_grouped_activations_in_seq_or_comb, group_activations_with_ports_names
 import re
 
-def generate_activation_with_full_type_list(full_type_signals: list, separated_activations: dict)-> dict:
+def generate_activation_with_full_type_list(full_type_signals: list, separated_activations: dict, reset_signal: str)-> dict:
     '''
     Obtains for each activation the full type of all the port variables inside of it.
     This is used to later generate the stimuli for each one of them.
@@ -12,11 +12,12 @@ def generate_activation_with_full_type_list(full_type_signals: list, separated_a
     new_separated_activations = dict.fromkeys(separated_activations.keys(), [])
 
     for activation, ports_names in separated_activations.items():
-        for signal in ports_names:
-            for full_type_signal in full_type_signals:
-                space_separated_signal = full_type_signal.split(' ')
-                if signal == space_separated_signal[-1]:
-                    new_separated_activations[activation].append(full_type_signal)
+        if (not reset_signal or reset_signal not in activation):
+            for signal in ports_names:
+                for full_type_signal in full_type_signals:
+                    space_separated_signal = full_type_signal.split(' ')
+                    if signal == space_separated_signal[-1]:
+                        new_separated_activations[activation].append(full_type_signal)
 
     return new_separated_activations
 
@@ -211,7 +212,7 @@ def generate_combinational_blocks(full_type_signals: list, activations_with_port
     '''
     combinational_blocks = []
 
-    activation_with_full_type_list = generate_activation_with_full_type_list(full_type_signals = full_type_signals, separated_activations=activations_with_ports)
+    activation_with_full_type_list = generate_activation_with_full_type_list(full_type_signals = full_type_signals, separated_activations=activations_with_ports, reset_signal=reset_signal)
 
     for key, value in activation_with_full_type_list.items():
 
@@ -221,10 +222,10 @@ def generate_combinational_blocks(full_type_signals: list, activations_with_port
                                f'\t\t// Wait for reset to complete\n'
                                f'\t\t#(RESET_DELAY + 5);\n'
                                f'\t\tfor(int i=0; i<COMB_TOTAL_TESTS; i++) begin\n'
-                               f'\t\t\t@({key});\n'
                                f'{stimulus}'
                                f'\t\tend\n'
-                               f'\t\tblocks_done = blocks_done + 1;\n'
+                               f'\t\t#1;'
+                               f'\t\tblocks_done++;\n'
                                f'\tend\n')
 
         combinational_blocks.append(sequential_template)
@@ -240,7 +241,7 @@ def generate_sequential_blocks(full_type_signals: list, activations_with_ports: 
     '''
     sequential_blocks = []
 
-    activation_with_full_type_list = generate_activation_with_full_type_list(full_type_signals = full_type_signals, separated_activations=activations_with_ports)
+    activation_with_full_type_list = generate_activation_with_full_type_list(full_type_signals = full_type_signals, separated_activations=activations_with_ports, reset_signal=reset_signal)
 
     for key, value in activations_with_ports.items():
 
@@ -263,16 +264,21 @@ def generate_sequential_blocks(full_type_signals: list, activations_with_ports: 
 
 
 
-def generate_blocks(dut_module: str, test_module: str):
+def generate_blocks(full_type_signals: list, dut_module: str, test_module: str, clock_signal: str, reset_signal: str)-> tuple:
     '''
     Main function to generate the combinational and sequential stimuli blocks
     :param dut_module:
     :param test_module:
     :return:
     '''
-    combinational_activations, sequential_activations = separate_grouped_activations_in_seq_or_comb(dut_module = dut_module, test_module = test_module)
-    combinational_blocks = "\n\n".join(generate_combinational_blocks(activations_with_ports=combinational_activations))
-    sequential_blocks = "\n\n".join(generate_sequential_blocks(activations_with_ports=sequential_activations))
+    combinational_activations, sequential_activations = separate_grouped_activations_in_seq_or_comb(dut_module = dut_module, test_module = test_module, reset_signal=reset_signal)
+    combinational_blocks = generate_combinational_blocks(full_type_signals = full_type_signals, activations_with_ports=combinational_activations, clock_signal=clock_signal, reset_signal=reset_signal)
+    sequential_blocks =  generate_sequential_blocks(full_type_signals = full_type_signals, activations_with_ports=sequential_activations, clock_signal=clock_signal, reset_signal=reset_signal)
+
+    total_blocks = len(combinational_blocks) + len(sequential_blocks)
+
+    combinational_blocks = "\n\n".join(combinational_blocks)
+    sequential_blocks = "\n\n".join(sequential_blocks)
 
     stimulus_blocks_section = (f'// ====================================================\n'
                                f'// TEST BLOCKS STIMULATIONS\n'
@@ -284,4 +290,4 @@ def generate_blocks(dut_module: str, test_module: str):
                                f'// SEQUENTIAL TESTS\n'
                                f'{sequential_blocks}\n')
 
-    return stimulus_blocks_section
+    return stimulus_blocks_section, total_blocks
