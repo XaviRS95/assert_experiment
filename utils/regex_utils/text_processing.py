@@ -27,11 +27,11 @@ def commentless_code(code: str) -> str:
     Removes both single-line (//) and multi-line (/* */) comments.
     Also cleans up leftover empty lines to prevent 'swiss cheese' code formatting.
     """
-    pattern = r'(\/\*[\s\S]*?\*\/|\/\/.*)'
-    clean_code = code
-    for match in re.finditer(pattern, code):
-        clean_code = clean_code.replace(match.group(0), '')
-    clean_code = re.sub(r'(?m)^[ \t]*\n', '', clean_code)
+    pattern = r'(\/\*[\s\S]*?\*\/)|(\/\/[^\r\n]*(\r?\n)?)'
+
+    # Use re.sub to do it in one pass
+    clean_code = re.sub(pattern, '', code)
+
     return clean_code
 
 def contains_assertions(code):

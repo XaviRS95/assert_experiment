@@ -8,7 +8,7 @@ def check_module_has_asserts(module: str)-> bool:
     '''
     is_valid = True
 
-    has_testing_in_code = re.findall(r'\b(assert|property)\b', module)
+    has_testing_in_code = re.findall(r'\b(assert property)\b', module)
     if not has_testing_in_code:
         is_valid = False
 

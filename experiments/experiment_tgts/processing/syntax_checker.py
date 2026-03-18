@@ -9,7 +9,7 @@ class SyntaxChecker:
         if not code:
             return "NO_CODE_GENERATED"
         else:
-            if check_module_has_asserts(module=code):
+            if not check_module_has_asserts(module=code):
                 return 'MODULE_WITHOUT_ASSERTS'
             else:
                 return utils.check_code_syntax(code=code)

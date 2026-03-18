@@ -110,6 +110,7 @@ CONSTRAINTS:
 Use:
 - RULE per assignment or conditional branch
 - DO NOT use IF ELSE statements
+- Generate multiple rules for each index in a FOR loop
 - Explicit guards for if statements
 - FUNCTION(...) for function calls
 - Explicit default rules if a signal is conditionally assigned
