@@ -7,6 +7,7 @@ from ..core.module_assembly.final_assembler import FinalAssembler
 from ..tracking.token_tracker import TokenTracker
 from ..tracking.statistics import ExperimentStatistics
 from ..tracking.results_writer import ResultsWriter
+from utils.regex_utils.module_assert_check import check_module_has_asserts
 
 class ExperimentController:
     """Controls the flow of experiment 3"""
@@ -76,7 +77,6 @@ class ExperimentController:
 
         elapsed_time = time.time() - time1
 
-        # Check syntax
         compiler_output = SyntaxChecker.check(final_module)
 
         return self._create_result(module_code, final_module, compiler_output, elapsed_time=elapsed_time)

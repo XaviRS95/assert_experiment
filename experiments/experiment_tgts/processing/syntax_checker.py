@@ -1,5 +1,5 @@
 from utils import utils
-
+from utils.regex_utils.module_assert_check import check_module_has_asserts
 class SyntaxChecker:
     """Handles syntax checking of generated code"""
 
@@ -8,7 +8,11 @@ class SyntaxChecker:
         """Check syntax of generated code"""
         if not code:
             return "NO_CODE_GENERATED"
-        return utils.check_code_syntax(code=code)
+        else:
+            if check_module_has_asserts(module=code):
+                return 'MODULE_WITHOUT_ASSERTS'
+            else:
+                return utils.check_code_syntax(code=code)
 
     @staticmethod
     def validate_blocks_exist(has_blocks: bool) -> str:

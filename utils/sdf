@@ -1,0 +1,141 @@
+module usb3_protocol_layer_asserts  (input logic clk,
+input logic rst_n,
+input logic [31:0] packet_data [0:15],
+input logic [4:0] packet_length,
+input logic packet_valid,
+input logic [3:0] endpoint,
+input logic [2:0] device_address,
+input logic direction,
+input logic setup_stage,
+input logic [1:0] link_status,
+input logic link_up,
+input logic [1:0] link_command,
+input logic [31:0] rx_data [0:15],
+input logic [4:0] rx_length,
+input logic rx_valid,
+input logic [3:0] rx_endpoint,
+input logic [2:0] rx_device,
+input logic [1:0] transaction_type,
+input logic [2:0] sequence_number,
+input logic data_xfer_complete,
+input logic link_power_state);
+
+    typedef enum logic [5:0] {
+    LINK_RESET,
+    LINK_POLLING,
+    LINK_U0,
+    LINK_U1,
+    LINK_U2,
+    LINK_U3,
+    LINK_RECOVERY,
+    LINK_HOT_RESET,
+    PROTOCOL_IDLE,
+    PROTOCOL_SETUP,
+    PROTOCOL_DATA_OUT,
+    PROTOCOL_DATA_IN,
+    PROTOCOL_STATUS,
+    PROTOCOL_PING,
+    PROTOCOL_NYET,
+    PROTOCOL_ERDY,
+    PACKET_HEADER,
+    PACKET_DATA,
+    PACKET_CRC,
+    PACKET_ACK,
+    PACKET_NACK,
+    PACKET_STALL,
+    PACKET_NOTIFY,
+    FLOW_CREDIT_UPDATE,
+    FLOW_WAIT,
+    FLOW_TIMEOUT,
+    ERROR_RETRY,
+    ERROR_RECOVERY,
+    ERROR_TIMEOUT
+} state_t;
+state_t link_state, protocol_state, next_state;
+logic [2:0] seq_num;
+logic [3:0] credit_count [0:15];
+logic [15:0] retry_counter;
+logic [31:0] timeout_counter;
+logic [4:0] data_phase;
+logic burst_mode;
+logic [2:0] retry_count;
+typedef enum logic [4:0] {
+    PTYPE_SETUP     = 5'b00001,
+    PTYPE_DATA      = 5'b00010,
+    PTYPE_ACK       = 5'b00100,
+    PTYPE_NACK      = 5'b01000,
+    PTYPE_STALL     = 5'b10000,
+    PTYPE_ERDY      = 5'b11000,
+    PTYPE_PING      = 5'b10100,
+    PTYPE_NOTIFY    = 5'b10010
+} packet_type_t;
+
+
+
+    ihfbbbdccabbknakajelbcichnakdodk: assert property (@(link_state, link_up) link_state == LINK_RESET && link_up |-> link_command == 2'b01) else $error("Error in immediate assert ihfbbbdccabbknakajelbcichnakdodk");
+ehhdjjnaimnbkocoochgoihejidegjpe: assert property (@(link_state) link_state == LINK_POLLING |-> next_state == LINK_U0) else $error("Error in immediate assert ehhdjjnaimnbkocoochgoihejidegjpe");
+paejpapbdkjmkdiipkbdfkepcajagacp: assert property (@(link_state, link_status) link_state == LINK_POLLING && link_status == 2'b11 |-> link_command == 2'b10) else $error("Error in immediate assert paejpapbdkjmkdiipkbdfkepcajagacp");
+ipoafmbilabpkhpoajlbbhfkjepjkech: assert property (@(link_state) link_state == LINK_U0 |-> next_state == PROTOCOL_IDLE) else $error("Error in immediate assert ipoafmbilabpkhpoajlbbhfkjepjkech");
+bckalonmhpbdkmijboclboibfdjkooci: assert property (@(protocol_state, packet_valid, setup_stage, direction) protocol_state == PROTOCOL_IDLE && packet_valid && setup_stage && !direction |-> next_state == PROTOCOL_SETUP) else $error("Error in immediate assert bckalonmhpbdkmijboclboibfdjkooci");
+iicglmncbhciklmjponcffpmffkihaoj: assert property (@(protocol_state, credit_count[endpoint]) protocol_state == PROTOCOL_DATA_OUT && credit_count[endpoint] > 0 |-> transaction_type == 2'b01) else $error("Error in immediate assert iicglmncbhciklmjponcffpmffkihaoj");
+iglagpgmeiaoknmdacacjccfnpohnamb: assert property (@(protocol_state, credit_count[endpoint]) protocol_state == PROTOCOL_DATA_IN || (protocol_state == PROTOCOL_DATA_OUT && credit_count[endpoint] == 0) |-> next_state == PACKET_HEADER) else $error("Error in immediate assert iglagpgmeiaoknmdacacjccfnpohnamb");
+mgnfnihdmbmbkipdodefchcobiiagjgj: assert property (@(protocol_state) protocol_state == PACKET_ACK |-> rx_valid == 1'b1) else $error("Error in immediate assert mgnfnihdmbmbkipdodefchcobiiagjgj");
+aadkiglhccmlkbpiolmndghdjcfolcdf: assert property (@(protocol_state) protocol_state == PACKET_ACK |-> rx_length == packet_length) else $error("Error in immediate assert aadkiglhccmlkbpiolmndghdjcfolcdf");
+emolmjedolnlkllfonbgcjmapapekldo: assert property (@(protocol_state) protocol_state == PACKET_ACK |-> rx_endpoint == endpoint) else $error("Error in immediate assert emolmjedolnlkllfonbgcjmapapekldo");
+kbfnjbnlaablkhfladmdjbmiggiabaap: assert property (@(protocol_state) protocol_state == PACKET_ACK |-> rx_device == device_address) else $error("Error in immediate assert kbfnjbnlaablkhfladmdjbmiggiabaap");
+fkikaibpopkckopnahdcdpfbacomgkkb: assert property (@(protocol_state, transaction_type) protocol_state == PACKET_HEADER && transaction_type == 2'b10 |-> next_state == PROTOCOL_STATUS) else $error("Error in immediate assert fkikaibpopkckopnahdcdpfbacomgkkb");
+nfeglfpedohkkepboekagdkgdhobdjka: assert property (@(protocol_state, transaction_type) protocol_state == PACKET_HEADER && transaction_type == 2'b11 |-> next_state == PROTOCOL_PING) else $error("Error in immediate assert nfeglfpedohkkepboekagdkgdhobdjka");
+bdegedcodpmikcbaancdiaffgkpdhnko: assert property (@(protocol_state, transaction_type) protocol_state == PACKET_HEADER && transaction_type == 2'b00 |-> rx_data[0] == {PTYPE_SETUP, device_address, endpoint, seq_num}) else $error("Error in immediate assert bdegedcodpmikcbaancdiaffgkpdhnko");
+hanacefipjbkkbgnannhhphdnlhkchog: assert property (@(protocol_state, transaction_type) protocol_state == PACKET_HEADER && transaction_type == 2'b01 |-> rx_data[0] == {PTYPE_DATA, device_address, endpoint, seq_num}) else $error("Error in immediate assert hanacefipjbkkbgnannhhphdnlhkchog");
+ppgojhmagobfklcoochggmhcigimdhdk: assert property (@(protocol_state, transaction_type) protocol_state == PACKET_HEADER && transaction_type == 2'b10 |-> rx_data[0] == {PTYPE_ERDY, device_address, endpoint, seq_num}) else $error("Error in immediate assert ppgojhmagobfklcoochggmhcigimdhdk");
+cpjnpcjjakaakbhooicbbeehkffeompn: assert property (@(protocol_state, transaction_type) protocol_state == PACKET_HEADER && transaction_type == 2'b11 |-> rx_data[0] == {PTYPE_PING, device_address, endpoint, seq_num}) else $error("Error in immediate assert cpjnpcjjakaakbhooicbbeehkffeompn");
+ndhlilnilgcakibgoncaglmcjdidneba: assert property (@(protocol_state, packet_length) protocol_state == PACKET_HEADER && packet_length > 0 |-> next_state == PACKET_DATA) else $error("Error in immediate assert ndhlilnilgcakibgoncaglmcjdidneba");
+jlbnjgdbfgnckfjcajdlodefimnkfkon: assert property (@(protocol_state) protocol_state == PACKET_DATA |-> data_phase == data_phase + 1) else $error("Error in immediate assert jlbnjgdbfgnckfjcajdlodefimnkfkon");
+kmdglklndnlbkfekbgdlncpblddpfdho: assert property (@(protocol_state, data_phase) protocol_state == PACKET_DATA && data_phase >= packet_length - 1 |-> next_state == PACKET_CRC) else $error("Error in immediate assert kmdglklndnlbkfekbgdlncpblddpfdho");
+ngjbjinjoglakmgppmejdanggnamllbm: assert property (@(protocol_state) protocol_state == PACKET_CRC |-> next_state == PACKET_ACK) else $error("Error in immediate assert ngjbjinjoglakmgppmejdanggnamllbm");
+niannkcdkodgkgafonckaalfloeojapb: assert property (@(protocol_state, retry_count) protocol_state == PACKET_HEADER && retry_count < 3 |-> next_state == PACKET_NACK) else $error("Error in immediate assert niannkcdkodgkgafonckaalfloeojapb");
+kmanocchcmplkbfbobljgagffmakpngm: assert property (@(protocol_state, retry_counter) protocol_state == PACKET_NACK && retry_counter < 100 |-> next_state == PACKET_HEADER) else $error("Error in immediate assert kmanocchcmplkbfbobljgagffmakpngm");
+bbkecclkhckdkdfpobiigglbpgkgboak: assert property (@(protocol_state, retry_counter) protocol_state == ERROR_RETRY && retry_counter > 1000 |-> next_state == ERROR_RECOVERY) else $error("Error in immediate assert bbkecclkhckdkdfpobiigglbpgkgboak");
+ckjjjffnhalekikaafcdcdnlpejlacjl: assert property (@(link_state, packet_valid) link_state == LINK_U1 && packet_valid |-> link_command == 2'b01) else $error("Error in immediate assert ckjjjffnhalekikaafcdcdnlpejlacjl");
+hlaofgcganfoknjpboonfgnkindambce: assert property (@(link_state, packet_valid) link_state == LINK_U2 && packet_valid |-> link_command == 2'b01) else $error("Error in immediate assert hlaofgcganfoknjpboonfgnkindambce");
+gcefhdhhanjaknmbaklmgjaomifdainp: assert property (@(link_state, link_status) link_state == LINK_RECOVERY && link_status == 2'b11 |-> next_state == LINK_U0) else $error("Error in immediate assert gcefhdhhanjaknmbaklmgjaomifdainp");
+obleacmbhmmdklgoajpchpjbpgkkfmbh: assert property (@(link_state, retry_counter) link_state == LINK_RECOVERY && retry_counter > 1000 |-> next_state == LINK_HOT_RESET) else $error("Error in immediate assert obleacmbhmmdklgoajpchpjbpgkkfmbh");
+
+
+    property cmhiajpkobcgkaldapcgjdkfocpcjfif;
+    @(posedge clk) disable iff(!rst_n) (link_state != next_state) |=> (link_state == next_state);
+endproperty
+assert property (cmhiajpkobcgkaldapcgjdkfocpcjfif);
+
+property iiehfimogmcakmnjalgiibamjbfifadc;
+    @(posedge clk) disable iff(!rst_n) (protocol_state != next_state) |=> (protocol_state == next_state);
+endproperty
+assert property (iiehfimogmcakmnjalgiibamjbfifadc);
+
+property fpjeafdkigkpkkmmajkgpkaekmgpbmoa;
+    @(posedge clk) disable iff(!rst_n) (link_state == LINK_U0 && protocol_state == PACKET_ACK) |=> (seq_num == seq_num + 1);
+endproperty
+assert property (fpjeafdkigkpkkmmajkgpkaekmgpbmoa);
+
+property mhkcclfdbfhfkfojbfiicklkaacliaef;
+    @(posedge clk) disable iff(!rst_n) (link_state == LINK_U0 && protocol_state == PACKET_NACK) |=> (retry_count == retry_count + 1);
+endproperty
+assert property (mhkcclfdbfhfkfojbfiicklkaacliaef);
+
+property efpommkljejgkpeoaoicjapdngkbhagl;
+    @(posedge clk) disable iff(!rst_n) ((link_state == LINK_U1 || link_state == LINK_U2) && timeout_counter < 32'hFFFFFFFF) |=> (timeout_counter == timeout_counter + 1);
+endproperty
+assert property (efpommkljejgkpeoaoicjapdngkbhagl);
+
+property oddnnhmgofkakachammkgdonhljajblc;
+    @(posedge clk) disable iff(!rst_n) (link_state == LINK_RECOVERY) |=> (retry_counter == retry_counter + 1);
+endproperty
+assert property (oddnnhmgofkakachammkgdonhljajblc);
+
+property bnealngjlcaeknnepkinfdpdkioohndl;
+    @(posedge clk) disable iff(!rst_n) (&& protocol_state == ERROR_TIMEOUT) |=> (timeout_counter == timeout_counter + 1);
+endproperty
+assert property (bnealngjlcaeknnepkinfdpdkioohndl);
+
+
+endmodule

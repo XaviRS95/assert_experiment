@@ -1,4 +1,5 @@
 import re
+from utils.regex_utils.module_assert_check import check_module_has_asserts
 
 def extract_code(output: str)-> tuple:
     '''
@@ -13,9 +14,8 @@ def extract_code(output: str)-> tuple:
     if not correct_format_output_match:
         is_valid = False
     else:
-        sv_code = correct_format_output_match.group(1)
-        has_testing_in_code = re.findall(r'\b(assert|property)\b', sv_code)
-        if not has_testing_in_code:
+        extracted_module = correct_format_output_match.group(1)
+        if not check_module_has_asserts(module=extracted_module):
             is_valid = False
 
     return sv_code, is_valid
