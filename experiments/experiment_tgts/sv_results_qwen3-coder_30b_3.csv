@@ -1,1 +1,171 @@
 original_code,generated_code,iverilog_output,time(s),prompt_tkns,output_tkns
+"module case4(input logic [3:0] in, output logic out);
+    always_comb begin
+        case(in)
+            4'b0001: out = 1;
+            4'b0010: out = 0;
+            4'b0100: out = 1;
+            4'b1000: out = 0;
+            default: out = 0;
+        endcase
+    end
+endmodule","module case4_asserts  (input logic [3:0] in, input logic out);
+
+    
+
+    
+
+    iledomginjoekocoppjgjjjjdgbgdenm: assert property (@(in) (in == 4'b0001) |-> out == 1) else $error(""Error in immediate assert iledomginjoekocoppjgjjjjdgbgdenm"");
+mcdhoaeiblkckagnodfmgcgedcekdloo: assert property (@(in) (in == 4'b0010) |-> out == 0) else $error(""Error in immediate assert mcdhoaeiblkckagnodfmgcgedcekdloo"");
+aiokjmmplheckmfebeoenccfdgejnppg: assert property (@(in) (in == 4'b0100) |-> out == 1) else $error(""Error in immediate assert aiokjmmplheckmfebeoenccfdgejnppg"");
+oobhcpkoechhkihoaikciiopkchehmff: assert property (@(in) (in == 4'b1000) |-> out == 0) else $error(""Error in immediate assert oobhcpkoechhkihoaikciiopkchehmff"");
+aifanflbjfofkmlbanndglbcmgmmnngg: assert property (@(in) (in != 4'b0001 && in != 4'b0010 && in != 4'b0100 && in != 4'b1000) |-> out == 0) else $error(""Error in immediate assert aifanflbjfofkmlbanndglbcmgmmnngg"");
+
+
+    
+
+endmodule",OK,20.096285343170166,399,155
+"module case17(input logic [1:0] state, output logic [1:0] next);
+    always_comb begin
+        case(state)
+            2'b00: next = 2'b01;
+            2'b01: next = 2'b10;
+            2'b10: next = 2'b11;
+            2'b11: next = 2'b00;
+            default: next = 2'b00; // safe default
+        endcase
+    end
+endmodule","module case17_asserts  (input logic [1:0] state, input logic [1:0] next);
+
+    
+
+    
+
+    ikjminlphgalklfhalfiognhkcffceml: assert property (@(state) state == 2'b00 |-> next[0] == 1'b1) else $error(""Error in immediate assert ikjminlphgalklfhalfiognhkcffceml"");
+mndhjkbajahnkiggocbchkpjcmpkjlim: assert property (@(state) state == 2'b00 |-> next[1] == 1'b0) else $error(""Error in immediate assert mndhjkbajahnkiggocbchkpjcmpkjlim"");
+kdpjpdidjmokkemcpdnldpchdnlbdgpk: assert property (@(state) state == 2'b01 |-> next[0] == 1'b0) else $error(""Error in immediate assert kdpjpdidjmokkemcpdnldpchdnlbdgpk"");
+dfnagboegloekimgbnpomkojhhknnaio: assert property (@(state) state == 2'b01 |-> next[1] == 1'b1) else $error(""Error in immediate assert dfnagboegloekimgbnpomkojhhknnaio"");
+lfdmjmjhdenjkdjjodopadkpcpdmnmla: assert property (@(state) state == 2'b10 |-> next[0] == 1'b1) else $error(""Error in immediate assert lfdmjmjhdenjkdjjodopadkpcpdmnmla"");
+ibeimlfdjmkpkgnmbhkllncldbfpgfha: assert property (@(state) state == 2'b10 |-> next[1] == 1'b1) else $error(""Error in immediate assert ibeimlfdjmkpkgnmbhkllncldbfpgfha"");
+bcpfghdohlogkfploebmmbepfgaejpnj: assert property (@(state) state == 2'b11 |-> next[0] == 1'b0) else $error(""Error in immediate assert bcpfghdohlogkfploebmmbepfgaejpnj"");
+inpcdidpndpgkjacpgajhpbehpenihji: assert property (@(state) state == 2'b11 |-> next[1] == 1'b0) else $error(""Error in immediate assert inpcdidpndpgkjacpgajhpbehpenihji"");
+ahahfnddfimckemgplfkphibganpgjda: assert property (@(state) state == 2'b00 || state == 2'b01 || state == 2'b10 || state == 2'b11 |-> next[0] == 1'b0) else $error(""Error in immediate assert ahahfnddfimckemgplfkphibganpgjda"");
+ndocmfedcjddkpilolmgcjihlaelmman: assert property (@(state) state == 2'b00 || state == 2'b01 || state == 2'b10 || state == 2'b11 |-> next[1] == 1'b0) else $error(""Error in immediate assert ndocmfedcjddkpilolmgcjihlaelmman"");
+
+
+    
+
+endmodule",OK,22.49410891532898,411,318
+"module case_example1(input logic [1:0] a, output logic y);
+    always_comb begin
+        case(a)
+            2'b00: y = 0;
+            2'b01: y = 1;
+            2'b10: y = 1;
+            2'b11: y = 0;
+            default: y = 0;
+        endcase
+    end
+endmodule","module case_example1_asserts  (input logic [1:0] a, input logic y);
+
+    
+
+    
+
+    hininidamhdgkemgbhcjmdlcjagmdlni: assert property (@(a) (a == 2'b00) |-> y == 0) else $error(""Error in immediate assert hininidamhdgkemgbhcjmdlcjagmdlni"");
+pflgpfpnkkogkonippplhjlmnejhpepm: assert property (@(a) (a == 2'b01) |-> y == 1) else $error(""Error in immediate assert pflgpfpnkkogkonippplhjlmnejhpepm"");
+cblgicbnbnniknfookjdedbpgmgpikip: assert property (@(a) (a == 2'b10) |-> y == 1) else $error(""Error in immediate assert cblgicbnbnniknfookjdedbpgmgpikip"");
+kpijlfecnjmnkmdfpcapejlabcljdanh: assert property (@(a) (a == 2'b11) |-> y == 0) else $error(""Error in immediate assert kpijlfecnjmnkmdfpcapejlabcljdanh"");
+
+
+    
+
+endmodule",OK,8.74186658859253,391,111
+"module case_example2(input logic [3:0] a, output logic [1:0] y);
+    always_comb begin
+        case(a)
+            4'd0: y = 2'b00;
+            4'd1: y = 2'b01;
+            4'd2: y = 2'b10;
+            default: y = 2'b11;
+        endcase
+    end
+endmodule","module case_example2_asserts  (input logic [3:0] a, input logic [1:0] y);
+
+    
+
+    
+
+    mhgnldfkiijikldiodeadnmfjfgadpph: assert property (@(a) a == 4'b0000 |-> y == 2'b00) else $error(""Error in immediate assert mhgnldfkiijikldiodeadnmfjfgadpph"");
+hdnnamkpbbflkbciognlhdaoapmikneg: assert property (@(a) a == 4'b0001 |-> y == 2'b01) else $error(""Error in immediate assert hdnnamkpbbflkbciognlhdaoapmikneg"");
+mlmaeibekogckebippflagkpinjnpodl: assert property (@(a) a == 4'b0010 |-> y == 2'b10) else $error(""Error in immediate assert mlmaeibekogckebippflagkpinjnpodl"");
+cegncgobhnbeklniaidhcmpjegndbhjo: assert property (@(a) a == 4'b0011 |-> y == 2'b11) else $error(""Error in immediate assert cegncgobhnbeklniaidhcmpjegndbhjo"");
+cniegabagikgkmlfajacffkdmbfjeiem: assert property (@(a) a == 4'b0100 |-> y == 2'b11) else $error(""Error in immediate assert cniegabagikgkmlfajacffkdmbfjeiem"");
+nkedgmjeebffkakfbcfckgoooddppala: assert property (@(a) a == 4'b0101 |-> y == 2'b11) else $error(""Error in immediate assert nkedgmjeebffkakfbcfckgoooddppala"");
+knnpkiegimlfkfadooogegginibeioag: assert property (@(a) a == 4'b0110 |-> y == 2'b11) else $error(""Error in immediate assert knnpkiegimlfkfadooogegginibeioag"");
+bjchgfkgiabpkklfblnpmofggmnmjdkj: assert property (@(a) a == 4'b0111 |-> y == 2'b11) else $error(""Error in immediate assert bjchgfkgiabpkklfblnpmofggmnmjdkj"");
+bgcoplnjldjekcfbbdaklcpefjkhnbeg: assert property (@(a) a == 4'b1000 |-> y == 2'b11) else $error(""Error in immediate assert bgcoplnjldjekcfbbdaklcpefjkhnbeg"");
+njhppciokabakebdpakkdoebmmljkdhi: assert property (@(a) a == 4'b1001 |-> y == 2'b11) else $error(""Error in immediate assert njhppciokabakebdpakkdoebmmljkdhi"");
+lhcgpepkjgbckcngpnbbhabobbiclkmb: assert property (@(a) a == 4'b1010 |-> y == 2'b11) else $error(""Error in immediate assert lhcgpepkjgbckcngpnbbhabobbiclkmb"");
+oapgodapmmcdkgohbeconfkddlaadljj: assert property (@(a) a == 4'b1011 |-> y == 2'b11) else $error(""Error in immediate assert oapgodapmmcdkgohbeconfkddlaadljj"");
+lilbmbjamfblkhmeodpmgkahcmjbiclh: assert property (@(a) a == 4'b1100 |-> y == 2'b11) else $error(""Error in immediate assert lilbmbjamfblkhmeodpmgkahcmjbiclh"");
+hoappbblaeonknmfbmmienpdljoljdko: assert property (@(a) a == 4'b1101 |-> y == 2'b11) else $error(""Error in immediate assert hoappbblaeonknmfbmmienpdljoljdko"");
+hffhnhdacophkhghabkomikaaijhepbc: assert property (@(a) a == 4'b1110 |-> y == 2'b11) else $error(""Error in immediate assert hffhnhdacophkhghabkomikaaijhepbc"");
+iheakboopoamknpjaemobodhakialmal: assert property (@(a) a == 4'b1111 |-> y == 2'b11) else $error(""Error in immediate assert iheakboopoamknpjaemobodhakialmal"");
+
+
+    
+
+endmodule",OK,31.579079389572144,393,438
+"module case2(input logic [2:0] sel, output logic z);
+    always_comb begin
+        case(sel)
+            3'b000: z = 0;
+            3'b001: z = 1;
+            3'b010: z = 1;
+            3'b011: z = 0;
+            3'b100: z = 1;
+            default: z = 0;
+        endcase
+    end
+endmodule","module case2_asserts  (input logic [2:0] sel, input logic z);
+
+    
+
+    
+
+    hmhlhfdckdbokgfgbpkdgjjlmnbnbiid: assert property (@(sel) (sel == 3'b000) |-> z == 0) else $error(""Error in immediate assert hmhlhfdckdbokgfgbpkdgjjlmnbnbiid"");
+kdbmfemgpkklkpglopgbhlmjdebfjake: assert property (@(sel) (sel == 3'b001) |-> z == 1) else $error(""Error in immediate assert kdbmfemgpkklkpglopgbhlmjdebfjake"");
+lgiandaldfgokgllapekakfccpkgoeml: assert property (@(sel) (sel == 3'b010) |-> z == 1) else $error(""Error in immediate assert lgiandaldfgokgllapekakfccpkgoeml"");
+ndcogamagcookhccbncdajnemcpkblde: assert property (@(sel) (sel == 3'b011) |-> z == 0) else $error(""Error in immediate assert ndcogamagcookhccbncdajnemcpkblde"");
+fdnfddfgpfemkddjpolaajnjabnajajf: assert property (@(sel) (sel == 3'b100) |-> z == 1) else $error(""Error in immediate assert fdnfddfgpfemkddjpolaajnjabnajajf"");
+ibijibihabaakgbiojipmmlooijgfbgi: assert property (@(sel) (sel != 3'b000 && sel != 3'b001 && sel != 3'b010 && sel != 3'b011 && sel != 3'b100) |-> z == 0) else $error(""Error in immediate assert ibijibihabaakgbiojipmmlooijgfbgi"");
+
+
+    
+
+endmodule",OK,13.24372935295105,408,180
+"module case3(input logic [1:0] sel, input logic a, b, c, d, output logic y);
+    always_comb begin
+        case(sel)
+            2'b00: y = a;
+            2'b01: y = b;
+            2'b10: y = c;
+            2'b11: y = d;
+        endcase
+    end
+endmodule","module case3_asserts  (input logic [1:0] sel, input logic a, b, c, d, input logic y);
+
+    
+
+    
+
+    jjbgcmbeejndkbfobjnmkcihgcpidakd: assert property (@(sel) sel == 2'b00 |-> y == a) else $error(""Error in immediate assert jjbgcmbeejndkbfobjnmkcihgcpidakd"");
+mmfcjkjkgefkklbhaephigmnbfnniabh: assert property (@(sel) sel == 2'b01 |-> y == b) else $error(""Error in immediate assert mmfcjkjkgefkklbhaephigmnbfnniabh"");
+okdbfffmfdjgkccpbbcgegkcfhlbhkhf: assert property (@(sel) sel == 2'b10 |-> y == c) else $error(""Error in immediate assert okdbfffmfdjgkccpbbcgegkcfhlbhkhf"");
+eoakkophhkofkjjioflkfemkenimmfcb: assert property (@(sel) sel == 2'b11 |-> y == d) else $error(""Error in immediate assert eoakkophhkofkjjioflkfemkenimmfcb"");
+
+
+    
+
+endmodule",OK,6.702516317367554,389,84

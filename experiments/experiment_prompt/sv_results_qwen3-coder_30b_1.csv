@@ -1,1 +1,51 @@
 original_code,generated_code,iverilog_output,time(s),prompt_tkns,output_tkns
+"module case4(input logic [3:0] in, output logic out);
+    always_comb begin
+        case(in)
+            4'b0001: out = 1;
+            4'b0010: out = 0;
+            4'b0100: out = 1;
+            4'b1000: out = 0;
+            default: out = 0;
+        endcase
+    end
+endmodule","module case4(input logic [3:0] in, output logic out);
+    always_comb begin
+        case(in)
+            4'b0001: out = 1;
+            4'b0010: out = 0;
+            4'b0100: out = 1;
+            4'b1000: out = 0;
+            default: out = 0;
+        endcase
+    end
+    
+    // Properties and asserts
+    property p_case4_valid;
+        @(posedge clk) disable iff (!reset) 
+        (in == 4'b0001 || in == 4'b0010 || in == 4'b0100 || in == 4'b1000 || in == 4'b0000) 
+        |-> (out == 1'b1 || out == 1'b0);
+    endproperty
+    
+    assert property(p_case4_valid);
+    
+    // Ensure specific behavior for each input
+    property p_case4_behavior;
+        @(posedge clk) disable iff (!reset)
+        (in == 4'b0001) |-> (out == 1'b1);
+        (in == 4'b0010) |-> (out == 1'b0);
+        (in == 4'b0100) |-> (out == 1'b1);
+        (in == 4'b1000) |-> (out == 1'b0);
+        (in == 4'b0000) |-> (out == 1'b0);
+    endproperty
+    
+    assert property(p_case4_behavior);
+    
+    // Cover properties
+    cover property(@(posedge clk) disable iff (!reset) (in == 4'b0001) && (out == 1'b1));
+    cover property(@(posedge clk) disable iff (!reset) (in == 4'b0010) && (out == 1'b0));
+    cover property(@(posedge clk) disable iff (!reset) (in == 4'b0100) && (out == 1'b1));
+    cover property(@(posedge clk) disable iff (!reset) (in == 4'b1000) && (out == 1'b0));
+    cover property(@(posedge clk) disable iff (!reset) (in == 4'b0000) && (out == 1'b0));
+    
+endmodule","** Error: (vlog-13069) prueba.sv(25): near ""("": syntax error, unexpected '(', expecting ""SystemVerilog keyword 'endproperty'"".",42.846226930618286,156,536

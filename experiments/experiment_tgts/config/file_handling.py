@@ -18,3 +18,5 @@ def initialize_csv_file(filepath: str):
         writer = csv.writer(results_file)
         writer.writerow(["original_code", "generated_code", "iverilog_output",
                          "time(s)", "prompt_tkns", "output_tkns"])
+
+        results_file.flush()

@@ -45,15 +45,15 @@ class ExperimentController:
 
         elapsed_time = time.time() - time1
 
+        # Track tokens
+        self.token_tracker.save_tokens(
+            model_response['prompt_tkns'],
+            model_response['response_tkns']
+        )
+
+        print(f'Generated testing module: \n{model_response["sv_code"]}\n')
+
         if model_response['is_valid']:
-
-            # Track tokens
-            self.token_tracker.save_tokens(
-                model_response['prompt_tkns'],
-                model_response['response_tkns']
-            )
-
-            print(f'Generated testing module: \n{model_response["sv_code"]}\n')
 
             compiler_output = check_code_syntax(code=model_response['sv_code'])
 

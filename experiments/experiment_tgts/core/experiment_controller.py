@@ -7,7 +7,7 @@ from ..core.module_assembly.final_assembler import FinalAssembler
 from ..tracking.token_tracker import TokenTracker
 from ..tracking.statistics import ExperimentStatistics
 from ..tracking.results_writer import ResultsWriter
-from utils.regex_utils.module_assert_check import check_module_has_asserts
+from utils.regex_utils.module_assert_check import check_module_has_asserts_properties
 
 class ExperimentController:
     """Controls the flow of experiment 3"""

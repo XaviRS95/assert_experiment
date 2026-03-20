@@ -1,0 +1,287 @@
+original_code,generated_code,iverilog_output,time(s),prompt_tkns,output_tkns
+"
+    module ethernet_crc32_pipelined (
+    input logic clk,
+    input logic rst_n,
+    input logic [7:0] data_in,
+    input logic data_valid,
+    input logic start_frame,
+    input logic end_frame,
+    output logic [31:0] crc_out,
+    output logic crc_valid,
+    output logic crc_error
+);
+
+//-------------------------------------------------------------------------
+// State enumeration
+//-------------------------------------------------------------------------
+typedef enum logic [1:0] {
+    IDLE,
+    CALC,
+    FINALIZE,
+    CHECK
+} state_t;
+
+//-------------------------------------------------------------------------
+// CRC32 Constants (Ethernet polynomial: 0x04C11DB7)
+//-------------------------------------------------------------------------
+parameter CRC32_POLY = 32'h04C11DB7;
+parameter CRC32_INIT = 32'hFFFFFFFF;
+parameter CRC32_RESIDUE = 32'hDEBB20E3;
+
+//-------------------------------------------------------------------------
+// Sequential logic: State and pipeline registers
+//-------------------------------------------------------------------------
+state_t state_reg, state_next;
+logic [31:0] crc_reg, crc_next;
+logic [31:0] crc_pipe1, crc_pipe2;
+logic [7:0] data_pipe1, data_pipe2;
+logic valid_pipe1, valid_pipe2;
+logic start_pipe1, start_pipe2;
+logic end_pipe1, end_pipe2;
+logic [2:0] byte_count_reg, byte_count_next;
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        state_reg <= IDLE;
+        crc_reg <= CRC32_INIT;
+        crc_pipe1 <= 32'b0;
+        crc_pipe2 <= 32'b0;
+        data_pipe1 <= 8'b0;
+        data_pipe2 <= 8'b0;
+        valid_pipe1 <= 1'b0;
+        valid_pipe2 <= 1'b0;
+        start_pipe1 <= 1'b0;
+        start_pipe2 <= 1'b0;
+        end_pipe1 <= 1'b0;
+        end_pipe2 <= 1'b0;
+        byte_count_reg <= 3'b0;
+    end else begin
+        state_reg <= state_next;
+        crc_reg <= crc_next;
+        byte_count_reg <= byte_count_next;
+
+        // Pipeline stage 1
+        crc_pipe1 <= crc_reg;
+        data_pipe1 <= data_in;
+        valid_pipe1 <= data_valid;
+        start_pipe1 <= start_frame;
+        end_pipe1 <= end_frame;
+
+        // Pipeline stage 2
+        crc_pipe2 <= crc_pipe1;
+        data_pipe2 <= data_pipe1;
+        valid_pipe2 <= valid_pipe1;
+        start_pipe2 <= start_pipe1;
+        end_pipe2 <= end_pipe1;
+    end
+end
+
+//-------------------------------------------------------------------------
+// CRC32 calculation function (combinational)
+//-------------------------------------------------------------------------
+function automatic [31:0] crc32_byte;
+    input [31:0] crc;
+    input [7:0] data;
+    logic [31:0] new_crc;
+    logic [31:0] poly;
+begin
+    new_crc = crc ^ {24'b0, data};
+    poly = CRC32_POLY;
+
+    for (int i = 0; i < 8; i++) begin
+        if (new_crc[0])
+            new_crc = (new_crc >> 1) ^ poly;
+        else
+            new_crc = (new_crc >> 1);
+    end
+
+    crc32_byte = new_crc;
+end
+endfunction
+
+//-------------------------------------------------------------------------
+// Pipeline stage 1 combinational logic
+//-------------------------------------------------------------------------
+logic [31:0] crc_stage1_out;
+logic [31:0] crc_stage1_init;
+logic stage1_valid;
+
+always_comb begin
+    // Stage 1 CRC calculation
+    if (start_pipe1)
+        crc_stage1_init = CRC32_INIT;
+    else
+        crc_stage1_init = crc_pipe1;
+
+    if (valid_pipe1)
+        crc_stage1_out = crc32_byte(crc_stage1_init, data_in);
+    else
+        crc_stage1_out = crc_stage1_init;
+
+    stage1_valid = valid_pipe1;
+end
+
+//-------------------------------------------------------------------------
+// Pipeline stage 2 combinational logic
+//-------------------------------------------------------------------------
+logic [31:0] crc_stage2_out;
+logic [31:0] crc_stage2_final;
+logic stage2_start, stage2_end;
+
+always_comb begin
+    // Stage 2 CRC calculation
+    if (start_pipe2)
+        crc_stage2_out = crc32_byte(CRC32_INIT, data_pipe2);
+    else if (valid_pipe2)
+        crc_stage2_out = crc32_byte(crc_pipe2, data_pipe2);
+    else
+        crc_stage2_out = crc_pipe2;
+
+    // Final XOR
+    crc_stage2_final = ~crc_stage2_out;
+
+    stage2_start = start_pipe2;
+    stage2_end = end_pipe2;
+end
+
+//-------------------------------------------------------------------------
+// Main FSM combinational logic
+//-------------------------------------------------------------------------
+always_comb begin
+    state_next = state_reg;
+    crc_next = crc_reg;
+    byte_count_next = byte_count_reg;
+    crc_out = 32'b0;
+    crc_valid = 1'b0;
+    crc_error = 1'b0;
+
+    case (state_reg)
+        IDLE: begin
+            if (start_frame) begin
+                state_next = CALC;
+                crc_next = CRC32_INIT;
+                byte_count_next = 3'b0;
+            end
+        end
+
+        CALC: begin
+            // Update CRC with pipelined output
+            crc_next = crc_stage2_out;
+
+            if (valid_pipe2)
+                byte_count_next = byte_count_reg + 1;
+
+            if (end_pipe2) begin
+                state_next = FINALIZE;
+                crc_next = crc_stage2_final;
+            end
+        end
+
+        FINALIZE: begin
+            crc_out = crc_reg;
+            crc_valid = 1'b1;
+            state_next = CHECK;
+        end
+
+        CHECK: begin
+            // Check against expected residue
+            if (crc_reg == CRC32_RESIDUE)
+                crc_error = 1'b0;
+            else
+                crc_error = 1'b1;
+
+            if (!data_valid)
+                state_next = IDLE;
+        end
+    endcase
+end
+
+endmodule
+    ","module ethernet_crc32_pipelined_asserts  (input logic clk,
+input logic rst_n,
+input logic [7:0] data_in,
+input logic data_valid,
+input logic start_frame,
+input logic end_frame,
+input logic [31:0] crc_out,
+input logic crc_valid,
+input logic crc_error);
+
+    typedef enum logic [1:0] {
+    IDLE,
+    CALC,
+    FINALIZE,
+    CHECK
+} state_t;
+
+parameter CRC32_POLY = 32'h04C11DB7;
+parameter CRC32_INIT = 32'hFFFFFFFF;
+parameter CRC32_RESIDUE = 32'hDEBB20E3;
+
+state_t state_reg, state_next;
+logic [31:0] crc_reg, crc_next;
+logic [31:0] crc_pipe1, crc_pipe2;
+logic [7:0] data_pipe1, data_pipe2;
+logic valid_pipe1, valid_pipe2;
+logic start_pipe1, start_pipe2;
+logic end_pipe1, end_pipe2;
+logic [2:0] byte_count_reg, byte_count_next;
+
+
+
+
+
+logic [31:0] crc_stage1_out;
+logic [31:0] crc_stage1_init;
+logic stage1_valid;
+
+
+
+logic [31:0] crc_stage2_out;
+logic [31:0] crc_stage2_final;
+logic stage2_start, stage2_end;
+
+    function automatic [31:0] crc32_byte;
+    input [31:0] crc;
+    input [7:0] data;
+    logic [31:0] new_crc;
+    logic [31:0] poly;
+begin
+    new_crc = crc ^ {24'b0, data};
+    poly = CRC32_POLY;
+
+    for (int i = 0; i < 8; i++) begin
+        if (new_crc[0])
+            new_crc = (new_crc >> 1) ^ poly;
+        else
+            new_crc = (new_crc >> 1);
+    end
+
+    crc32_byte = new_crc;
+end
+endfunction
+
+    
+
+
+
+ockfkcmephnfkeflpcjieagceogaalfk: assert property (@(state_reg, start_frame) (state_reg == 2'b00) && (start_frame == 1'b1) |-> state_next == 2'b01) else $error(""Error in immediate assert ockfkcmephnfkeflpcjieagceogaalfk"");
+miigjimokpebkimopkiaebkjdjfmeckm: assert property (@(state_reg, valid_pipe2) (state_reg == 2'b01) && (valid_pipe2 == 1'b1) |-> state_next == 2'b01) else $error(""Error in immediate assert miigjimokpebkimopkiaebkjdjfmeckm"");
+kpfkochoccdgkcboagbpjfkockkalmgm: assert property (@(state_reg, end_pipe2) (state_reg == 2'b01) && (end_pipe2 == 1'b1) |-> state_next == 2'b10) else $error(""Error in immediate assert kpfkochoccdgkcboagbpjfkockkalmgm"");
+khijimhjhngdkamabheabepiihogbcki: assert property (@(state_reg) (state_reg == 2'b10) |-> state_next == 2'b11) else $error(""Error in immediate assert khijimhjhngdkamabheabepiihogbcki"");
+oobiljfpnimhkbehbhdkfomecgbcfabi: assert property (@(state_reg, data_valid) (state_reg == 2'b11) && (data_valid == 1'b0) |-> state_next == 2'b00) else $error(""Error in immediate assert oobiljfpnimhkbehbhdkfomecgbcfabi"");
+kobddecbpanlkhiepheiiggnlkcpngen: assert property (@(state_reg, start_frame) (state_reg == 2'b00) && (start_frame == 1'b1) |-> crc_next == 32'hFFFFFFFF) else $error(""Error in immediate assert kobddecbpanlkhiepheiiggnlkcpngen"");
+hcgmllbhabeokklnbblgiocaipeheane: assert property (@(state_reg, valid_pipe2) (state_reg == 2'b01) && (valid_pipe2 == 1'b1) |-> crc_next == crc_stage2_out) else $error(""Error in immediate assert hcgmllbhabeokklnbblgiocaipeheane"");
+lndblocoefmpkmgdpjbilidaiceppmif: assert property (@(state_reg, end_pipe2) (state_reg == 2'b01) && (end_pipe2 == 1'b1) |-> crc_next == crc_stage2_final) else $error(""Error in immediate assert lndblocoefmpkmgdpjbilidaiceppmif"");
+mnfkbkjknmiikinhbdfmefgdogodbhdg: assert property (@(state_reg, start_frame) (state_reg == 2'b00) && (start_frame == 1'b1) |-> byte_count_next == 3'b000) else $error(""Error in immediate assert mnfkbkjknmiikinhbdfmefgdogodbhdg"");
+ihaodblnglmdkkdcpkbogpjbfmolbbek: assert property (@(state_reg, valid_pipe2) (state_reg == 2'b01) && (valid_pipe2 == 1'b1) |-> byte_count_next == (byte_count_reg + 3'b001)) else $error(""Error in immediate assert ihaodblnglmdkkdcpkbogpjbfmolbbek"");
+lnkbndghffjikainoedonpcdjdngiano: assert property (@(state_reg) (state_reg == 2'b10) |-> crc_out == crc_reg) else $error(""Error in immediate assert lnkbndghffjikainoedonpcdjdngiano"");
+dmiedeoccgdjkmcoanffgelimkciaimg: assert property (@(state_reg) (state_reg == 2'b10) |-> crc_valid == 1'b1) else $error(""Error in immediate assert dmiedeoccgdjkmcoanffgelimkciaimg"");
+oehlecfpkabmkhempfhjkhgadcgbnnfe: assert property (@(state_reg, crc_reg) (state_reg == 2'b11) && (crc_reg == 32'hDEBB20E3) |-> crc_error == 1'b0) else $error(""Error in immediate assert oehlecfpkabmkhempfhjkhgadcgbnnfe"");
+eoejbkhikpoekpbgobcbhmhncjkbfmlh: assert property (@(state_reg, crc_reg) (state_reg == 2'b11) && (crc_reg != 32'hDEBB20E3) |-> crc_error == 1'b1) else $error(""Error in immediate assert eoejbkhikpoekpbgobcbhmhncjkbfmlh"");
+
+
+    
+
+endmodule",OK,23.56405019760132,3123,1551

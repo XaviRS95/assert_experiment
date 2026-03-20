@@ -1,4 +1,4 @@
-import csv
+import csv, os
 
 class ResultsWriter:
     """Handles writing results to CSV"""
@@ -29,3 +29,8 @@ class ResultsWriter:
             prompt_tkns,
             response_tkns
         ])
+
+        # FORCE the data out of the buffer and onto the disk
+        if self.file:
+            self.file.flush()
+            os.fsync(self.file.fileno())  # Optional: forces OS-level write

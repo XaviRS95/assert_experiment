@@ -1,5 +1,5 @@
 from utils import utils
-from utils.regex_utils.module_assert_check import check_module_has_asserts
+from utils.regex_utils.module_assert_check import check_module_has_asserts_properties
 class SyntaxChecker:
     """Handles syntax checking of generated code"""
 
@@ -9,7 +9,7 @@ class SyntaxChecker:
         if not code:
             return "NO_CODE_GENERATED"
         else:
-            if not check_module_has_asserts(module=code):
+            if not check_module_has_asserts_properties(module=code):
                 return 'MODULE_WITHOUT_ASSERTS'
             else:
                 return utils.check_code_syntax(code=code)

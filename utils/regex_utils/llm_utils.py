@@ -14,9 +14,8 @@ def extract_code(output: str)-> tuple:
     if not correct_format_output_match:
         is_valid = False
     else:
-        extracted_module = correct_format_output_match.group(1)
-        if not check_module_has_asserts(module=extracted_module):
+        sv_code = correct_format_output_match.group(1)
+        if not check_module_has_asserts(module=sv_code):
             is_valid = False
 
     return sv_code, is_valid
-
