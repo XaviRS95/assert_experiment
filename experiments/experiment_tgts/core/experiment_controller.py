@@ -12,11 +12,11 @@ from utils.regex_utils.module_assert_check import check_module_has_asserts_prope
 class ExperimentController:
     """Controls the flow of experiment 3"""
 
-    def __init__(self, model_name: str, output_filepath: str):
+    def __init__(self, model_name: str, output_filepath: str, ollama_settings: dict):
         self.model_name = model_name
         self.output_filepath = output_filepath
-        self.comb_generator = CombinationalAssertionGenerator(model_name)
-        self.seq_generator = SequentialAssertionGenerator(model_name)
+        self.comb_generator = CombinationalAssertionGenerator(model_name, ollama_settings)
+        self.seq_generator = SequentialAssertionGenerator(model_name, ollama_settings)
         self.assembler = FinalAssembler()
         self.stats = ExperimentStatistics()
         self.token_tracker = TokenTracker()

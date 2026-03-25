@@ -64,6 +64,36 @@ def extract_module_interface_and_decls(code: str, comb_blocks: list, seq_blocks:
         'inner_vars': inner_vars
     }
 
+def extract_input_variable_names(ports: str)-> list:
+    '''
+    Extracts only the input variable names from the ports list. This is used to update the sensitivity list of combinational asserts.
+    :param ports:
+    :return input_variable_names:
+    '''
+
+    ports_variables = [port.strip() for port in ports.split(',')]
+
+    is_input = True
+
+    input_variable_names = []
+
+    for port in ports_variables:
+        port_sections = port.split(' ')
+        port_type = port_sections[0]
+        if port_type == 'input':
+            #If the signal is an input, itś stored.
+            is_input = True
+            port_name = port_sections[-1]
+            input_variable_names.append(port_name)
+        elif port_type == 'output':
+            is_input = False
+        else: #Sometimes, the ports can be referenced in a group of inputs or outputs without explicitely specifying the type for each one.
+            if is_input:
+                port_name = port_sections[-1]
+                input_variable_names.append(port_name)
+
+    return input_variable_names
+
 def extract_functions(code: str)-> list:
     """
     Captures all function definitions within a module.
@@ -171,3 +201,29 @@ def extract_sensitivity_list(block: str):
         'clk': clk,
         'rst': rst
     }
+
+def extract_sv_signals(expression: str):
+    """
+    Extracts signal names from a SystemVerilog operation string.
+
+    Regex breakdown:
+    - (?<!['0-9]) : Negative lookbehind to avoid matching numbers or hex/bin suffixes.
+    - [a-zA-Z_]   : Signals must start with a letter or underscore.
+    - [a-zA-Z0-9_$]* : Followed by letters, numbers, underscores, or dollar signs.
+    - \b          : Word boundary to ensure we get the full identifier.
+    """
+
+    # 1. Define keywords to ignore (optional but recommended)
+    keywords = {'if', 'else', 'begin', 'end', 'case', 'assign', 'always', 'inside'}
+
+    # 2. Pattern to match identifiers while ignoring numbers and tick-bases
+    # This specifically avoids 'h, 'b, 'd and leading digits.
+    pattern = r"\b(?<!['\d])[a-zA-Z_][a-zA-Z0-9_$]*\b"
+
+    # 3. Find all matches
+    matches = re.findall(pattern, expression)
+
+    # 4. Filter out any Verilog keywords
+    signals = [m for m in matches if m.lower() not in keywords]
+
+    return signals

@@ -18,7 +18,7 @@ def extract_ports_names(signals_list: list):
 
     return signals_names
 
-def generate_instantiate_section(module_name: str, signals_list: list, section_type: str):
+def generate_instantiate_section(dut_module_name: str, assert_module_name: str, signals_list: list, section_type: str, internal_variables_names: list= []):
     '''
     Generates the binding of the dut and assert modules with their port signals.
     :param module_name:
@@ -26,15 +26,115 @@ def generate_instantiate_section(module_name: str, signals_list: list, section_t
     :param section_type:
     :return:
     '''
-    dut_module = f'\t{module_name} {section_type} (\n'
+    if section_type == 'dut':
+        dut_module = f'\t{dut_module_name} {section_type} (\n'
+    else:
+        dut_module = f'\tbind {dut_module_name} {assert_module_name} checker_inst (\n'
     signals = ''
     for i in range(len(signals_list)):
-        signals += f'\t\t.{signals_list[i]}({signals_list[i]}){"," if i < len(signals_list) - 1 else ""}\n'
+        signals += f'\t\t.{signals_list[i]}({signals_list[i]}){"," if i < len(signals_list) - 1 else ""}'
+    if internal_variables_names:
+        signals +=',\n'
+        for i in range(len(internal_variables_names)):
+            signals += f'\t\t.{internal_variables_names[i]}({internal_variables_names[i]}){"," if i < len(internal_variables_names) - 1 else ""}'
 
     dut_module += signals
     dut_module +=  f'\t);\n'
 
     return dut_module
+
+
+
+def extract_functions(code: str)-> list:
+    """
+    Captures all function definitions within a module.
+    Uses a multi-line anchor to ignore 'function' keywords appearing in mid-line comments.
+    """
+    pattern = r'(?m)^[ \t]*function\b[\s\S]*?\bendfunction\b'
+    functions = []
+    for match in re.finditer(pattern, code):
+        function = match.group(0)
+        functions.append(function)
+
+    return functions
+
+def extract_inner_vars(code: str, comb_blocks: list, seq_blocks: list, func_blocks: list)-> str:
+    """
+    Isolates the module header and internal variable declarations/assignments.
+    This works by 'carving out' the procedural blocks (always, functions) from the
+    raw code to reveal the structural 'Gaps' (logic, wire, assign).
+    """
+
+    extractable_code = code.strip()
+
+    #Extract combinational & sequential blocks
+    for block in comb_blocks+seq_blocks:
+        extractable_code = extractable_code.replace(block, '')
+
+    #Extract internal auxiliar functions
+    for block in func_blocks:
+        extractable_code = extractable_code.replace(block, '')
+
+    #Extracts the module name and ports
+    header_pattern = r'\bmodule\b[\s\S]*?;'
+
+    # 3. Remove the header (replace with empty string)
+    extractable_code = re.sub(header_pattern, '', extractable_code, count=1, flags=re.MULTILINE).strip()
+
+    #leaving only the inner variables to extract:
+    inner_vars = extractable_code.replace('endmodule', '').strip()
+
+    return inner_vars
+
+
+
+def get_blocks(code:str, pattern: str):
+    """
+    Entry point to find all procedural blocks (always_ff, always_comb, etc.)
+    within a module based on a starting keyword pattern.
+    """
+    blocks = []
+    for match in re.finditer(pattern, code):
+        block_data = begin_end_extractor(code=code, start_match=match)
+        if block_data:
+            blocks.append(block_data)
+    return blocks
+
+def begin_end_extractor(code:str, start_match)-> str:
+    """
+    Analyzes a code slice to find the balanced 'end' keyword for a given block.
+    Uses a stack-based counting approach to handle nested begin/end pairs correctly.
+    """
+    start_pos = start_match.start()
+    # 2. Search for 'begin' or 'end' only AFTER the always_comb
+    # We use finditer to get the positions (match.start() and match.end())
+    search_area = code[start_pos:]
+    stack = 0
+    first_begin_found = False
+    block_end_pos = -1
+
+    # This regex finds 'begin' and 'end' as whole words
+    for match in re.finditer(r'\b(begin|end)\b', search_area):
+        word = match.group(1)
+
+        if word == 'begin':
+            if not first_begin_found:
+                first_begin_found = True
+            stack += 1
+
+        elif word == 'end':
+            stack -= 1
+
+        # 3. When stack hits 0, we've found the matching 'end'
+        if first_begin_found and stack == 0:
+            block_end_pos = start_pos + match.end()
+            break
+
+    if block_end_pos != -1:
+        return code[start_pos:block_end_pos]
+
+    return ''
+
 
 def get_port_signals(module: str):
     # Captures everything between 'module name (...);'
@@ -157,15 +257,18 @@ def get_combinational_sensitivity_lists(test_module: str, sequential_sensitivity
     # Find all matches
     matches = re.findall(PATTERN, test_module)
 
-    for event in matches:
-        #Avoid by mistake including the reset activation.
-        if (not reset_signal or reset_signal not in event) and event not in sequential_sensitivity_list:
-            combinational_sensitivity_list.append(event.strip())
+    for sensitivity_list in matches:
+        sensitivity_list = sensitivity_list.split(',')
+        for signal in sensitivity_list:
+            signal = signal.replace(' ','')
+            #Avoid by mistake including the reset activation.
+            if (not reset_signal or reset_signal != signal) and signal not in sequential_sensitivity_list:
+                combinational_sensitivity_list.append(signal)
 
     return list(set(combinational_sensitivity_list))
 
 
-def group_activations_with_ports_names(test_module: str)-> dict:
+def group_activations_with_ports_names(test_module: str, clock_signal: str)-> dict:
     '''
     Extracts the sensitivity list that activates each port from all the tests.
     This is crucial to later understand what ports stimulate under what sensitivity lists,
@@ -178,57 +281,51 @@ def group_activations_with_ports_names(test_module: str)-> dict:
 
     results = {}
 
-    all_extracted_vars = set()
-
     for activation, body in matches:
-        # 2. Split by implication operators |-> or |=>
-        parts = re.split(r'\|->|\|=>', body)
 
-        if len(parts) > 1:
+        all_extracted_vars = set()
 
-            antecedent = parts[0]
+        if clock_signal in activation:
 
-            #Remove all disable iff() references in the antecedent:
             pattern = r'disable\s+iff\s*\([^)]+\)'
-            # Replace with an empty string and clean up double spaces if necessary
-            cleaned_text = re.sub(pattern, '', antecedent)
-            # Optional: clean up extra internal spaces left behind
-            antecedent = re.sub(r'\s{2,}', ' ', cleaned_text).strip()
+            cleaned_text = re.sub(pattern, '', body)
+            parts = re.split(r'\|->|\|=>', cleaned_text)
 
-            # 3. Split by logical && or ||
-            logical_groups = re.split(r'&&|\|\|', antecedent)
+            for part in parts:
 
-            for group in logical_groups:
-                # 4. Remove parentheses to simplify the string
-                clean_group = group.replace('(', '').replace(')', '').strip()
+                # 3. Split by logical && or ||
+                logical_groups = re.split(r'&&|\|\|', part)
 
-                # 5. Split by comparison operators to isolate the LHS
-                # This handles ==, >=, <=, !=, >, <
-                comparisons = re.split(r'==|>=|<=|!=|>|<', clean_group)
-                lhs = comparisons[0].strip()
+                for group in logical_groups:
+                    # 4. Remove parentheses to simplify the string
+                    clean_group = group.replace('(', '').replace(')', '').strip()
 
-                # 6. Extract Variable Names
-                # We look for words starting with alpha/underscore.
-                # We specifically exclude matches that look like SV constants (e.g., 8'hFF)
-                # by checking if they are preceded by a tick (').
+                    # 5. Split by comparison operators to isolate the LHS
+                    # This handles ==, >=, <=, !=, >, <
+                    comparisons = re.split(r'==|>=|<=|!=|>|<', clean_group)
 
-                # Regex breakdown:
-                # (?<!['\d])  -> Negative lookbehind: Don't match if preceded by a tick or digit (filters 1'b1)
-                # \b[a-zA-Z_]\w*\b -> Standard identifier pattern
-                found_vars = re.findall(r"(?<!['\d\w])\b([a-zA-Z_]\w*)\b", lhs)
+                    for comparison_part in comparisons:
 
-                for v in found_vars:
-                    all_extracted_vars.add(v)
+                        lhs = comparison_part.strip()
 
-            if activation not in results:
-                results[activation] = list(all_extracted_vars)
-            else:
-                new_list = sorted(list(set(results[activation] + list(all_extracted_vars))))
-                results[activation] = new_list
+                        # 6. Extract Variable Names
+                        # We look for words starting with alpha/underscore.
+                        # We specifically exclude matches that look like SV constants (e.g., 8'hFF)
+                        # by checking if they are preceded by a tick (').
+
+                        # Regex breakdown:
+                        # (?<!['\d])  -> Negative lookbehind: Don't match if preceded by a tick or digit (filters 1'b1)
+                        # \b[a-zA-Z_]\w*\b -> Standard identifier pattern
+                        found_vars = re.findall(r"\b(?<!['\d])[a-zA-Z_][a-zA-Z0-9_$]*\b", lhs)
+
+                        for v in found_vars:
+                            all_extracted_vars.add(v)
+
+            results[activation] = all_extracted_vars
 
     return results
 
-def separate_grouped_activations_in_seq_or_comb(dut_module:str, test_module: str, reset_signal: str) -> tuple:
+def separate_grouped_activations_in_seq_or_comb(dut_module:str, test_module: str, reset_signal: str, clock_signal: str) -> tuple:
     '''
     Groups the ports with their activation variables.
     :param dut_module:
@@ -242,27 +339,75 @@ def separate_grouped_activations_in_seq_or_comb(dut_module:str, test_module: str
     # All the combinations of the combinational blocks activation are stored.
     combinational_sensitivity_lists_variables = get_combinational_sensitivity_lists(test_module = test_module, sequential_sensitivity_list=sequential_sensitivity_list_variables, reset_signal=reset_signal)
 
-    #Groups all the activations with the ports that are involved in that block.
-    activations_with_ports_names = group_activations_with_ports_names(test_module=test_module)
+    #Clock scenario:
+    clock_related_activations = group_activations_with_ports_names(test_module=test_module, clock_signal=clock_signal)
 
-    combinational_grouped_variables_by_testing = dict.fromkeys(combinational_sensitivity_lists_variables, [])
-    sequential_grouped_variables_by_testing = dict.fromkeys(sequential_sensitivity_list_variables, [])
-
-    for activation in activations_with_ports_names.keys():
-        #Check if it's an activation condition previously recognized
-        if activation in combinational_grouped_variables_by_testing.keys():
-            combinational_grouped_variables_by_testing[activation] += activations_with_ports_names[activation]
-
-        #If reset signal is not the activation (Since it needs to be eliminated because it doesn't generate any port stimulus).
-        if activation in sequential_grouped_variables_by_testing:
-            sequential_grouped_variables_by_testing[activation] = sequential_grouped_variables_by_testing[activation] + activations_with_ports_names[activation]
-
-        #Eliminate all the repeated port names from each activation type
-        if combinational_grouped_variables_by_testing:
-            combinational_grouped_variables_by_testing[activation] = list(set(combinational_grouped_variables_by_testing[activation]))
-        if sequential_grouped_variables_by_testing:
-            sequential_grouped_variables_by_testing[activation] = list(set(sequential_grouped_variables_by_testing[activation]))
-
-    return combinational_grouped_variables_by_testing, sequential_grouped_variables_by_testing
+    return combinational_sensitivity_lists_variables, clock_related_activations
 
 #print(group_activations_with_signal_names(dut_module=dut_module, test_module=test_module))
+
+
+def extract_variable_names(text):
+    # 1. Strip out the 'typedef struct' blocks entirely first
+    # This prevents 'data', 'keep', 'last' from being caught
+    text = re.sub(r'typedef\s+struct[\s\S]*?\}\s*\w+;', '', text)
+
+    # 2. Strip out 'assign' lines
+    text = re.sub(r'assign\s+[\s\S]*?;', '', text)
+
+    # 3. Improved Regex for Declarations:
+    # It looks for a type (logic, reg, or a custom type like fifo_entry_t)
+    # Then it captures the variable names, but stops if it sees an '='
+    # (to avoid grabbing assignment logic).
+    declaration_pattern = r'^\s*(?!\b(?:assign|parameter|typedef|module|endmodule)\b)(\w+)\s+(?:\[.*?\]\s*)?([^;=]+);'
+
+    # We use MULTILINE so ^ matches the start of each line
+    matches = re.findall(declaration_pattern, text, re.MULTILINE)
+
+    variable_names = []
+    for _, var_list in matches:
+        # Split by comma for multi-variable lines: logic a, b, c;
+        parts = var_list.split(',')
+        for p in parts:
+            # Remove array dimensions like [0:1024]
+            name = re.sub(r'\[.*?\]', '', p).strip()
+            # Double check to ensure we didn't grab an empty string
+            # or a stray bit of logic
+            if name and not any(c in name for c in '?:><+-'):
+                variable_names.append(name)
+
+    return variable_names
+
+
+
+
+def extract_internal_variables_names(dut_module: str)-> list:
+    '''
+    Extracts all the internal variable names from the dut module to be used in the assert bind of the testbench.
+    :param dut_module:
+    :return:
+    '''
+
+    internal_variables_names = []
+
+    stripped_module = dut_module
+
+    comments_pattern = r'(\/\*[\s\S]*?\*\/)|(\/\/[^\r\n]*(\r?\n)?)'
+    header_pattern = r'(module)'
+    # re.sub replaces matches with an empty string
+    stripped_module = re.sub(comments_pattern, '', stripped_module)
+
+    comb_blocks = get_blocks(code=stripped_module, pattern=r'always_comb')
+    seq_blocks = get_blocks(code=stripped_module, pattern=r'always_(?:ff|latch)')
+    func_blocks = extract_functions(code=stripped_module)
+
+
+    inner_vars = extract_inner_vars(code=stripped_module,
+                                                    comb_blocks=comb_blocks,
+                                                    seq_blocks=seq_blocks,
+                                                    func_blocks=func_blocks)
+
+    internal_variables_names = extract_variable_names(text = inner_vars)
+
+
+    return internal_variables_names

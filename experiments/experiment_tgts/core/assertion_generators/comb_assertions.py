@@ -7,11 +7,12 @@ from utils.regex_utils import sv_parsing
 class CombinationalAssertionGenerator:
     """Generates assertions for combinational blocks"""
 
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, ollama_settings: dict):
         self.model_name = model_name
+        self.ollama_settings = ollama_settings
 
     def generate_for_blocks(self, comb_blocks: list, parameters: str,
-                            ports: str, inner_vars: str) -> dict:
+                            ports: str, inner_vars: str, ) -> dict:
         """Generate assertions for all combinational blocks"""
         all_assertions = []
 
@@ -39,7 +40,11 @@ class CombinationalAssertionGenerator:
                               ports: str, inner_vars: str) -> dict:
         """Process a single combinational block"""
 
+
+
         headerless_block = sv_parsing.extract_block_content(block=block)
+
+        input_ports_list = sv_parsing.extract_input_variable_names(ports=ports)
 
         prompt = comb_to_tgts_prompt(
             parameters=parameters,
@@ -51,11 +56,13 @@ class CombinationalAssertionGenerator:
         model_response = utils.query_ollama(
             prompt=prompt,
             model=self.model_name,
-            code_call=False
+            code_call=False,
+            ollama_settings=self.ollama_settings
         )
 
         immediate_asserts = tgts_to_immediate_asserts.concurrent_asserts_from_tgts(
-            tgts_rules=model_response['tgts_rules']
+            tgts_rules=model_response['tgts_rules'],
+            input_ports_list = input_ports_list
         )
 
         return {'immediate_asserts': immediate_asserts,

@@ -24,6 +24,7 @@ class ModuleProcessor:
             func_blocks=blocks['functions']
         )
 
+
         return {
             'has_blocks': True,
             'clean_code': self.block_extractor.clean_code,

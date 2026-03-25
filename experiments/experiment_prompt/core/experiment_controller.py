@@ -10,12 +10,13 @@ from prompts.prompt_experiments import experiment1_prompt, experiment2_prompt
 class ExperimentController:
     """Controls the flow of experiment 3"""
 
-    def __init__(self, model_name: str, output_filepath: str, experiment_mode: int):
+    def __init__(self, model_name: str, output_filepath: str, experiment_mode: int, ollama_settings: dict):
         self.model_name = model_name
         self.output_filepath = output_filepath
         self.experiment_mode = experiment_mode
         self.stats = ExperimentStatistics()
         self.token_tracker = TokenTracker()
+        self.ollama_settings = ollama_settings
 
     def run(self, modules: list):
         """Run the experiment on all modules"""
@@ -41,7 +42,7 @@ class ExperimentController:
         else:
             prompt = experiment2_prompt(module=module_code)
 
-        model_response = query_ollama(prompt=prompt, model=self.model_name, code_call=True)
+        model_response = query_ollama(prompt=prompt, model=self.model_name, code_call=True, ollama_settings = self.ollama_settings)
 
         elapsed_time = time.time() - time1
 

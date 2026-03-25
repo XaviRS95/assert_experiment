@@ -1,6 +1,6 @@
-from module_info_extractor import extract_ports_names, generate_instantiate_section
+from module_info_extractor import extract_ports_names, generate_instantiate_section, extract_internal_variables_names
 
-def generate_dut_assert_sections(signals: list, dut_module_name: str, assert_module_name: str) -> dict:
+def generate_dut_assert_sections(signals: list, dut_module_name: str, assert_module_name: str, internal_dut_variables_names: list) -> dict:
     '''
     Generates the DUT and assert binding section
     :param signals:
@@ -11,15 +11,18 @@ def generate_dut_assert_sections(signals: list, dut_module_name: str, assert_mod
     signals_names = extract_ports_names(signals_list = signals)
 
     dut_section = generate_instantiate_section(
-        module_name=dut_module_name,
+        dut_module_name = dut_module_name,
+        assert_module_name = assert_module_name,
         signals_list=signals_names,
         section_type='dut'
     )
 
     assert_section = generate_instantiate_section(
-        module_name=assert_module_name,
+        dut_module_name=dut_module_name,
+        assert_module_name=assert_module_name,
         signals_list=signals_names,
-        section_type='assertions'
+        section_type='assertions',
+        internal_variables_names=internal_dut_variables_names
     )
 
     return {

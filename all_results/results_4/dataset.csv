@@ -6595,6 +6595,178 @@ always_ff @(posedge clk or negedge rst_n) begin
 end
 
 endmodule"
+"module ethernet_mac_qos (
+    input logic clk,
+    input logic rst_n,
+
+    // GMII/RGMII interface
+    input logic [7:0] gmii_rxd,
+    input logic gmii_rx_dv,
+    input logic gmii_rx_er,
+    output logic [7:0] gmii_txd,
+    output logic gmii_tx_en,
+    output logic gmii_tx_er,
+    input logic gmii_tx_clk,
+    input logic gmii_rx_clk,
+
+    // User interface with QoS
+    input logic [7:0] tx_data [0:3][0:63],  // 4 priority queues
+    input logic [5:0] tx_length [0:3],
+    input logic [1:0] tx_queue,
+    input logic tx_valid,
+    output logic tx_ready,
+
+    output logic [7:0] rx_data [0:63],
+    output logic [5:0] rx_length,
+    output logic [2:0] rx_priority,           // Extracted priority
+    output logic rx_valid,
+    output logic rx_error,
+
+    // Statistics
+    output logic [31:0] tx_packets [0:3],
+    output logic [31:0] rx_packets [0:7],
+    output logic [15:0] collisions,
+    output logic [15:0] crc_errors
+);
+
+typedef enum logic [4:0] {
+    // Transmit states
+    TX_IDLE,
+    TX_PREAMBLE,
+    TX_SFD,
+    TX_DATA,
+    TX_CRC,
+    TX_IFG,
+    TX_BACKOFF,
+    TX_RETRY,
+    TX_PAUSE,
+
+    // Receive states
+    RX_IDLE,
+    RX_PREAMBLE,
+    RX_SFD,
+    RX_DATA,
+    RX_CRC,
+    RX_ERROR,
+
+    // QoS scheduling
+    QOS_STRICT_PRIORITY,
+    QOS_WRR,
+    QOS_WRR_UPDATE,
+    QOS_TX_SCHEDULE,
+
+    // Flow control
+    FLOW_PAUSE_SENT,
+    FLOW_PAUSE_RCVD,
+    FLOW_XON,
+    FLOW_XOFF
+} state_t;
+
+state_t tx_state, rx_state, qos_state, next_state;
+logic [47:0] src_mac, dst_mac;
+logic [15:0] ethertype;
+logic [31:0] crc_calc;
+logic [6:0] byte_count;
+logic [2:0] backoff_count;
+logic [9:0] random_seed;
+logic carrier_sense;
+logic collision_detect;
+logic [3:0] wrr_credit [0:3];  // Weighted Round Robin credits
+logic [1:0] current_queue;
+logic [1:0] next_queue;
+logic pause_frame;
+logic [15:0] pause_time;
+
+// CRC32 implementation
+function [31:0] crc32;
+    input [7:0] data;
+    input [31:0] crc;
+    // Simplified CRC32 - actual implementation would be more complex
+    crc32 = crc ^ {24'b0, data};
+endfunction
+
+always_ff @(posedge clk or negedge rst_n) begin
+    if (!rst_n) begin
+        tx_state <= TX_IDLE;
+        rx_state <= RX_IDLE;
+        qos_state <= QOS_STRICT_PRIORITY;
+        byte_count <= 7'b0;
+        backoff_count <= 3'b0;
+        crc_calc <= 32'hFFFFFFFF;
+        current_queue <= 2'b0;
+
+        for (int i = 0; i < 4; i++) begin
+            tx_packets[i] <= 32'b0;
+            wrr_credit[i] <= 4'b1000;  // Initial credits
+        end
+
+        for (int i = 0; i < 8; i++)
+            rx_packets[i] <= 32'b0;
+
+        collisions <= 16'b0;
+        crc_errors <= 16'b0;
+    end else begin
+        tx_state <= next_state;
+        rx_state <= next_state;
+        qos_state <= next_state;
+
+        case (tx_state)
+            TX_DATA: begin
+                if (byte_count < tx_length[current_queue] - 1)
+                    byte_count <= byte_count + 1;
+                crc_calc <= crc32(tx_data[current_queue][byte_count], crc_calc);
+            end
+
+            TX_CRC: begin
+                // Transmit CRC
+                gmii_txd <= ~crc_calc[31:24];  // Send CRC MSB first
+                crc_calc <= {crc_calc[23:0], 8'hFF};
+            end
+
+            TX_BACKOFF: begin
+                random_seed <= random_seed + 1;
+                backoff_count <= backoff_count + 1;
+            end
+
+            default: begin
+                byte_count <= 7'b0;
+            end
+        endcase
+
+        case (rx_state)
+            RX_DATA: begin
+                if (gmii_rx_dv) begin
+                    rx_data[byte_count] <= gmii_rxd;
+                    byte_count <= byte_count + 1;
+                    crc_calc <= crc32(gmii_rxd, crc_calc);
+                end
+            end
+
+            RX_CRC: begin
+                if (crc_calc != 32'hDEBB20E3)  // Valid CRC residue
+                    crc_errors <= crc_errors + 1;
+            end
+
+            default: begin
+                byte_count <= 7'b0;
+                crc_calc <= 32'hFFFFFFFF;
+            end
+        endcase
+
+        case (qos_state)
+            QOS_WRR_UPDATE: begin
+                for (int i = 0; i < 4; i++)
+                    wrr_credit[i] <= wrr_credit[i] + 1;
+            end
+        endcase
+    end
+end
+
+always_comb begin
+    next_state = tx_state;  // Default
+    tx_ready = (tx_state == TX_IDLE);
+    rx_valid = 1'b0;
+    rx_error = 1'b0;"
 "module ethernet_crc32_pipelined (
     input logic clk,
     input logic rst_n,
@@ -8085,290 +8257,3 @@ always_comb begin
 end
 
 endmodule"
-"
-//------------------------------------------------------------------------------
-// AXI4-Lite to APB Bridge Module
-// Converts AXI4-Lite transactions to APB protocol.
-// Supports configurable data width (32/64-bit) and up to 16 address slaves.
-//------------------------------------------------------------------------------
-module axi_lite_to_apb #(
-    parameter DATA_WIDTH = 32,
-    parameter ADDR_WIDTH = 32,
-    parameter NUM_SLAVES = 4,
-    // APB timing parameters
-    parameter P_SETUP_CYCLES = 1,   // Setup cycles in PSELx to PENABLE
-    parameter P_ENABLE_CYCLES = 1   // Cycles PENABLE stays high
-) (
-    // AXI4-Lite Interface
-    input  logic                     ACLK,
-    input  logic                     ARESETn,
-    // AXI Write Address Channel
-    input  logic [ADDR_WIDTH-1:0]    AWADDR,
-    input  logic [2:0]               AWPROT,
-    input  logic                     AWVALID,
-    output logic                     AWREADY,
-    // AXI Write Data Channel
-    input  logic [DATA_WIDTH-1:0]    WDATA,
-    input  logic [DATA_WIDTH/8-1:0]  WSTRB,
-    input  logic                     WVALID,
-    output logic                     WREADY,
-    // AXI Write Response Channel
-    output logic [1:0]               BRESP,
-    output logic                     BVALID,
-    input  logic                     BREADY,
-    // AXI Read Address Channel
-    input  logic [ADDR_WIDTH-1:0]    ARADDR,
-    input  logic [2:0]               ARPROT,
-    input  logic                     ARVALID,
-    output logic                     ARREADY,
-    // AXI Read Data Channel
-    output logic [DATA_WIDTH-1:0]    RDATA,
-    output logic [1:0]               RRESP,
-    output logic                     RVALID,
-    input  logic                     RREADY,
-
-    // APB Interface
-    output logic [ADDR_WIDTH-1:0]    PADDR,
-    output logic                     PSELx,
-    output logic                     PENABLE,
-    output logic                     PWRITE,
-    output logic [DATA_WIDTH-1:0]    PWDATA,
-    output logic [DATA_WIDTH/8-1:0]  PSTRB,
-    input  logic [DATA_WIDTH-1:0]    PRDATA,
-    input  logic                     PREADY,
-    input  logic                     PSLVERR
-);
-
-    // State machine encoding
-    typedef enum logic [2:0] {
-        IDLE        = 3'b000,
-        WR_SETUP    = 3'b001,
-        WR_ENABLE   = 3'b010,
-        WR_RESPONSE = 3'b011,
-        RD_SETUP    = 3'b100,
-        RD_ENABLE   = 3'b101,
-        RD_RESPONSE = 3'b110
-    } state_t;
-
-    state_t state, next_state;
-
-    // Address decoding for slave select
-    logic [NUM_SLAVES-1:0] addr_decode;
-    logic [ADDR_WIDTH-1:0] apb_addr_reg;
-    logic [DATA_WIDTH-1:0] write_data_reg;
-    logic [DATA_WIDTH/8-1:0] write_strb_reg;
-    logic write_op_pending, read_op_pending;
-    logic [1:0] write_resp, read_resp;
-
-    // APB timing counters
-    logic [7:0] setup_cnt, enable_cnt;
-
-    //--------------------------------------------------------------------------
-    // Address decoding logic
-    //--------------------------------------------------------------------------
-    always_comb begin
-        addr_decode = '0;
-        // Simple address decoding based on top bits (assumes equally sized regions)
-        for (int i = 0; i < NUM_SLAVES; i++) begin
-            if (apb_addr_reg[ADDR_WIDTH-1:ADDR_WIDTH-$clog2(NUM_SLAVES)] == i)
-                addr_decode[i] = 1'b1;
-        end
-    end
-
-    //--------------------------------------------------------------------------
-    // State machine sequential block
-    //--------------------------------------------------------------------------
-    always_ff @(posedge ACLK or negedge ARESETn) begin
-        if (!ARESETn) begin
-            state <= IDLE;
-            setup_cnt <= '0;
-            enable_cnt <= '0;
-            apb_addr_reg <= '0;
-            write_data_reg <= '0;
-            write_strb_reg <= '0;
-            write_op_pending <= 1'b0;
-            read_op_pending <= 1'b0;
-            write_resp <= 2'b00;
-            read_resp <= 2'b00;
-        end else begin
-            state <= next_state;
-
-            // APB timing counters
-            case (state)
-                WR_SETUP, RD_SETUP: begin
-                    if (setup_cnt < P_SETUP_CYCLES - 1)
-                        setup_cnt <= setup_cnt + 1;
-                    else
-                        setup_cnt <= '0;
-                end
-                WR_ENABLE, RD_ENABLE: begin
-                    if (enable_cnt < P_ENABLE_CYCLES - 1)
-                        enable_cnt <= enable_cnt + 1;
-                    else
-                        enable_cnt <= '0;
-                end
-                default: begin
-                    setup_cnt <= '0;
-                    enable_cnt <= '0;
-                end
-            endcase
-
-            // Register APB data/address for ongoing transaction
-            if (next_state == WR_SETUP && state == IDLE) begin
-                apb_addr_reg <= AWADDR;
-                write_data_reg <= WDATA;
-                write_strb_reg <= WSTRB;
-                write_op_pending <= 1'b1;
-            end else if (next_state == RD_SETUP && state == IDLE) begin
-                apb_addr_reg <= ARADDR;
-                read_op_pending <= 1'b1;
-            end
-
-            // Capture response from APB
-            if (state == WR_ENABLE && PREADY) begin
-                write_resp <= PSLVERR ? 2'b10 : 2'b00; // SLVERR -> AXI SLVERR
-                write_op_pending <= 1'b0;
-            end else if (state == RD_ENABLE && PREADY) begin
-                read_resp <= PSLVERR ? 2'b10 : 2'b00;
-                read_op_pending <= 1'b0;
-            end
-        end
-    end
-
-    //--------------------------------------------------------------------------
-    // State machine combinational block with case statements
-    //--------------------------------------------------------------------------
-    always_comb begin
-        next_state = state;
-
-        case (state)
-            IDLE: begin
-                if (AWVALID && WVALID && !write_op_pending)
-                    next_state = WR_SETUP;
-                else if (ARVALID && !read_op_pending)
-                    next_state = RD_SETUP;
-            end
-
-            WR_SETUP: begin
-                if (setup_cnt == P_SETUP_CYCLES - 1)
-                    next_state = WR_ENABLE;
-            end
-
-            WR_ENABLE: begin
-                if (PREADY && (enable_cnt == P_ENABLE_CYCLES - 1))
-                    next_state = WR_RESPONSE;
-            end
-
-            WR_RESPONSE: begin
-                if (BREADY)
-                    next_state = IDLE;
-            end
-
-            RD_SETUP: begin
-                if (setup_cnt == P_SETUP_CYCLES - 1)
-                    next_state = RD_ENABLE;
-            end
-
-            RD_ENABLE: begin
-                if (PREADY && (enable_cnt == P_ENABLE_CYCLES - 1))
-                    next_state = RD_RESPONSE;
-            end
-
-            RD_RESPONSE: begin
-                if (RREADY)
-                    next_state = IDLE;
-            end
-
-            default: next_state = IDLE;
-        endcase
-    end
-
-    //--------------------------------------------------------------------------
-    // APB control signals using case statements
-    //--------------------------------------------------------------------------
-    always_comb begin
-        // Default values
-        PSELx = 1'b0;
-        PENABLE = 1'b0;
-        PWRITE = 1'b0;
-        PADDR = apb_addr_reg;
-        PWDATA = write_data_reg;
-        PSTRB = write_strb_reg;
-
-        case (state)
-            WR_SETUP: begin
-                PSELx = |addr_decode;
-                PENABLE = 1'b0;
-                PWRITE = 1'b1;
-            end
-            WR_ENABLE: begin
-                PSELx = |addr_decode;
-                PENABLE = 1'b1;
-                PWRITE = 1'b1;
-            end
-            RD_SETUP: begin
-                PSELx = |addr_decode;
-                PENABLE = 1'b0;
-                PWRITE = 1'b0;
-            end
-            RD_ENABLE: begin
-                PSELx = |addr_decode;
-                PENABLE = 1'b1;
-                PWRITE = 1'b0;
-            end
-            default: begin
-                PSELx = 1'b0;
-                PENABLE = 1'b0;
-            end
-        endcase
-    end
-
-    //--------------------------------------------------------------------------
-    // AXI handshake and response logic with case statements
-    //--------------------------------------------------------------------------
-    always_comb begin
-        // Default values
-        AWREADY = 1'b0;
-        WREADY = 1'b0;
-        ARREADY = 1'b0;
-        BVALID = 1'b0;
-        RVALID = 1'b0;
-        BRESP = 2'b00;
-        RRESP = 2'b00;
-        RDATA = '0;
-
-        case (state)
-            IDLE: begin
-                AWREADY = 1'b1;
-                WREADY = 1'b1;
-                ARREADY = 1'b1;
-            end
-
-            WR_RESPONSE: begin
-                BVALID = 1'b1;
-                case (write_resp)
-                    2'b00: BRESP = 2'b00; // OKAY
-                    2'b10: BRESP = 2'b10; // SLVERR
-                    default: BRESP = 2'b11; // DECERR
-                endcase
-            end
-
-            RD_RESPONSE: begin
-                RVALID = 1'b1;
-                case (read_resp)
-                    2'b00: RRESP = 2'b00; // OKAY
-                    2'b10: RRESP = 2'b10; // SLVERR
-                    default: RRESP = 2'b11; // DECERR
-                endcase
-                RDATA = PRDATA;
-            end
-
-            default: begin
-                // No additional handshakes in other states
-            end
-        endcase
-    end
-
-endmodule
-
-"

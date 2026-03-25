@@ -1,6 +1,6 @@
 from clock_reset_initialize import generate_reset_initial_info, generate_clock_initial_section
 from generate_bindings import generate_dut_assert_sections
-from module_info_extractor import get_module_name, get_port_signals, get_triggers, normalize_ports_with_range, separate_grouped_activations_in_seq_or_comb
+from module_info_extractor import get_module_name, get_port_signals, get_triggers, normalize_ports_with_range, extract_internal_variables_names
 from stimuli_section_generator import generate_blocks
 
 def generate_testbench_header(CLK_HALF_PERIOD: int,
@@ -39,7 +39,7 @@ def generate_full_instantiate_section(full_type_signals: list, clk_initializatio
     common_signals_section = '\n'.join([f'\t{signal};' for signal in common_signals])
     template = (f'\t\n//Common signals\n'
                 f'{common_signals_section}'
-                f'\t\t\nint blocks_done = 0;\n'
+                f'\n\tint blocks_done = 0;\n'
                 f'\n'
                 f'{clk_initialization_section}\n'
                 f'{reset_initialization_section}\n'
@@ -130,10 +130,13 @@ def generate_testbench(timescale: str, dut_module: str, assert_module: str, CLK_
 
     clk_initialization_section, reset_initialization_section = generate_clk_reset_initialization(clk_signal = clk_signal, rst_signal = rst_signal, rst_trigger = rst_trigger)
 
+    internal_dut_variables_names = extract_internal_variables_names(dut_module=dut_module)
+
     dut_assert_sections = generate_dut_assert_sections(
         signals=full_type_signals,
         dut_module_name=dut_module_name,
-        assert_module_name=assert_module_name)
+        assert_module_name=assert_module_name,
+        internal_dut_variables_names=internal_dut_variables_names)
 
     full_instantiate_section = generate_full_instantiate_section(full_type_signals=full_type_signals,
                                                                  clk_initialization_section=clk_initialization_section,

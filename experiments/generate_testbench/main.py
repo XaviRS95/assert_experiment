@@ -5,11 +5,24 @@ from config import arguments
 import requests
 
 def filter_dataset(filepath: str):
+    '''
+
+    :param filepath:
+    :return:
+    '''
     file_data = pd.read_csv(filepath)
     file_data = file_data[file_data['iverilog_output'] == 'OK']
     return file_data[['original_code','generated_code']]
 
 def try_testbench(dut_module: str, assert_module:str, testbench_module:str, host:str = 'http://localhost:8002')-> dict:
+    '''
+
+    :param dut_module:
+    :param assert_module:
+    :param testbench_module:
+    :param host:
+    :return:
+    '''
     url = f"{host}/api/testbench_testing"
 
     payload = {
@@ -45,10 +58,13 @@ def main():
 
         for index, row in file_data.iterrows():
 
-                print('INDEX', index)
+                print(f'INDEX {index + 1} out of {file_data.shape[0]}')
 
                 dut_module = row['original_code']
                 assert_module = row['generated_code']
+
+                print(f'DUT module: \n{dut_module}\n\n')
+                print(f'Assert module: \n{assert_module}\n\n')
 
                 testbench_module = generate_testbench(
                         timescale=TIMESCALE,
@@ -75,8 +91,8 @@ def main():
                 average_errors += 1 if testbench_test_results["total_errors"] > 0 else 0
                 average_coverage += testbench_test_results["coverage_pct"]
 
-                print(f"Current average errors: {average_errors / len(file_data)}")
-                print(f"Current average coverage: {average_coverage / len(file_data)}")
+                #print(f"Current average errors: {average_errors / len(file_data)}")
+                #print(f"Current average coverage: {average_coverage / len(file_data)}")
 
                 print('---------------------------------------------------------------------------------------------')
 

@@ -8,7 +8,7 @@ def parse_arguments():
     parser.add_argument(
         "--path",
         type=str,
-        default="../../results_3/codegemma_7b/sv_results_codegemma_7b_3.csv",
+        default="../../all_results/results_5/borrar_prueba.csv",
         help="Path to the source CSV"
     )
     parser.add_argument(

@@ -8,8 +8,9 @@ from experiments.experiment_tgts.tracking.token_tracker import TokenTracker
 class SequentialAssertionGenerator:
     """Generates assertions for sequential blocks"""
 
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, ollama_settings: dict):
         self.model_name = model_name
+        self.ollama_settings = ollama_settings
 
     def generate_for_blocks(self, seq_blocks: list, parameters: str,
                             ports: str, inner_vars: str) -> dict:
@@ -59,7 +60,8 @@ class SequentialAssertionGenerator:
         model_response = utils.query_ollama(
             prompt=prompt,
             model=self.model_name,
-            code_call=False
+            code_call=False,
+            ollama_settings=self.ollama_settings
         )
 
         properties = tgts_to_sequential_properties.sequential_properties_from_tgts(

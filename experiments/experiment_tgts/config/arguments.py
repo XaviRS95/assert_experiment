@@ -8,7 +8,7 @@ def parse_arguments():
     parser.add_argument(
         "--model",
         type=str,
-        default="qwen3-coder:30b",
+        default="qwen2.5-coder:7b",
         help="Model name in Ollama"
     )
     parser.add_argument(

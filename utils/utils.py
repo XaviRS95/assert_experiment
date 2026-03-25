@@ -1,4 +1,4 @@
-import requests, csv, json, os
+import requests, csv, json, os, subprocess, sys, re
 from utils.regex_utils.llm_utils import extract_code
 from utils.regex_utils.tgts_parsing import extract_tgts_rules
 from pathlib import Path
@@ -38,19 +38,44 @@ def generate_final_assertion_content(module_name:str, parameters: str, aux_vars:
 
     return new_module
 
+def get_model_info(model_name: str) -> str:
+    """Fetch model metadata using ollama show command."""
+    try:
+        result = subprocess.run(
+            ['ollama', 'show', model_name, '--verbose'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+
+        # Parse the JSON output from --verbose flag
+        # The output is JSON, not plain text
+        stdout = result.stdout
+        return stdout
+
+    except subprocess.CalledProcessError as e:
+        print(f"Error: Failed to get model info for '{model_name}'")
+        print(f"Error output: {e.stderr}")
+        sys.exit(1)
+    except json.JSONDecodeError as e:
+        print(f"Error: Failed to parse model info as JSON")
+        print(f"Raw output: {result.stdout}")
+        sys.exit(1)
+
 
 def query_ollama(
     prompt: str,
     model: str,
     code_call: bool, #This parameter is to identify if what's needed to be extracted from the response is SystemVerilog code or TGTS rules.
-    host: str = "http://localhost:11434"
-) -> dict:
+    ollama_settings: dict,
+    host: str = "http://localhost:11434") -> dict:
     url = f"{host}/api/generate"
 
     payload = {
         "model": model,
         "prompt": prompt,
-        "stream": False  # IMPORTANT: disables streaming
+        "stream": False,  # IMPORTANT: disables streaming
+        "options": ollama_settings
     }
 
     response = requests.post(url, json=payload)

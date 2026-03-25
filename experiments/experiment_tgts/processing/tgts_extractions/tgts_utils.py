@@ -1,5 +1,6 @@
 import re
 from utils.regex_utils.text_processing import get_alpha_uuid
+from utils.regex_utils.sv_parsing import extract_sv_signals
 
 def constains_delays(text: str)-> bool:
     delay_pattern = r"\[\s*t\s*(?:\+\s*\d+)?\s*\]"
@@ -207,7 +208,7 @@ def extract_reset_info(sensitivity_list: dict) -> dict:
 
     return reset_info
 
-def generate_concurrent_sensitivity_list(clauses: str)-> str:
+def generate_concurrent_sensitivity_list(clauses: str, checks: str, input_ports_list: list)-> str:
     """Extract variable names and bit selections from a logic clause."""
 
     def extract_elements_from_expression(expr, flatten=False):
@@ -312,15 +313,60 @@ def generate_concurrent_sensitivity_list(clauses: str)-> str:
         # Extract the expression before any comparison operator
         for op in ['==', '!=', '<=', '>=', '<', '>']:
             if op in part:
-                part = part.split(op)[0].strip()
-                break
+                part_sections = part.split(op)
+                for part_section in part_sections:
+                    part = part_section.strip()
 
-        # Remove leading NOT
-        part = part.lstrip('!').strip()
+                    # Remove leading NOT
+                    part = part.lstrip('!').strip()
 
-        # Extract all elements from the expression (flatten concatenations)
-        vars_in_part = extract_elements_from_expression(part, flatten=True)
-        variables.extend(vars_in_part)
+                    variables_in_parts = extract_sv_signals(expression=part)
+
+                    for variable_part in variables_in_parts:
+                        # Extract all elements from the expression (flatten concatenations)
+                        vars_in_part = extract_elements_from_expression(variable_part, flatten=True)
+                        variables.extend(vars_in_part)
+
+
+    # Split by logical operators
+    parts = re.split(r'\s*(?:&&|\|\|)\s*', checks)
+
+    for part in parts:
+        # Remove surrounding parentheses recursively
+        while part.startswith('(') and part.endswith(')'):
+            part = part[1:-1].strip()
+
+        # Skip empty parts
+        if not part:
+            continue
+
+        # Extract the expression before any comparison operator
+        for op in ['==', '!=', '<=', '>=', '<', '>']:
+            if op in part:
+                part_sections = part.split(op)
+                for part_section in part_sections:
+                    part = part_section.strip()
+
+                    # Remove leading NOT
+                    part = part.lstrip('!').strip()
+
+                    variables_in_parts = extract_sv_signals(expression=part)
+
+                    for variable_part in variables_in_parts:
+                        # Extract all elements from the expression (flatten concatenations)
+                        vars_in_part = extract_elements_from_expression(variable_part, flatten=True)
+                        variables.extend(vars_in_part)
+
+
+    variables = list(set(variables))
+
+    sensitivity_list = []
+
+    for variable in variables:
+        if variable in input_ports_list:
+            sensitivity_list.append(variable)
+
+
 
     # Remove duplicates while preserving order
-    return ', '.join(list(dict.fromkeys(variables)))
+    return ', '.join(list(dict.fromkeys(sensitivity_list)))

@@ -204,33 +204,39 @@ def parse_signal_declaration(signal):
     return None, None, None
 
 
-def generate_combinational_blocks(full_type_signals: list, activations_with_ports: dict, clock_signal: str, reset_signal: str) -> list:
+def generate_combinational_block(full_type_signals: list, combinational_triggers: list, clock_signal: str, reset_signal: str) -> str:
     '''
 
-    :param activations_with_ports:
+    :param combinational_triggers:
     :return:
     '''
-    combinational_blocks = []
 
-    activation_with_full_type_list = generate_activation_with_full_type_list(full_type_signals = full_type_signals, separated_activations=activations_with_ports, reset_signal=reset_signal)
+    combinational_block = ''
 
-    for key, value in activation_with_full_type_list.items():
+    if combinational_triggers:
 
-        stimulus = generate_signal_stimulus(signals=activation_with_full_type_list[key], reset_signal=reset_signal, clock_signal=clock_signal)
+        prepared_signals = []
+        for signal in combinational_triggers:
+            for full_type_signal in full_type_signals:
+                if signal == full_type_signal.split(' ')[-1]:
+                    prepared_signals.append(full_type_signal)
+
+        stimulus = generate_signal_stimulus(signals=prepared_signals, reset_signal=reset_signal, clock_signal=clock_signal)
 
         sequential_template = (f'\tinitial begin\n'
                                f'\t\t// Wait for reset to complete\n'
                                f'\t\t#(RESET_DELAY + 5);\n'
                                f'\t\tfor(int i=0; i<COMB_TOTAL_TESTS; i++) begin\n'
                                f'{stimulus}'
+                               f'\t\t\t#5;\n'
                                f'\t\tend\n'
-                               f'\t\t#1;'
+                               f'\t\t#1;\n'
                                f'\t\tblocks_done++;\n'
                                f'\tend\n')
 
-        combinational_blocks.append(sequential_template)
+        combinational_block = sequential_template
 
-    return combinational_blocks
+    return combinational_block
 
 
 def generate_sequential_blocks(full_type_signals: list, activations_with_ports: dict, clock_signal: str, reset_signal: str)-> list:
@@ -271,13 +277,16 @@ def generate_blocks(full_type_signals: list, dut_module: str, test_module: str, 
     :param test_module:
     :return:
     '''
-    combinational_activations, sequential_activations = separate_grouped_activations_in_seq_or_comb(dut_module = dut_module, test_module = test_module, reset_signal=reset_signal)
-    combinational_blocks = generate_combinational_blocks(full_type_signals = full_type_signals, activations_with_ports=combinational_activations, clock_signal=clock_signal, reset_signal=reset_signal)
-    sequential_blocks =  generate_sequential_blocks(full_type_signals = full_type_signals, activations_with_ports=sequential_activations, clock_signal=clock_signal, reset_signal=reset_signal)
+    combinational_activations, clock_activations = separate_grouped_activations_in_seq_or_comb(dut_module = dut_module, test_module = test_module, reset_signal=reset_signal, clock_signal=clock_signal)
+    combinational_block = generate_combinational_block(full_type_signals = full_type_signals, combinational_triggers=combinational_activations, clock_signal=clock_signal, reset_signal=reset_signal)
 
-    total_blocks = len(combinational_blocks) + len(sequential_blocks)
+    if clock_signal:
+        sequential_blocks =  generate_sequential_blocks(full_type_signals = full_type_signals, activations_with_ports=clock_activations, clock_signal=clock_signal, reset_signal=reset_signal)
+    else:
+        sequential_blocks = []
 
-    combinational_blocks = "\n\n".join(combinational_blocks)
+    total_blocks = (1 if combinational_block else 0) + len(sequential_blocks)
+
     sequential_blocks = "\n\n".join(sequential_blocks)
 
     stimulus_blocks_section = (f'// ====================================================\n'
@@ -285,7 +294,7 @@ def generate_blocks(full_type_signals: list, dut_module: str, test_module: str, 
                                f'// ====================================================\n'
                                f'\n'
                                f'// COMBINATIONAL TESTS\n'
-                               f'{combinational_blocks}\n'
+                               f'{combinational_block}\n'
                                f'\n'
                                f'// SEQUENTIAL TESTS\n'
                                f'{sequential_blocks}\n')

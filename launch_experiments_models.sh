@@ -2,16 +2,15 @@
 
 # 1. Define the array of models
 MODELS=(
-    "deepseek-coder-v2:16b"
-    "qwen3-coder:30b"
-    "qwen2.5-coder:32b"
-    "codegemma:7b"
-    "starcoder2:15b"
-    "deepseek-coder-v2:236b"
-    "qwen3-coder:480b"
-    "codellama:70b"
+  "qwen2.5-coder:7b"
+  "qwen2.5-coder:14b"
+  "qwen2.5-coder:32b"
+  "qwen3-coder:30b"
+  "codegemma:7b"
+  "deepseek-coder-v2:16b"
+  "deepseek-coder:33b"
+  "yi-coder:9b"
 )
-
 
 # 2. Loop through each model in the array
 for MODEL in "${MODELS[@]}"
