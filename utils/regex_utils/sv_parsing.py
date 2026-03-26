@@ -71,26 +71,29 @@ def extract_input_variable_names(ports: str)-> list:
     :return input_variable_names:
     '''
 
-    ports_variables = [port.strip() for port in ports.split(',')]
+    # 1. Strip comments to prevent false matches
+    clean_text = re.sub(r'//.*', '', ports)
 
-    is_input = True
+    # 2. Regex to find direction OR variable names
+    # This matches:
+    # - The keywords: (input|output|inout)
+    # - The variable names: followed by optional [dims] and then , or ;
+    pattern = r'\b(input|output|inout)\b|\b(\w+)\b(?:\s*\[[^\]]*\])*\s*(?=[,;])'
 
+    keywords = {'input', 'output', 'inout', 'logic', 'reg', 'wire', 'int', 'byte', 'bit'}
     input_variable_names = []
+    current_direction = None
 
-    for port in ports_variables:
-        port_sections = port.split(' ')
-        port_type = port_sections[0]
-        if port_type == 'input':
-            #If the signal is an input, itś stored.
-            is_input = True
-            port_name = port_sections[-1]
-            input_variable_names.append(port_name)
-        elif port_type == 'output':
-            is_input = False
-        else: #Sometimes, the ports can be referenced in a group of inputs or outputs without explicitely specifying the type for each one.
-            if is_input:
-                port_name = port_sections[-1]
-                input_variable_names.append(port_name)
+    # finditer gives us matches in the exact order they appear in the file
+    for match in re.finditer(pattern, clean_text):
+        direction_hit = match.group(1)
+        variable_hit = match.group(2)
+
+        if direction_hit:
+            current_direction = direction_hit
+        elif variable_hit and variable_hit not in keywords:
+            if current_direction == 'input':
+                input_variable_names.append(variable_hit)
 
     return input_variable_names
 

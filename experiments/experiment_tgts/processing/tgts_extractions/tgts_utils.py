@@ -357,7 +357,6 @@ def generate_concurrent_sensitivity_list(clauses: str, checks: str, input_ports_
                         vars_in_part = extract_elements_from_expression(variable_part, flatten=True)
                         variables.extend(vars_in_part)
 
-
     variables = list(set(variables))
 
     sensitivity_list = []

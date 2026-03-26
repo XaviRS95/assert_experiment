@@ -62,7 +62,9 @@ def concurrent_asserts_from_tgts(tgts_rules: list, input_ports_list:list) -> str
         clauses = clean_logical_operators(rule['clauses'])
         check = clean_logical_operators(rule['check'])
 
-        sensitivity_list = f'@({generate_concurrent_sensitivity_list(clauses=clauses, checks=check, input_ports_list=input_ports_list)})'
+        concurrent_sensitivity_list = generate_concurrent_sensitivity_list(clauses=clauses, checks=check, input_ports_list=input_ports_list)
+
+        sensitivity_list = f'@({concurrent_sensitivity_list})'
 
         raw_assert = f'{sensitivity_list} {clauses} |-> {check}'
 
