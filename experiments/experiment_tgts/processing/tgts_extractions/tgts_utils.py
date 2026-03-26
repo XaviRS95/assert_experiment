@@ -208,7 +208,10 @@ def extract_reset_info(sensitivity_list: dict) -> dict:
 
     return reset_info
 
-def generate_concurrent_sensitivity_list(clauses: str, checks: str, input_ports_list: list)-> str:
+
+
+
+def generate_concurrent_sensitivity_list(clauses: str, checks: str, variables_lists: dict)-> str:
     """Extract variable names and bit selections from a logic clause."""
 
     def extract_elements_from_expression(expr, flatten=False):
@@ -293,11 +296,9 @@ def generate_concurrent_sensitivity_list(clauses: str, checks: str, input_ports_
 
         return elements
 
-    variables = []
-
+    clauses_variables = []
     # Remove leading NOT and clean up
     clauses = clauses.lstrip('!').strip()
-
     # Split by logical operators
     parts = re.split(r'\s*(?:&&|\|\|)\s*', clauses)
 
@@ -310,24 +311,43 @@ def generate_concurrent_sensitivity_list(clauses: str, checks: str, input_ports_
         if not part:
             continue
 
+        separate_part = False
+
         # Extract the expression before any comparison operator
         for op in ['==', '!=', '<=', '>=', '<', '>']:
             if op in part:
-                part_sections = part.split(op)
-                for part_section in part_sections:
-                    part = part_section.strip()
+                separate_part = True
+        if separate_part:
+            part_sections = part.split(op)
+            for part_section in part_sections:
+                part = part_section.strip()
 
-                    # Remove leading NOT
-                    part = part.lstrip('!').strip()
+                # Remove leading NOT
+                part = part.lstrip('!').strip()
 
-                    variables_in_parts = extract_sv_signals(expression=part)
+                variables_in_parts = extract_sv_signals(expression=part)
 
-                    for variable_part in variables_in_parts:
-                        # Extract all elements from the expression (flatten concatenations)
-                        vars_in_part = extract_elements_from_expression(variable_part, flatten=True)
-                        variables.extend(vars_in_part)
+                for variable_part in variables_in_parts:
+                    # Extract all elements from the expression (flatten concatenations)
+                    vars_in_part = extract_elements_from_expression(variable_part, flatten=True)
+                    clauses_variables.extend(vars_in_part)
 
+        else: #Considers that it could be a 1-variable part of experssion, like !active or something like that
+            part = part.strip()
+            # Remove leading NOT
+            part = part.lstrip('!').strip()
+            variables_in_parts = extract_sv_signals(expression=part)
+            for variable_part in variables_in_parts:
+                # Extract all elements from the expression (flatten concatenations)
+                vars_in_part = extract_elements_from_expression(variable_part, flatten=True)
+                clauses_variables.extend(vars_in_part)
 
+    clauses_variables = list(set(clauses_variables))
+
+    # Split by logical operators
+    checks_variables = []
+    # Remove leading NOT and clean up
+    checks = checks.lstrip('!').strip()
     # Split by logical operators
     parts = re.split(r'\s*(?:&&|\|\|)\s*', checks)
 
@@ -340,32 +360,52 @@ def generate_concurrent_sensitivity_list(clauses: str, checks: str, input_ports_
         if not part:
             continue
 
+        separate_part = False
+
         # Extract the expression before any comparison operator
         for op in ['==', '!=', '<=', '>=', '<', '>']:
             if op in part:
-                part_sections = part.split(op)
-                for part_section in part_sections:
-                    part = part_section.strip()
+                separate_part = True
+        if separate_part:
+            part_sections = part.split(op)
+            for part_section in part_sections:
+                part = part_section.strip()
 
-                    # Remove leading NOT
-                    part = part.lstrip('!').strip()
+                # Remove leading NOT
+                part = part.lstrip('!').strip()
 
-                    variables_in_parts = extract_sv_signals(expression=part)
+                variables_in_parts = extract_sv_signals(expression=part)
 
-                    for variable_part in variables_in_parts:
-                        # Extract all elements from the expression (flatten concatenations)
-                        vars_in_part = extract_elements_from_expression(variable_part, flatten=True)
-                        variables.extend(vars_in_part)
+                for variable_part in variables_in_parts:
+                    # Extract all elements from the expression (flatten concatenations)
+                    vars_in_part = extract_elements_from_expression(variable_part, flatten=True)
+                    checks_variables.extend(vars_in_part)
 
-    variables = list(set(variables))
+        else: #Considers that it could be a 1-variable part of experssion, like !active or something like that
+            part = part.strip()
+            # Remove leading NOT
+            part = part.lstrip('!').strip()
+            variables_in_parts = extract_sv_signals(expression=part)
+            for variable_part in variables_in_parts:
+                # Extract all elements from the expression (flatten concatenations)
+                vars_in_part = extract_elements_from_expression(variable_part, flatten=True)
+                checks_variables.extend(vars_in_part)
+
+    checks_variables = list(set(checks_variables))
 
     sensitivity_list = []
 
-    for variable in variables:
-        if variable in input_ports_list:
+    all_variables = variables_lists['input_ports_list'] + variables_lists['inner_vars_list']
+
+    #Check which variables should be considered important from the clause section:
+    for variable in clauses_variables:
+        if variable in all_variables:
             sensitivity_list.append(variable)
 
-
+    #Check which variables should be considered important from the check section (only the variables that are module inputs):
+    for variable in checks_variables:
+        if variable in variables_lists['input_ports_list']:
+            sensitivity_list.append(variable)
 
     # Remove duplicates while preserving order
-    return ', '.join(list(dict.fromkeys(sensitivity_list)))
+    return ', '.join(sensitivity_list)

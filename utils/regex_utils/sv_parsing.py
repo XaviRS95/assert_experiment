@@ -64,15 +64,55 @@ def extract_module_interface_and_decls(code: str, comb_blocks: list, seq_blocks:
         'inner_vars': inner_vars
     }
 
-def extract_input_variable_names(ports: str)-> list:
+def extract_internal_variable_names(variables: str):
+    '''
+
+    :param variables:
+    :return:
+    '''
+
+    statements = variables.split(';')
+
+    results = []
+    reserved_typedef_names = []
+
+    for stmt in statements:
+        stmt = stmt.strip()
+        if not stmt:
+            continue
+
+        # Ignore parameters entirely
+        if stmt.startswith('parameter'):
+            continue
+
+        # Handle typedef: Extract only the name at the end (e.g., 'state_t')
+        if stmt.startswith('typedef'):
+            typedef_name = re.search(r'}\s*([a-zA-Z_]\w*)', stmt)
+            if typedef_name:
+                reserved_typedef_names.append(typedef_name.group(1))
+            continue
+
+        # Remove bit-ranges like [31:0] or [0:3] first to simplify
+        clean_stmt = re.sub(r'\[[^\]]*\]', '', stmt)
+
+        # Extract words: skip the first word (the type like 'logic') and grab the rest as variable names
+        parts = re.findall(r'\b[a-zA-Z_]\w*\b', clean_stmt)
+
+        for part in parts:
+            if part not in reserved_typedef_names and part != 'logic':  # Part is not a typedef enum variable name:
+                results.append(part)
+
+    return results
+
+def extract_input_variable_names(variables: str)-> list:
     '''
     Extracts only the input variable names from the ports list. This is used to update the sensitivity list of combinational asserts.
-    :param ports:
+    :param variables:
     :return input_variable_names:
     '''
 
     # 1. Strip comments to prevent false matches
-    clean_text = re.sub(r'//.*', '', ports)
+    clean_text = re.sub(r'//.*', '', variables)
 
     # 2. Regex to find direction OR variable names
     # This matches:

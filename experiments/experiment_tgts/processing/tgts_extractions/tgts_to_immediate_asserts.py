@@ -43,7 +43,7 @@ def immediate_asserts_from_tgts(tgts_rules: list) -> str:
     return "\n".join(sva_lines)
 
 
-def concurrent_asserts_from_tgts(tgts_rules: list, input_ports_list:list) -> str:
+def concurrent_asserts_from_tgts(tgts_rules: list, variables:dict) -> str:
     """
     Generates immediate assertions from TGTS rules.
 
@@ -62,7 +62,7 @@ def concurrent_asserts_from_tgts(tgts_rules: list, input_ports_list:list) -> str
         clauses = clean_logical_operators(rule['clauses'])
         check = clean_logical_operators(rule['check'])
 
-        concurrent_sensitivity_list = generate_concurrent_sensitivity_list(clauses=clauses, checks=check, input_ports_list=input_ports_list)
+        concurrent_sensitivity_list = generate_concurrent_sensitivity_list(clauses=clauses, checks=check, variables_lists=variables)
 
         sensitivity_list = f'@({concurrent_sensitivity_list})'
 

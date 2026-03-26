@@ -39,7 +39,7 @@ def main():
 
         module = '''
         
-        module mipi_csi2_receiver (
+module mipi_csi2_receiver (
     input logic clk,
     input logic rst_n,
 
@@ -54,6 +54,7 @@ def main():
     output logic [15:0] pixel_data [0:3][0:255], // 4 lanes of pixel data
     output logic [7:0] line_length,
     output logic [15:0] frame_width,
+    output logic [15:0] frame_height,
     output logic [15:0] frame_height,
     output logic [3:0] data_type,               // RAW8, RAW10, RGB565, YUV422, etc.
     output logic [1:0] virtual_channel,

@@ -44,7 +44,13 @@ class CombinationalAssertionGenerator:
 
         headerless_block = sv_parsing.extract_block_content(block=block)
 
-        input_ports_list = sv_parsing.extract_input_variable_names(ports=ports)
+        input_ports_list = sv_parsing.extract_input_variable_names(variables=ports)
+        inner_vars_list = sv_parsing.extract_internal_variable_names(variables=inner_vars)
+
+        variables = {
+            'input_ports_list': input_ports_list,
+            'inner_vars_list': inner_vars_list
+        }
 
         prompt = comb_to_tgts_prompt(
             parameters=parameters,
@@ -62,7 +68,7 @@ class CombinationalAssertionGenerator:
 
         immediate_asserts = tgts_to_immediate_asserts.concurrent_asserts_from_tgts(
             tgts_rules=model_response['tgts_rules'],
-            input_ports_list = input_ports_list
+            variables= variables
         )
 
         return {'immediate_asserts': immediate_asserts,
