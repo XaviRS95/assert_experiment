@@ -3,13 +3,13 @@
 # 1. Define the array of models
 MODELS=(
   "qwen2.5-coder:7b"
-  "qwen2.5-coder:14b"
-  "qwen2.5-coder:32b"
-  "qwen3-coder:30b"
+  "yi-coder:9b"
   "codegemma:7b"
+  "qwen2.5-coder:14b"
   "deepseek-coder-v2:16b"
   "deepseek-coder:33b"
-  "yi-coder:9b"
+  "qwen2.5-coder:32b"
+
 )
 
 # 2. Loop through each model in the array
@@ -30,7 +30,7 @@ do
     python3 experiments/experiment_prompt/main.py --model "$MODEL" --experiment 2
 
     echo "Running Experiment 3..."
-    python3 experiments/experiment_tgts/main.py --model "$MODEL"
+#    python3 experiments/experiment_tgts/main.py --model "$MODEL"
 
     echo "Completed all experiments for $MODEL"
     echo "-----------------------------------------------------------"

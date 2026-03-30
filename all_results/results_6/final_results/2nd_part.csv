@@ -1,0 +1,1159 @@
+original_code,generated_code,iverilog_output,time(s),prompt_tkns,output_tkns
+"//=============================================================================
+// ATM Transaction Controller
+//
+// Industry Theme: Financial Transaction State Machine
+// - Uses only 'case' and 'casez' statements (no if/else)
+// - 4 procedural blocks: 2 always_ff (sequential), 2 always_comb (combinational)
+// - Implements card insertion, PIN verification, withdrawal, and balance inquiry
+//=============================================================================
+
+module atm_controller (
+    // Clock and reset
+    input  logic clk,
+    input  logic rst_n,
+
+    // Card interface
+    input  logic card_inserted,
+    input  logic [3:0] card_type,      // 4'b0001: debit, 4'b0010: credit, 4'b0100: prepaid
+
+    // PIN pad interface
+    input  logic [3:0] pin_entered,
+    input  logic pin_enter_valid,
+
+    // User selection (from touchscreen)
+    input  logic [1:0] menu_select,    // 00: withdraw, 01: balance, 10: deposit, 11: exit
+
+    // Amount entry
+    input  logic [7:0] withdraw_amount,
+    input  logic amount_valid,
+
+    // Backend banking system interface
+    input  logic [15:0] account_balance,
+    input  logic pin_verified,
+    input  logic transaction_approved,
+
+    // Outputs
+    output logic [7:0]  dispense_amount,
+    output logic [15:0] new_balance,
+    output logic [3:0]  transaction_status,  // 4-bit encoded status
+    output logic        dispense_enable,
+    output logic        card_eject,
+    output logic        receipt_print
+);
+
+    //=========================================================================
+    // State and Register Declarations
+    //=========================================================================
+    typedef enum logic [2:0] {
+        IDLE,
+        VERIFY_PIN,
+        SELECT_TRANSACTION,
+        PROCESS_WITHDRAWAL,
+        PROCESS_BALANCE,
+        COMPLETE,
+        ERROR
+    } state_t;
+
+    state_t current_state, next_state;
+
+    // Internal registers for transaction data
+    logic [7:0]  pending_withdraw;
+    logic [15:0] updated_balance;
+    logic [3:0]  transaction_code;
+    logic        card_valid;
+
+    //=========================================================================
+    // Block 1: Sequential State Register (always_ff with case)
+    //=========================================================================
+    always_ff @(posedge clk or negedge rst_n) begin
+        case (rst_n)
+            1'b0: current_state <= IDLE;
+            1'b1: current_state <= next_state;
+        endcase
+    end
+
+    //=========================================================================
+    // Block 2: Combinational Next State Logic (always_comb with casez)
+    //=========================================================================
+    always_comb begin
+        next_state = current_state;  // Default to current
+
+        casez (current_state)
+            IDLE: begin
+                casez ({card_inserted, card_type})
+                    5'b1_0001: next_state = VERIFY_PIN;  // Debit card
+                    5'b1_0010: next_state = VERIFY_PIN;  // Credit card
+                    5'b1_0100: next_state = ERROR;       // Prepaid card not accepted
+                    5'b0_????: next_state = IDLE;
+                    default:   next_state = ERROR;
+                endcase
+            end
+
+            VERIFY_PIN: begin
+                casez ({pin_enter_valid, pin_verified})
+                    2'b11: next_state = SELECT_TRANSACTION;
+                    2'b10: next_state = ERROR;
+                    2'b0?: next_state = VERIFY_PIN;
+                    default: next_state = ERROR;
+                endcase
+            end
+
+            SELECT_TRANSACTION: begin
+                casez (menu_select)
+                    2'b00: next_state = PROCESS_WITHDRAWAL;
+                    2'b01: next_state = PROCESS_BALANCE;
+                    2'b10: next_state = ERROR;      // Deposit not supported in this ATM
+                    2'b11: next_state = COMPLETE;
+                    default: next_state = SELECT_TRANSACTION;
+                endcase
+            end
+
+            PROCESS_WITHDRAWAL: begin
+                casez ({amount_valid, transaction_approved})
+                    2'b11: next_state = COMPLETE;
+                    2'b10: next_state = ERROR;
+                    2'b0?: next_state = PROCESS_WITHDRAWAL;
+                    default: next_state = ERROR;
+                endcase
+            end
+
+            PROCESS_BALANCE: begin
+                casez (transaction_approved)
+                    1'b1: next_state = COMPLETE;
+                    1'b0: next_state = ERROR;
+                    default: next_state = PROCESS_BALANCE;
+                endcase
+            end
+
+            COMPLETE: begin
+                casez (card_inserted)
+                    1'b1: next_state = COMPLETE;  // Wait for card removal
+                    1'b0: next_state = IDLE;
+                    default: next_state = COMPLETE;
+                endcase
+            end
+
+            ERROR: begin
+                casez (card_inserted)
+                    1'b1: next_state = ERROR;     // Wait for card removal in error state
+                    1'b0: next_state = IDLE;
+                    default: next_state = ERROR;
+                endcase
+            end
+
+            default: next_state = IDLE;
+        endcase
+    end
+    //=========================================================================
+    // Block 3: Sequential Transaction Processing (always_ff with case)
+    //=========================================================================
+    always_ff @(posedge clk or negedge rst_n) begin
+        case (rst_n)
+            1'b0: begin
+                pending_withdraw <= 8'd0;
+                updated_balance <= 16'd0;
+                transaction_code <= 4'd0;
+                card_valid <= 1'b0;
+            end
+            1'b1: begin
+                case (current_state)
+                    IDLE: begin
+                        case (card_inserted)
+                            1'b1: card_valid <= 1'b1;
+                            1'b0: card_valid <= 1'b0;
+                        endcase
+                    end
+
+                    VERIFY_PIN: begin
+                        transaction_code <= 4'd1;  // PIN verification transaction
+                    end
+
+                    SELECT_TRANSACTION: begin
+                        case (menu_select)
+                            2'b00: transaction_code <= 4'd2;  // Withdrawal
+                            2'b01: transaction_code <= 4'd3;  // Balance inquiry
+                            2'b10: transaction_code <= 4'd4;  // Deposit (error case)
+                            2'b11: transaction_code <= 4'd5;  // Exit
+                        endcase
+                    end
+
+                    PROCESS_WITHDRAWAL: begin
+                        case (amount_valid)
+                            1'b1: pending_withdraw <= withdraw_amount;
+                            default: ;
+                        endcase
+
+                        case (transaction_approved)
+                            1'b1: updated_balance <= account_balance - pending_withdraw;
+                            default: updated_balance <= account_balance;
+                        endcase
+                    end
+
+                    PROCESS_BALANCE: begin
+                        updated_balance <= account_balance;
+                    end
+
+                    COMPLETE: begin
+                        case (menu_select)
+                            2'b00: pending_withdraw <= 8'd0;  // Clear after completion
+                            default: ;
+                        endcase
+                    end
+
+                    ERROR: begin
+                        transaction_code <= 4'd15;  // Error code
+                        pending_withdraw <= 8'd0;
+                    end
+                endcase
+            end
+        endcase
+    end
+
+    //=========================================================================
+    // Block 4: Combinational Output Logic (always_comb with case)
+    //=========================================================================
+    always_comb begin
+        // Default assignments
+        dispense_amount = 8'd0;
+        new_balance = account_balance;
+        transaction_status = 4'd0;
+        dispense_enable = 1'b0;
+        card_eject = 1'b0;
+        receipt_print = 1'b0;
+
+        case (current_state)
+            IDLE: begin
+                transaction_status = 4'd0;  // Ready
+                card_eject = 1'b0;
+            end
+
+            VERIFY_PIN: begin
+                transaction_status = 4'd1;  // Verifying
+            end
+
+            SELECT_TRANSACTION: begin
+                transaction_status = 4'd2;  // Awaiting selection
+            end
+
+            PROCESS_WITHDRAWAL: begin
+                case (transaction_approved)
+                    1'b1: begin
+                        transaction_status = 4'd3;  // Processing
+                        dispense_amount = pending_withdraw;
+                        new_balance = updated_balance;
+                    end
+                    default: transaction_status = 4'd4;  // Pending approval
+                endcase
+            end
+
+            PROCESS_BALANCE: begin
+                transaction_status = 4'd5;  // Retrieving balance
+                new_balance = updated_balance;
+            end
+
+            COMPLETE: begin
+                case (menu_select)
+                    2'b00: begin  // Withdrawal completed
+                        dispense_enable = 1'b1;
+                        receipt_print = 1'b1;
+                        transaction_status = 4'd6;  // Success - dispense
+                        new_balance = updated_balance;
+                    end
+                    2'b01: begin  // Balance inquiry completed
+                        receipt_print = 1'b1;
+                        transaction_status = 4'd7;  // Success - balance shown
+                        new_balance = updated_balance;
+                    end
+                    2'b11: begin  // Exit
+                        card_eject = 1'b1;
+                        transaction_status = 4'd8;  // Complete - card ejected
+                    end
+                    default: begin
+                        transaction_status = 4'd9;  // Complete - other
+                        card_eject = 1'b1;
+                    end
+                endcase
+            end
+
+            ERROR: begin
+                case (transaction_code)
+                    4'd1: transaction_status = 4'd10;  // PIN error
+                    4'd2: transaction_status = 4'd11;  // Withdrawal error
+                    4'd3: transaction_status = 4'd12;  // Balance error
+                    4'd4: transaction_status = 4'd13;  // Deposit error
+                    4'd15: transaction_status = 4'd14; // General error
+                    default: transaction_status = 4'd15; // Unknown error
+                endcase
+                card_eject = 1'b1;
+                dispense_amount = 8'd0;
+            end
+        endcase
+
+        // Override for card removal during error or complete
+        casez ({current_state, card_inserted})
+            {ERROR, 1'b0}: card_eject = 1'b0;
+            {COMPLETE, 1'b0}: card_eject = 1'b0;
+            default: ;
+        endcase
+    end
+
+endmodule","module atm_controller_asserts  (input logic clk,
+input logic rst_n,
+input logic card_inserted,
+input logic [3:0] card_type,
+input logic [3:0] pin_entered,
+input logic pin_enter_valid,
+input logic [1:0] menu_select,
+input logic [7:0] withdraw_amount,
+input logic amount_valid,
+input logic [15:0] account_balance,
+input logic pin_verified,
+input logic transaction_approved,
+input logic [7:0] dispense_amount,
+input logic [15:0] new_balance,
+input logic [3:0] transaction_status, input logic dispense_enable,
+input logic card_eject,
+input logic receipt_print);
+
+    typedef enum logic [2:0] {
+        IDLE,
+        VERIFY_PIN,
+        SELECT_TRANSACTION,
+        PROCESS_WITHDRAWAL,
+        PROCESS_BALANCE,
+        COMPLETE,
+        ERROR
+    } state_t;
+
+    state_t current_state, next_state;
+
+        logic [7:0]  pending_withdraw;
+    logic [15:0] updated_balance;
+    logic [3:0]  transaction_code;
+    logic        card_valid;
+
+    
+
+    iafmjgcdnpcakehfpmdabhgfdmmehjci: assert property (@(card_inserted, card_type) card_inserted == 1'b0 && card_type[3:0] == 4'b0000 |-> next_state == IDLE) else $error(""Error in immediate assert iafmjgcdnpcakehfpmdabhgfdmmehjci"");
+dompihgopdhakoimajejnlhcbnmdibff: assert property (@(card_inserted, card_type) card_inserted == 1'b1 && (card_type[3:0] == 4'b0001 || card_type[3:0] == 4'b0010) |-> next_state == VERIFY_PIN) else $error(""Error in immediate assert dompihgopdhakoimajejnlhcbnmdibff"");
+enkodehljfmlkgkaokbafaflobcagkfl: assert property (@(card_inserted, card_type) card_inserted == 1'b1 && (card_type[3:0] != 4'b0001 || card_type[3:0] != 4'b0010) |-> next_state == ERROR) else $error(""Error in immediate assert enkodehljfmlkgkaokbafaflobcagkfl"");
+
+gikkefhhbhhokfpnbbkefgajbpkkigkp: assert property (@(transaction_approved, transaction_code, current_state) current_state == ERROR && transaction_code == 4'd3 || current_state == PROCESS_WITHDRAWAL && transaction_approved == 1'b1 |-> dispense_amount == 8'd0) else $error(""Error in immediate assert gikkefhhbhhokfpnbbkefgajbpkkigkp"");
+kfhbhljhihbikaelalejmkflghidhnfc: assert property (@(menu_select, transaction_approved, transaction_code, current_state) current_state == COMPLETE && menu_select == 2'b00 || current_state == COMPLETE && menu_select == 2'b01 || current_state == ERROR && transaction_code == 4'd3 || current_state == PROCESS_WITHDRAWAL && transaction_approved == 1'b1 |-> new_balance == updated_balance) else $error(""Error in immediate assert kfhbhljhihbikaelalejmkflghidhnfc"");
+afnkbafadohlkcjebndpghpmcibcpmio: assert property (@(menu_select, transaction_approved, transaction_code, current_state) current_state == COMPLETE && menu_select == 2'b00 || current_state == ERROR && transaction_code == 4'd3 || current_state == PROCESS_WITHDRAWAL && transaction_approved == 1'b1 |-> dispense_enable == 1'b1) else $error(""Error in immediate assert afnkbafadohlkcjebndpghpmcibcpmio"");
+cjphppfonheikgabaadfbncjahklpdfm: assert property (@(menu_select, current_state) current_state == COMPLETE && menu_select == 2'b00 || current_state == COMPLETE && menu_select == 2'b01 |-> receipt_print == 1'b1) else $error(""Error in immediate assert cjphppfonheikgabaadfbncjahklpdfm"");
+fagjklpiambekoecpekgfghpcjmfochb: assert property (@(menu_select, transaction_approved, current_state) current_state == ERROR || (current_state == PROCESS_WITHDRAWAL && transaction_approved == 1'b0) || (current_state == COMPLETE && menu_select != 2'b11) |-> card_eject == 1'b0) else $error(""Error in immediate assert fagjklpiambekoecpekgfghpcjmfochb"");
+ppdjkkpeeijgkipgojihkfmbeajimiik: assert property (@(menu_select, current_state) current_state == COMPLETE && menu_select == 2'b11 |-> card_eject == 1'b1) else $error(""Error in immediate assert ppdjkkpeeijgkipgojihkfmbeajimiik"");
+fhdmcapdoaeakbhopemmniebjogdlbkn: assert property (@(current_state, transaction_approved) current_state == PROCESS_WITHDRAWAL && transaction_approved == 1'b1 |-> dispense_amount == pending_withdraw) else $error(""Error in immediate assert fhdmcapdoaeakbhopemmniebjogdlbkn"");
+lpdidekmkfpgkjhkoccndckfmelkjmgm: assert property (@(current_state) current_state == IDLE |-> transaction_status == 4'd0) else $error(""Error in immediate assert lpdidekmkfpgkjhkoccndckfmelkjmgm"");
+jlllpabgonoekaieomfakdkmhjobpdcd: assert property (@(current_state) current_state == VERIFY_PIN |-> transaction_status == 4'd1) else $error(""Error in immediate assert jlllpabgonoekaieomfakdkmhjobpdcd"");
+fkmdfdechembkghaaemaeopfkpegifho: assert property (@(current_state) current_state == SELECT_TRANSACTION |-> transaction_status == 4'd2) else $error(""Error in immediate assert fkmdfdechembkghaaemaeopfkpegifho"");
+pephjpiejnmpklglpcildpflgpjpfiff: assert property (@(current_state, transaction_approved) current_state == PROCESS_WITHDRAWAL && transaction_approved == 1'b1 |-> transaction_status == 4'd3) else $error(""Error in immediate assert pephjpiejnmpklglpcildpflgpjpfiff"");
+nildjlefnbbakcibbinkmgmcccpobnga: assert property (@(current_state) current_state == ERROR |-> transaction_status == 4'd10 || transaction_status == 4'd11 || transaction_status == 4'd12 || transaction_status == 4'd13 || transaction_status == 4'd15) else $error(""Error in immediate assert nildjlefnbbakcibbinkmgmcccpobnga"");
+egbbdijaojegkblianeomcelfdncihla: assert property (@(current_state) current_state == PROCESS_BALANCE |-> transaction_status == 4'd5) else $error(""Error in immediate assert egbbdijaojegkblianeomcelfdncihla"");
+camegdbblgehknncbnboefgoaceajabb: assert property (@(menu_select, current_state) current_state == COMPLETE && menu_select == 2'b00 || current_state == COMPLETE && menu_select == 2'b01 |-> transaction_status == 4'd6 || transaction_status == 4'd7) else $error(""Error in immediate assert camegdbblgehknncbnboefgoaceajabb"");
+aachkogfiinlkgfobnofdjdgdhfpeilf: assert property (@(current_state) current_state == ERROR |-> transaction_status == {3'b0, transaction_code}) else $error(""Error in immediate assert aachkogfiinlkgfobnofdjdgdhfpeilf"");
+
+
+    property hpgjggimhghpknkeobpmdcejiaocmjdh;
+	@(negedge rst_n) current_state == IDLE;
+endproperty
+assert property (hpgjggimhghpknkeobpmdcejiaocmjdh) else $error(""Error in asynchronous reset hpgjggimhghpknkeobpmdcejiaocmjdh"");
+
+property fdanggccpdblknljocpaeoldjgcmmfbl;
+	@(negedge rst_n) current_state == next_state;
+endproperty
+assert property (fdanggccpdblknljocpaeoldjgcmmfbl) else $error(""Error in asynchronous reset fdanggccpdblknljocpaeoldjgcmmfbl"");
+
+property allmgcibmoiiknncogfgkcadmciknnlo;
+    @(posedge clk) disable iff(!rst_n) (current_state == PROCESS_WITHDRAWAL && transaction_approved == 1'b1) |=> (dispense_amount == pending_withdraw);
+endproperty
+assert property (allmgcibmoiiknncogfgkcadmciknnlo);
+
+property eceamgpdfbnakadgojjippllhlbhagpl;
+    @(posedge clk) disable iff(!rst_n) (current_state == PROCESS_WITHDRAWAL && transaction_approved == 1'b0) |=> (dispense_amount == 8'd0);
+endproperty
+assert property (eceamgpdfbnakadgojjippllhlbhagpl);
+
+property gjnbikbmapickpokbhplnigiejaehpem;
+    @(posedge clk) disable iff(!rst_n) (current_state == PROCESS_WITHDRAWAL || current_state == COMPLETE) |=> (new_balance == updated_balance);
+endproperty
+assert property (gjnbikbmapickpokbhplnigiejaehpem);
+
+property jhbdonkjdjpkkgeaofbnnpdfenkanccp;
+    @(posedge clk) disable iff(!rst_n) (current_state != PROCESS_WITHDRAWAL && current_state != COMPLETE) |=> (new_balance == 16'd0);
+endproperty
+assert property (jhbdonkjdjpkkgeaofbnnpdfenkanccp);
+
+property noaaapppeagbkcljpjnffohhcalkjhdj;
+    @(posedge clk) disable iff(!rst_n) (current_state == SELECT_TRANSACTION || current_state == ERROR) |=> (transaction_status == transaction_code);
+endproperty
+assert property (noaaapppeagbkcljpjnffohhcalkjhdj);
+
+property mmmbpddcoikmkkgcpfmfpaodoempofok;
+    @(posedge clk) disable iff(!rst_n) (current_state != SELECT_TRANSACTION && current_state != ERROR) |=> (transaction_status == 4'd0);
+endproperty
+assert property (mmmbpddcoikmkkgcpfmfpaodoempofok);
+
+property decehecommlikacgbipmcpcmbingipcl;
+    @(posedge clk) disable iff(!rst_n) (current_state == PROCESS_WITHDRAWAL || current_state == COMPLETE) |=> (dispense_enable == 1'b1);
+endproperty
+assert property (decehecommlikacgbipmcpcmbingipcl);
+
+property fogldhngmbnmkhkcahpilcbjocaeahca;
+    @(posedge clk) disable iff(!rst_n) (current_state != PROCESS_WITHDRAWAL && current_state != COMPLETE) |=> (dispense_enable == 1'b0);
+endproperty
+assert property (fogldhngmbnmkhkcahpilcbjocaeahca);
+
+property amcacmfaioonkmklpeneekaloofkjhop;
+    @(posedge clk) disable iff(!rst_n) (current_state == ERROR || current_state == COMPLETE) |=> (card_eject == 1'b1);
+endproperty
+assert property (amcacmfaioonkmklpeneekaloofkjhop);
+
+property gpbjbpkeacankncmbboejidjmdkpllhg;
+    @(posedge clk) disable iff(!rst_n) (current_state != ERROR && current_state != COMPLETE) |=> (card_eject == 1'b0);
+endproperty
+assert property (gpbjbpkeacankncmbboejidjmdkpllhg);
+
+property gkhdaenlcommkkbkbcajcgahgbglooha;
+    @(posedge clk) disable iff(!rst_n) (current_state == PROCESS_BALANCE || current_state == COMPLETE) |=> (receipt_print == 1'b1);
+endproperty
+assert property (gkhdaenlcommkkbkbcajcgahgbglooha);
+
+property cgehbojfdghdkkfmobadigemgoglcbgl;
+    @(posedge clk) disable iff(!rst_n) (current_state != PROCESS_BALANCE && current_state != COMPLETE) |=> (receipt_print == 1'b0);
+endproperty
+assert property (cgehbojfdghdkkfmobadigemgoglcbgl);
+
+
+endmodule",OK,167.57125115394592,5527,2023
+"module memory_controller #(
+    parameter ADDR_WIDTH = 16,
+    parameter DATA_WIDTH = 32,
+    parameter ECC_WIDTH = 7,  // Hamming code for 32-bit data
+    parameter NUM_MASTERS = 4
+) (
+    // Clock and reset
+    input  logic clk,
+    input  logic rst_n,
+
+    // Master interfaces
+    input  logic [NUM_MASTERS-1:0]        master_req,
+    input  logic [NUM_MASTERS-1:0][ADDR_WIDTH-1:0] master_addr,
+    input  logic [NUM_MASTERS-1:0]        master_rw,  // 1=write, 0=read
+    input  logic [NUM_MASTERS-1:0][DATA_WIDTH-1:0] master_wdata,
+    output logic [NUM_MASTERS-1:0]        master_grant,
+    output logic [NUM_MASTERS-1:0][DATA_WIDTH-1:0] master_rdata,
+    output logic [NUM_MASTERS-1:0]        master_ack,
+
+    // Memory interface
+    output logic                          mem_cs,
+    output logic                          mem_we,
+    output logic [ADDR_WIDTH-1:0]         mem_addr,
+    output logic [DATA_WIDTH+ECC_WIDTH-1:0] mem_wdata,
+    input  logic [DATA_WIDTH+ECC_WIDTH-1:0] mem_rdata,
+    input  logic                          mem_rdy
+);
+
+    // Internal state
+    typedef enum logic [2:0] {
+        IDLE         = 3'b000,
+        ARB_WAIT     = 3'b001,
+        CMD_SEND     = 3'b010,
+        DATA_WAIT    = 3'b011,
+        DATA_CAPTURE = 3'b100,
+        ECC_CHECK    = 3'b101,
+        RESPONSE     = 3'b110
+    } state_t;
+
+    state_t current_state, next_state;
+
+    // Arbitration and request tracking
+    logic [NUM_MASTERS-1:0] req_latched;
+    logic [NUM_MASTERS-1:0] req_priority;
+    logic [NUM_MASTERS-1:0] grant_current;
+    logic [ADDR_WIDTH-1:0]  active_addr;
+    logic                   active_rw;
+    logic [DATA_WIDTH-1:0]  active_wdata;
+    logic [NUM_MASTERS-1:0] active_master;
+    logic [DATA_WIDTH+ECC_WIDTH-1:0] ecc_encoded_data;
+    logic [DATA_WIDTH+ECC_WIDTH-1:0] ecc_decoded_data;
+    logic [ECC_WIDTH-1:0]   ecc_syndrome;
+    logic                   ecc_error;
+    logic                   ecc_corrected;
+
+    // Counter for timing
+    logic [2:0] wait_counter;
+    logic [2:0] wait_target;
+
+    // Pipeline registers
+    logic [DATA_WIDTH-1:0] response_data;
+    logic [NUM_MASTERS-1:0] response_master;
+    logic response_valid;
+
+    //------------------------------------------------------------------------
+    // Block 1: Request Latching (Sequential)
+    //------------------------------------------------------------------------
+    always_ff @(posedge clk or negedge rst_n) begin
+        case (rst_n)
+            1'b0: req_latched <= '0;
+            1'b1: begin
+                case (current_state)
+                    IDLE: req_latched <= master_req;
+                    CMD_SEND: begin
+                        case (mem_rdy)
+                            1'b1: req_latched <= req_latched & ~grant_current;
+                            default: req_latched <= req_latched;
+                        endcase
+                    end
+                    default: req_latched <= req_latched;
+                endcase
+            end
+        endcase
+    end
+
+    //------------------------------------------------------------------------
+    // Block 2: Priority Encoder (Combinational - Case Only)
+    //------------------------------------------------------------------------
+    always_comb begin
+        req_priority = 4'b0000;
+
+        // Fixed priority: Master 0 > Master 1 > Master 2 > Master 3
+        casez (req_latched)
+            4'b???1: req_priority = 4'b0001;
+            4'b??10: req_priority = 4'b0010;
+            4'b?100: req_priority = 4'b0100;
+            4'b1000: req_priority = 4'b1000;
+            default: req_priority = 4'b0000;
+        endcase
+    end
+
+    //------------------------------------------------------------------------
+    // Block 3: State Transition Logic (Combinational - Case Only)
+    //------------------------------------------------------------------------
+    always_comb begin
+        next_state = current_state;
+
+        case (current_state)
+            IDLE: begin
+                case (|req_latched)
+                    1'b1: next_state = ARB_WAIT;
+                    default: next_state = IDLE;
+                endcase
+            end
+
+            ARB_WAIT: begin
+                case (req_priority != 4'b0000)
+                    1'b1: next_state = CMD_SEND;
+                    default: next_state = ARB_WAIT;
+                endcase
+            end
+
+            CMD_SEND: begin
+                case (mem_rdy)
+                    1'b1: begin
+                        case (active_rw)
+                            1'b1: next_state = DATA_WAIT;
+                            default: next_state = DATA_CAPTURE;
+                        endcase
+                    end
+                    default: next_state = CMD_SEND;
+                endcase
+            end
+
+            DATA_WAIT: begin
+                case (wait_counter == wait_target)
+                    1'b1: next_state = DATA_CAPTURE;
+                    default: next_state = DATA_WAIT;
+                endcase
+            end
+
+            DATA_CAPTURE: begin
+                case (mem_rdy)
+                    1'b1: begin
+                        case (active_rw)
+                            1'b1: next_state = RESPONSE;
+                            default: next_state = ECC_CHECK;
+                        endcase
+                    end
+                    default: next_state = DATA_CAPTURE;
+                endcase
+            end
+
+            ECC_CHECK: begin
+                next_state = RESPONSE;
+            end
+
+            RESPONSE: begin
+                next_state = IDLE;
+            end
+
+            default: next_state = IDLE;
+        endcase
+    end
+
+    //------------------------------------------------------------------------
+    // Block 4: Main State Machine and Grant Logic (Sequential - Single Block)
+    //------------------------------------------------------------------------
+    always_ff @(posedge clk or negedge rst_n) begin
+        case (rst_n)
+            1'b0: begin
+                current_state <= IDLE;
+                grant_current <= '0;
+                active_master <= '0;
+                active_addr <= '0;
+                active_rw <= 1'b0;
+                active_wdata <= '0;
+                wait_counter <= 3'b0;
+                wait_target <= 3'b0;
+                response_data <= '0;
+                response_master <= '0;
+                response_valid <= 1'b0;
+            end
+            1'b1: begin
+                current_state <= next_state;
+
+                case (current_state)
+                    IDLE: begin
+                        grant_current <= '0;
+                        response_valid <= 1'b0;
+                        wait_counter <= 3'b0;
+                    end
+
+                    ARB_WAIT: begin
+                        case (req_priority != 4'b0000)
+                            1'b1: begin
+                                grant_current <= req_priority;
+
+                                // Capture active request details
+                                case (req_priority)
+                                    4'b0001: begin
+                                        active_master <= 4'b0001;
+                                        active_addr <= master_addr[0];
+                                        active_rw <= master_rw[0];
+                                        active_wdata <= master_wdata[0];
+                                    end
+                                    4'b0010: begin
+                                        active_master <= 4'b0010;
+                                        active_addr <= master_addr[1];
+                                        active_rw <= master_rw[1];
+                                        active_wdata <= master_wdata[1];
+                                    end
+                                    4'b0100: begin
+                                        active_master <= 4'b0100;
+                                        active_addr <= master_addr[2];
+                                        active_rw <= master_rw[2];
+                                        active_wdata <= master_wdata[2];
+                                    end
+                                    4'b1000: begin
+                                        active_master <= 4'b1000;
+                                        active_addr <= master_addr[3];
+                                        active_rw <= master_rw[3];
+                                        active_wdata <= master_wdata[3];
+                                    end
+                                    default: begin
+                                        active_master <= active_master;
+                                        active_addr <= active_addr;
+                                        active_rw <= active_rw;
+                                        active_wdata <= active_wdata;
+                                    end
+                                endcase
+                            end
+                            default: begin
+                                grant_current <= grant_current;
+                                active_master <= active_master;
+                                active_addr <= active_addr;
+                                active_rw <= active_rw;
+                                active_wdata <= active_wdata;
+                            end
+                        endcase
+                    end
+
+                    CMD_SEND: begin
+                        case (mem_rdy)
+                            1'b1: begin
+                                wait_counter <= 3'b0;
+                                case (active_rw)
+                                    1'b1: wait_target <= 3'd3;
+                                    default: wait_target <= 3'd2;
+                                endcase
+                            end
+                            default: begin
+                                wait_counter <= wait_counter;
+                                wait_target <= wait_target;
+                            end
+                        endcase
+                    end
+
+                    DATA_WAIT: begin
+                        wait_counter <= wait_counter + 1'b1;
+                    end
+
+                    DATA_CAPTURE: begin
+                        case (mem_rdy)
+                            1'b1: begin
+                                case (active_rw)
+                                    1'b0: begin
+                                        response_data <= ecc_decoded_data[DATA_WIDTH-1:0];
+                                        response_master <= active_master;
+                                        response_valid <= 1'b1;
+                                    end
+                                    default: begin
+                                        response_data <= response_data;
+                                        response_master <= response_master;
+                                        response_valid <= response_valid;
+                                    end
+                                endcase
+                            end
+                            default: begin
+                                response_data <= response_data;
+                                response_master <= response_master;
+                                response_valid <= response_valid;
+                            end
+                        endcase
+                    end
+
+                    RESPONSE: begin
+                        // Hold values during response
+                    end
+
+                    default: begin
+                        // Hold all values
+                    end
+                endcase
+            end
+        endcase
+    end
+
+    //------------------------------------------------------------------------
+    // Block 5: ECC Encoding for Write Data (Sequential - Falling Edge)
+    //------------------------------------------------------------------------
+    always_ff @(negedge clk or negedge rst_n) begin
+        case (rst_n)
+            1'b0: ecc_encoded_data <= '0;
+            1'b1: begin
+                case (current_state)
+                    CMD_SEND: begin
+                        case (active_rw)
+                            1'b1: begin
+                                // Generate Hamming code for 32-bit data
+                                ecc_encoded_data[DATA_WIDTH-1:0] <= active_wdata;
+                                ecc_encoded_data[DATA_WIDTH +: ECC_WIDTH] <= {
+                                    ^(active_wdata & 32'hAAAAAAAA),  // Even parity for bit0
+                                    ^(active_wdata & 32'hCCCCCCCC),  // Even parity for bit1
+                                    ^(active_wdata & 32'hF0F0F0F0),  // Even parity for bit2
+                                    ^(active_wdata & 32'hFF00FF00),  // Even parity for bit3
+                                    ^(active_wdata & 32'hFFFF0000),  // Even parity for bit4
+                                    ^(active_wdata & 32'hFFFFFFFF),  // Overall parity
+                                    ^(active_wdata & 32'hF0F0F0F0) ^ ^(active_wdata & 32'h0F0F0F0F)
+                                };
+                            end
+                            default: ecc_encoded_data <= ecc_encoded_data;
+                        endcase
+                    end
+                    default: ecc_encoded_data <= ecc_encoded_data;
+                endcase
+            end
+        endcase
+    end
+
+    //------------------------------------------------------------------------
+    // Block 6: ECC Decoding and Error Detection (Combinational - Case Only)
+    //------------------------------------------------------------------------
+    always_comb begin
+        ecc_syndrome = '0;
+        ecc_error = 1'b0;
+        ecc_corrected = 1'b0;
+        ecc_decoded_data = mem_rdata;
+
+        // Calculate syndrome bits using case
+        case (1'b1)
+            1'b1: begin
+                ecc_syndrome[0] = ^mem_rdata[31:0] ^ mem_rdata[32];
+                ecc_syndrome[1] = ^(mem_rdata[31:0] & 32'hAAAAAAAA) ^ mem_rdata[33];
+                ecc_syndrome[2] = ^(mem_rdata[31:0] & 32'hCCCCCCCC) ^ mem_rdata[34];
+                ecc_syndrome[3] = ^(mem_rdata[31:0] & 32'hF0F0F0F0) ^ mem_rdata[35];
+                ecc_syndrome[4] = ^(mem_rdata[31:0] & 32'hFF00FF00) ^ mem_rdata[36];
+                ecc_syndrome[5] = ^(mem_rdata[31:0] & 32'hFFFF0000) ^ mem_rdata[37];
+                ecc_syndrome[6] = ^mem_rdata ^ mem_rdata[38];
+            end
+        endcase
+
+        // Error detection
+        case (ecc_syndrome != 7'b0)
+            1'b1: ecc_error = 1'b1;
+            default: ecc_error = 1'b0;
+        endcase
+
+        // Error correction based on syndrome
+        case (ecc_syndrome)
+            7'b0000001: begin
+                ecc_corrected = 1'b1;
+                ecc_decoded_data[0] = ~mem_rdata[0];
+            end
+            7'b0000010: begin
+                ecc_corrected = 1'b1;
+                ecc_decoded_data[1] = ~mem_rdata[1];
+            end
+            7'b0000100: begin
+                ecc_corrected = 1'b1;
+                ecc_decoded_data[2] = ~mem_rdata[2];
+            end
+            7'b0001000: begin
+                ecc_corrected = 1'b1;
+                ecc_decoded_data[3] = ~mem_rdata[3];
+            end
+            7'b0010000: begin
+                ecc_corrected = 1'b1;
+                ecc_decoded_data[4] = ~mem_rdata[4];
+            end
+            7'b0100000: begin
+                ecc_corrected = 1'b1;
+                ecc_decoded_data[5] = ~mem_rdata[5];
+            end
+            7'b1000000: begin
+                ecc_corrected = 1'b1;
+                ecc_decoded_data[6] = ~mem_rdata[6];
+            end
+            default: begin
+                ecc_corrected = 1'b0;
+                ecc_decoded_data = ecc_decoded_data;
+            end
+        endcase
+    end
+
+    //------------------------------------------------------------------------
+    // Block 7: Output Assignments (Combinational - Case Only)
+    //------------------------------------------------------------------------
+    always_comb begin
+        // Default assignments
+        master_grant = 4'b0000;
+        master_ack = 4'b0000;
+        master_rdata = '{default: '0};
+        mem_cs = 1'b0;
+        mem_we = 1'b0;
+        mem_addr = '0;
+        mem_wdata = '0;
+
+        case (current_state)
+            ARB_WAIT: begin
+                master_grant = req_priority;
+            end
+
+            CMD_SEND: begin
+                case (mem_rdy)
+                    1'b1: begin
+                        mem_cs = 1'b1;
+                        mem_we = active_rw;
+                        mem_addr = active_addr;
+                        case (active_rw)
+                            1'b1: mem_wdata = ecc_encoded_data;
+                            default: mem_wdata = '0;
+                        endcase
+                    end
+                    default: begin
+                        mem_cs = 1'b0;
+                        mem_we = 1'b0;
+                    end
+                endcase
+            end
+
+            DATA_CAPTURE: begin
+                case (mem_rdy)
+                    1'b1: begin
+                        mem_cs = 1'b1;
+                        mem_we = active_rw;
+                        mem_addr = active_addr;
+                    end
+                    default: begin
+                        mem_cs = 1'b0;
+                        mem_we = 1'b0;
+                    end
+                endcase
+            end
+
+            RESPONSE: begin
+                case (response_master)
+                    4'b0001: begin
+                        master_rdata[0] = response_data;
+                        master_ack = 4'b0001;
+                    end
+                    4'b0010: begin
+                        master_rdata[1] = response_data;
+                        master_ack = 4'b0010;
+                    end
+                    4'b0100: begin
+                        master_rdata[2] = response_data;
+                        master_ack = 4'b0100;
+                    end
+                    4'b1000: begin
+                        master_rdata[3] = response_data;
+                        master_ack = 4'b1000;
+                    end
+                    default: begin
+                        master_rdata = '{default: '0};
+                        master_ack = 4'b0000;
+                    end
+                endcase
+            end
+
+            default: begin
+                master_grant = 4'b0000;
+                master_ack = 4'b0000;
+                master_rdata = '{default: '0};
+                mem_cs = 1'b0;
+                mem_we = 1'b0;
+            end
+        endcase
+    end
+
+endmodule","module memory_controller_asserts # (parameter ADDR_WIDTH = 16,
+parameter DATA_WIDTH = 32,
+parameter ECC_WIDTH = 7, parameter NUM_MASTERS = 4) (input logic clk,
+input logic rst_n,
+input logic [NUM_MASTERS-1:0] master_req,
+input logic [NUM_MASTERS-1:0][ADDR_WIDTH-1:0] master_addr,
+input logic [NUM_MASTERS-1:0] master_rw, input logic [NUM_MASTERS-1:0][DATA_WIDTH-1:0] master_wdata,
+input logic [NUM_MASTERS-1:0] master_grant,
+input logic [NUM_MASTERS-1:0][DATA_WIDTH-1:0] master_rdata,
+input logic [NUM_MASTERS-1:0] master_ack,
+input logic mem_cs,
+input logic mem_we,
+input logic [ADDR_WIDTH-1:0] mem_addr,
+input logic [DATA_WIDTH+ECC_WIDTH-1:0] mem_wdata,
+input logic [DATA_WIDTH+ECC_WIDTH-1:0] mem_rdata,
+input logic mem_rdy);
+
+    typedef enum logic [2:0] {
+        IDLE         = 3'b000,
+        ARB_WAIT     = 3'b001,
+        CMD_SEND     = 3'b010,
+        DATA_WAIT    = 3'b011,
+        DATA_CAPTURE = 3'b100,
+        ECC_CHECK    = 3'b101,
+        RESPONSE     = 3'b110
+    } state_t;
+
+    state_t current_state, next_state;
+
+        logic [NUM_MASTERS-1:0] req_latched;
+    logic [NUM_MASTERS-1:0] req_priority;
+    logic [NUM_MASTERS-1:0] grant_current;
+    logic [ADDR_WIDTH-1:0]  active_addr;
+    logic                   active_rw;
+    logic [DATA_WIDTH-1:0]  active_wdata;
+    logic [NUM_MASTERS-1:0] active_master;
+    logic [DATA_WIDTH+ECC_WIDTH-1:0] ecc_encoded_data;
+    logic [DATA_WIDTH+ECC_WIDTH-1:0] ecc_decoded_data;
+    logic [ECC_WIDTH-1:0]   ecc_syndrome;
+    logic                   ecc_error;
+    logic                   ecc_corrected;
+
+        logic [2:0] wait_counter;
+    logic [2:0] wait_target;
+
+        logic [DATA_WIDTH-1:0] response_data;
+    logic [NUM_MASTERS-1:0] response_master;
+    logic response_valid;
+
+    
+
+    
+
+egcplbdakngokadjoncjkdehjlnlllok: assert property (@(req_latched, current_state) (current_state == IDLE) && (|req_latched == 1'b0) && ((ARB_WAIT != CMD_SEND) || (ARB_WAIT == RESPONSE)) && (CMD_SEND == DATA_WAIT) && (DATA_WAIT == DATA_CAPTURE) && (DATA_CAPTURE == ECC_CHECK) && (ECC_CHECK == RESPONSE) |-> current_state == IDLE) else $error(""Error in immediate assert egcplbdakngokadjoncjkdehjlnlllok"");
+pnekmplgbgfokndgbplcppfjdfonefbc: assert property (@(current_state, req_priority) (current_state == ARB_WAIT) && (req_priority != 4'b0000) && ((CMD_SEND != DATA_WAIT) || (CMD_SEND == RESPONSE)) && (DATA_WAIT == DATA_CAPTURE) && (DATA_CAPTURE == ECC_CHECK) && (ECC_CHECK == RESPONSE) |-> current_state == ARB_WAIT) else $error(""Error in immediate assert pnekmplgbgfokndgbplcppfjdfonefbc"");
+lpdonfjhnjlikdnhpndfmadepefmaemj: assert property (@(active_rw, current_state) (current_state == CMD_SEND) && ((mem_rdy == 1'b0) || (active_rw == 1'b0)) && ((DATA_CAPTURE != ECC_CHECK) || (DATA_CAPTURE == RESPONSE)) && (ECC_CHECK == RESPONSE) |-> current_state == CMD_SEND) else $error(""Error in immediate assert lpdonfjhnjlikdnhpndfmadepefmaemj"");
+fladplcgefaakjdnpiappilledaibafi: assert property (@(wait_target, current_state, wait_counter) (current_state == DATA_WAIT) && ((wait_counter != wait_target) || (mem_rdy == 1'b0)) && ((DATA_CAPTURE != ECC_CHECK) || (DATA_CAPTURE == RESPONSE)) && (ECC_CHECK == RESPONSE) |-> current_state == DATA_WAIT) else $error(""Error in immediate assert fladplcgefaakjdnpiappilledaibafi"");
+eaeopgfekpokkncebghbcdpopcepaafj: assert property (@(active_rw, current_state) (current_state == DATA_CAPTURE) && ((mem_rdy == 1'b0) || (active_rw == 1'b1)) && (ECC_CHECK == RESPONSE) |-> current_state == DATA_CAPTURE) else $error(""Error in immediate assert eaeopgfekpokkncebghbcdpopcepaafj"");
+jdfmaephkcchknlnaaegjcbgbpkcjbbf: assert property (@(current_state) (current_state == ECC_CHECK) && ((RESPONSE != IDLE) || (RESPONSE != ARB_WAIT)) |-> current_state == ECC_CHECK) else $error(""Error in immediate assert jdfmaephkcchknlnaaegjcbgbpkcjbbf"");
+bgldppobkpofkgcpplbmcfjkomfoocaf: assert property (@(current_state) (current_state == RESPONSE) && ((IDLE == 1'b0) || (ARB_WAIT == 1'b0) || (CMD_SEND == 1'b0) || (DATA_WAIT == 1'b0) || (DATA_CAPTURE == 1'b0) || (ECC_CHECK == 1'b0)) |-> current_state == RESPONSE) else $error(""Error in immediate assert bgldppobkpofkgcpplbmcfjkomfoocaf"");
+
+hcphdmmeljfhkjclaaecalanflhgpkhk: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome != 7'b0) |-> ecc_syndrome[0] == ^mem_rdata[31:0] ^ mem_rdata[32]) else $error(""Error in immediate assert hcphdmmeljfhkjclaaecalanflhgpkhk"");
+ldhjkjdapdbfkkcoampjnemmlalkific: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome != 7'b0) |-> ecc_syndrome[1] == ^(mem_rdata[31:0] & 32'hAAAAAAAA) ^ mem_rdata[33]) else $error(""Error in immediate assert ldhjkjdapdbfkkcoampjnemmlalkific"");
+fnhgmookgojlkihgaekplmjhgebjaloc: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome != 7'b0) |-> ecc_syndrome[2] == ^(mem_rdata[31:0] & 32'hCCCCCCCC) ^ mem_rdata[34]) else $error(""Error in immediate assert fnhgmookgojlkihgaekplmjhgebjaloc"");
+gbhhcfdbmpomkgigohdjgkiglokbehpi: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome != 7'b0) |-> ecc_syndrome[3] == ^(mem_rdata[31:0] & 32'hF0F0F0F0) ^ mem_rdata[35]) else $error(""Error in immediate assert gbhhcfdbmpomkgigohdjgkiglokbehpi"");
+kilicnlligmdkgaibalacledpbegkmdo: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome != 7'b0) |-> ecc_syndrome[4] == ^(mem_rdata[31:0] & 32'hFF00FF00) ^ mem_rdata[36]) else $error(""Error in immediate assert kilicnlligmdkgaibalacledpbegkmdo"");
+gnhdmlindghhkfjhpoagipcfgclkiaib: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome != 7'b0) |-> ecc_syndrome[5] == ^(mem_rdata[31:0] & 32'hFFFF0000) ^ mem_rdata[37]) else $error(""Error in immediate assert gnhdmlindghhkfjhpoagipcfgclkiaib"");
+hpmpphcnplpikagnpacgjbbjellggmlb: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome != 7'b0) |-> ecc_syndrome[6] == ^mem_rdata ^ mem_rdata[38]) else $error(""Error in immediate assert hpmpphcnplpikagnpacgjbbjellggmlb"");
+bjkbmhcjiifokhhobbjohhacobagpngn: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0000001) |-> ecc_error == 1'b1) else $error(""Error in immediate assert bjkbmhcjiifokhhobbjohhacobagpngn"");
+mkkegmblkcdckomjocdmohfpoihphagp: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0000001) |-> ecc_corrected == 1'b1) else $error(""Error in immediate assert mkkegmblkcdckomjocdmohfpoihphagp"");
+ifhdppgpdphnkmepphnkdckmkicohnhm: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome == 7'b0000001) |-> ecc_decoded_data[0] == ~mem_rdata[0]) else $error(""Error in immediate assert ifhdppgpdphnkmepphnkdckmkicohnhm"");
+cldfoidkhejmkokebmklennbialmjkjp: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0000010) |-> ecc_error == 1'b1) else $error(""Error in immediate assert cldfoidkhejmkokebmklennbialmjkjp"");
+ajknnijofilmkmjlapmabpndfmnpkbfh: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0000010) |-> ecc_corrected == 1'b1) else $error(""Error in immediate assert ajknnijofilmkmjlapmabpndfmnpkbfh"");
+kkhidjdmgedckafcpecpnenikhijgkch: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome == 7'b0000010) |-> ecc_decoded_data[1] == ~mem_rdata[1]) else $error(""Error in immediate assert kkhidjdmgedckafcpecpnenikhijgkch"");
+lkgncchpcppikdeobnmpfnenhoejfboh: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0000100) |-> ecc_error == 1'b1) else $error(""Error in immediate assert lkgncchpcppikdeobnmpfnenhoejfboh"");
+jljlknjgfhcbkmmpaljdklknbfhnlppi: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0000100) |-> ecc_corrected == 1'b1) else $error(""Error in immediate assert jljlknjgfhcbkmmpaljdklknbfhnlppi"");
+pnoicbmnkpjekaipbdoniikliokhebed: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome == 7'b0000100) |-> ecc_decoded_data[2] == ~mem_rdata[2]) else $error(""Error in immediate assert pnoicbmnkpjekaipbdoniikliokhebed"");
+deipbfkfpopekgkcbfbdcglbjcohapon: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0001000) |-> ecc_error == 1'b1) else $error(""Error in immediate assert deipbfkfpopekgkcbfbdcglbjcohapon"");
+lljodomnonjckmeappkecjnlnnlpihej: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0001000) |-> ecc_corrected == 1'b1) else $error(""Error in immediate assert lljodomnonjckmeappkecjnlnnlpihej"");
+ggfkpbdfloidkcmeomoilaflmplmbkdo: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome == 7'b0001000) |-> ecc_decoded_data[3] == ~mem_rdata[3]) else $error(""Error in immediate assert ggfkpbdfloidkcmeomoilaflmplmbkdo"");
+llbkkpbfnilakenkbhjdmlihbbjfkccc: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0010000) |-> ecc_error == 1'b1) else $error(""Error in immediate assert llbkkpbfnilakenkbhjdmlihbbjfkccc"");
+emppnfilfapnkoddodmimigdeihjjnio: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0010000) |-> ecc_corrected == 1'b1) else $error(""Error in immediate assert emppnfilfapnkoddodmimigdeihjjnio"");
+gacamcpopadbkfbfbokecmpfjflieacf: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome == 7'b0010000) |-> ecc_decoded_data[4] == ~mem_rdata[4]) else $error(""Error in immediate assert gacamcpopadbkfbfbokecmpfjflieacf"");
+lilpeokfaeinkkkcoonnoodfendaihkk: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0100000) |-> ecc_error == 1'b1) else $error(""Error in immediate assert lilpeokfaeinkkkcoonnoodfendaihkk"");
+dkjecegflbnekkgnagjkkajanheljdga: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b0100000) |-> ecc_corrected == 1'b1) else $error(""Error in immediate assert dkjecegflbnekkgnagjkkajanheljdga"");
+cjbipkfojpdbkoggonfomjllnicbhgjo: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome == 7'b0100000) |-> ecc_decoded_data[5] == ~mem_rdata[5]) else $error(""Error in immediate assert cjbipkfojpdbkoggonfomjllnicbhgjo"");
+enlelckjgcfakjjbpjckcaandbiablpk: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b1000000) |-> ecc_error == 1'b1) else $error(""Error in immediate assert enlelckjgcfakjjbpjckcaandbiablpk"");
+nafecoobihmkkpbebjpdhglmfmdbobcj: assert property (@(ecc_syndrome) (ecc_syndrome == 7'b1000000) |-> ecc_corrected == 1'b1) else $error(""Error in immediate assert nafecoobihmkkpbebjpdhglmfmdbobcj"");
+nkkpinlckbolkhpmadcmikpmahmdgimj: assert property (@(ecc_syndrome, mem_rdata) (ecc_syndrome == 7'b1000000) |-> ecc_decoded_data[6] == ~mem_rdata[6]) else $error(""Error in immediate assert nkkpinlckbolkhpmadcmikpmahmdgimj"");
+dlkananddbpkkeciahddejfogdlkhdok: assert property (@(ecc_syndrome) (ecc_syndrome != 7'b0000001 && ecc_syndrome != 7'b0000010 && ecc_syndrome != 7'b0000100 && ecc_syndrome != 7'b0001000 && ecc_syndrome != 7'b0010000 && ecc_syndrome != 7'b0100000 && ecc_syndrome != 7'b1000000) |-> ecc_error == 1'b1) else $error(""Error in immediate assert dlkananddbpkkeciahddejfogdlkhdok"");
+imojijopogahkggmofccjmpjkjdddefl: assert property (@(ecc_syndrome) (ecc_syndrome != 7'b0000001 && ecc_syndrome != 7'b0000010 && ecc_syndrome != 7'b0000100 && ecc_syndrome != 7'b0001000 && ecc_syndrome != 7'b0010000 && ecc_syndrome != 7'b0100000 && ecc_syndrome != 7'b1000000) |-> ecc_corrected == 1'b0) else $error(""Error in immediate assert imojijopogahkggmofccjmpjkjdddefl"");
+kjmklhnidgalkjcdpecidphkpgdejdbd: assert property (@(ecc_syndrome) (ecc_syndrome != 7'b0000001 && ecc_syndrome != 7'b0000010 && ecc_syndrome != 7'b0000100 && ecc_syndrome != 7'b0001000 && ecc_syndrome != 7'b0010000 && ecc_syndrome != 7'b0100000 && ecc_syndrome != 7'b1000000) |-> ecc_decoded_data == ecc_decoded_data) else $error(""Error in immediate assert kjmklhnidgalkjcdpecidphkpgdejdbd"");
+
+ofkclkhngnchkpepbemiofaboomallba: assert property (@(current_state) current_state == ARB_WAIT |-> master_grant = req_priority) else $error(""Error in immediate assert ofkclkhngnchkpepbemiofaboomallba"");
+glaapeknagchkcgaoljfjobccepgjlap: assert property (@(current_state) current_state == CMD_SEND && mem_rdy == 1'b1 |-> mem_cs = 1'b1) else $error(""Error in immediate assert glaapeknagchkcgaoljfjobccepgjlap"");
+dnbaelbencoakobapbdiemnmjcakghim: assert property (@(current_state) current_state == CMD_SEND && mem_rdy == 1'b1 |-> mem_we = active_rw) else $error(""Error in immediate assert dnbaelbencoakobapbdiemnmjcakghim"");
+bojfomodkhlikigbakbkcoghjnppbikc: assert property (@(current_state) current_state == CMD_SEND && mem_rdy == 1'b1 |-> mem_addr = active_addr) else $error(""Error in immediate assert bojfomodkhlikigbakbkcoghjnppbikc"");
+mmgnlbccjcllkmfjbehndlomfebgdkcc: assert property (@(current_state, active_rw) current_state == CMD_SEND && mem_rdy == 1'b1 && active_rw == 1'b1 |-> mem_wdata = ecc_encoded_data) else $error(""Error in immediate assert mmgnlbccjcllkmfjbehndlomfebgdkcc"");
+ilbglpmlflhlkfflbeefiohcledhlnfa: assert property (@(current_state) current_state == IDLE |-> master_grant = 4'b0000) else $error(""Error in immediate assert ilbglpmlflhlkfflbeefiohcledhlnfa"");
+dhmjakoniiaikblgogdeehpjcmlnpcih: assert property (@(current_state) current_state == IDLE |-> master_ack = 4'b0000) else $error(""Error in immediate assert dhmjakoniiaikblgogdeehpjcmlnpcih"");
+fmnbkbbobjmpkiapolgcpeepfabjijhe: assert property (@(current_state) current_state == IDLE |-> mem_cs = 1'b0) else $error(""Error in immediate assert fmnbkbbobjmpkiapolgcpeepfabjijhe"");
+ogfeehegjicckdlkajjkfmcclfhfbdpo: assert property (@(current_state) current_state == IDLE |-> mem_we = 1'b0) else $error(""Error in immediate assert ogfeehegjicckdlkajjkfmcclfhfbdpo"");
+mhpljpllbgjikclobiiekkghdmmkphpj: assert property (@(current_state) current_state == IDLE |-> mem_addr = '0) else $error(""Error in immediate assert mhpljpllbgjikclobiiekkghdmmkphpj"");
+icajpofekdjakjinbccpgdjedpmjccig: assert property (@(current_state) current_state == IDLE |-> mem_wdata = '0) else $error(""Error in immediate assert icajpofekdjakjinbccpgdjedpmjccig"");
+ibelphelpeedkoppoioajiijbmalcccp: assert property (@(current_state, response_master) current_state == RESPONSE && response_master == 4'b0001 |-> master_rdata[0] = response_data) else $error(""Error in immediate assert ibelphelpeedkoppoioajiijbmalcccp"");
+enholjkekigikanhoedanfejcboikcph: assert property (@(current_state, response_master) current_state == RESPONSE && response_master == 4'b0001 |-> master_ack = 4'b0001) else $error(""Error in immediate assert enholjkekigikanhoedanfejcboikcph"");
+knggpngampggkphjadjbdpgifnibchjc: assert property (@(current_state, response_master) current_state == RESPONSE && response_master == 4'b0010 |-> master_rdata[1] = response_data) else $error(""Error in immediate assert knggpngampggkphjadjbdpgifnibchjc"");
+jcmlddclkgiekgjkbebhafacebhddkab: assert property (@(current_state, response_master) current_state == RESPONSE && response_master == 4'b0010 |-> master_ack = 4'b0010) else $error(""Error in immediate assert jcmlddclkgiekgjkbebhafacebhddkab"");
+cgldobkhpecakechoojhnjkbdfojnfmf: assert property (@(current_state, response_master) current_state == RESPONSE && response_master == 4'b0100 |-> master_rdata[2] = response_data) else $error(""Error in immediate assert cgldobkhpecakechoojhnjkbdfojnfmf"");
+imejeomkcopfkeooppacgjkingkdoobf: assert property (@(current_state, response_master) current_state == RESPONSE && response_master == 4'b0100 |-> master_ack = 4'b0100) else $error(""Error in immediate assert imejeomkcopfkeooppacgjkingkdoobf"");
+lplpojaongidknghpcppnhfjkjjgjfmd: assert property (@(current_state, response_master) current_state == RESPONSE && response_master == 4'b1000 |-> master_rdata[3] = response_data) else $error(""Error in immediate assert lplpojaongidknghpcppnhfjkjjgjfmd"");
+ieeoeccndjpdkildplehhnkonmfaolcm: assert property (@(current_state, response_master) current_state == RESPONSE && response_master == 4'b1000 |-> master_ack = 4'b1000) else $error(""Error in immediate assert ieeoeccndjpdkildplehhnkonmfaolcm"");
+ficmmilndjnlknocapjbjeedadfachhi: assert property (@(current_state) current_state != ARB_WAIT && current_state != CMD_SEND && current_state != RESPONSE |-> mem_cs = 1'b0) else $error(""Error in immediate assert ficmmilndjnlknocapjbjeedadfachhi"");
+nklbpbhjnadnkchopknghpmlleoinele: assert property (@(current_state) current_state != ARB_WAIT && current_state != CMD_SEND && current_state != RESPONSE |-> mem_we = 1'b0) else $error(""Error in immediate assert nklbpbhjnadnkchopknghpmlleoinele"");
+afdhhngkmniaklododklceohhkbdbieo: assert property (@(current_state) current_state != IDLE && current_state != ARB_WAIT && current_state != CMD_SEND && current_state != RESPONSE |-> master_grant = 4'b0000) else $error(""Error in immediate assert afdhhngkmniaklododklceohhkbdbieo"");
+nbalofnfddikklmfpjmoofcomaeahfdc: assert property (@(current_state) current_state != IDLE && current_state != ARB_WAIT && current_state != CMD_SEND && current_state != RESPONSE |-> master_ack = 4'b0000) else $error(""Error in immediate assert nbalofnfddikklmfpjmoofcomaeahfdc"");
+bbcnghekkcackafhbealbdeggopkailb: assert property (@(current_state) current_state != IDLE && current_state != ARB_WAIT && current_state != CMD_SEND && current_state != RESPONSE |-> mem_addr = '0) else $error(""Error in immediate assert bbcnghekkcackafhbealbdeggopkailb"");
+ipflkpjlchlckaobpaolmbgkpjgghone: assert property (@(current_state) current_state != IDLE && current_state != ARB_WAIT && current_state != CMD_SEND && current_state != RESPONSE |-> mem_wdata = '0) else $error(""Error in immediate assert ipflkpjlchlckaobpaolmbgkpjgghone"");
+dibanpedjkhgkikdpdjoleijjildjmji: assert property (@(current_state) current_state != IDLE && current_state != ARB_WAIT && current_state != CMD_SEND && current_state != RESPONSE |-> master_rdata = '{default: '0}) else $error(""Error in immediate assert dibanpedjkhgkikdpdjoleijjildjmji"");
+
+
+    property afmoaedcegdokebobialijlcgcklgjhf;
+    @(posedge clk) disable iff(!rst_n) (current_state == IDLE) |=> (master_req == $past(master_req) && ~grant_current);
+endproperty
+assert property (afmoaedcegdokebobialijlcgcklgjhf);
+
+property ddbiddccilnikekiaaoabknlbjeimjei;
+    @(posedge clk) disable iff(!rst_n) ((current_state == CMD_SEND || current_state == DATA_WAIT || current_state == DATA_CAPTURE || current_state == ECC_CHECK || current_state == RESPONSE)) |=> (master_req == req_latched & ~grant_current);
+endproperty
+assert property (ddbiddccilnikekiaaoabknlbjeimjei);
+
+property nkgeafgihefmkpanaoakmmlmbobpjpkm;
+    @(posedge clk) disable iff(!rst_n) ((current_state == IDLE || current_state == ARB_WAIT)) |=> (master_req == req_latched);
+endproperty
+assert property (nkgeafgihefmkpanaoakmmlmbobpjpkm);
+
+property efohjbfmgdbhkmbpplipoggpafpcfhek;
+    @(posedge clk) disable iff(!rst_n) (current_state == CMD_SEND) |=> (mem_rdy == $past(mem_rdy));
+endproperty
+assert property (efohjbfmgdbhkmbpplipoggpafpcfhek);
+
+property abpjgnodnidjkklppkenjipibmoaipfp;
+    @(posedge clk) disable iff(!rst_n) ((current_state == IDLE || current_state == ARB_WAIT || current_state == RESPONSE)) |=> (mem_rdy == '0);
+endproperty
+assert property (abpjgnodnidjkklppkenjipibmoaipfp);
+
+property gicjikbjcfcckjkfadflkgldgfielpmh;
+    @(posedge clk) disable iff(!rst_n) ((current_state == CMD_SEND || current_state == DATA_WAIT || current_state == DATA_CAPTURE || current_state == ECC_CHECK)) |=> (mem_rdy == '1);
+endproperty
+assert property (gicjikbjcfcckjkfadflkgldgfielpmh);
+
+property obmdjlheicpnkadaooeomlcpjoanlaea;
+    @(posedge clk) disable iff(!rst_n) ((current_state == IDLE || current_state == ARB_WAIT || current_state == RESPONSE)) |=> (req_latched == master_req);
+endproperty
+assert property (obmdjlheicpnkadaooeomlcpjoanlaea);
+
+property cahcldpcaooekgkkblfgnoiekbnofjpc;
+    @(posedge clk) disable iff(!rst_n) ((current_state == CMD_SEND || current_state == DATA_WAIT || current_state == DATA_CAPTURE || current_state == ECC_CHECK)) |=> (req_latched == master_req);
+endproperty
+assert property (cahcldpcaooekgkkblfgnoiekbnofjpc);
+
+property mgbbkaihihjfkabfomehjoikedihjhnb;
+    @(posedge clk) disable iff(!rst_n) (current_state == IDLE) |=> (req_latched == '0);
+endproperty
+assert property (mgbbkaihihjfkabfomehjoikedihjhnb);
+
+
+property pebccfbcanjekmojapdifjanhlkmbokb;
+    @(negedge clk) disable iff(!rst_n) (current_state == IDLE && !(|master_req)) |=> (master_grant == 4'b0000);
+endproperty
+assert property (pebccfbcanjekmojapdifjanhlkmbokb);
+
+property njfidnaahdicklfjapfkfjaafjhphnlb;
+    @(negedge clk) disable iff(!rst_n) (current_state == IDLE && (|master_req)) |=> (master_grant[0] == 1);
+endproperty
+assert property (njfidnaahdicklfjapfkfjaafjhphnlb);
+
+property igjepggphknlkpfobajlmbkfjjhilchj;
+    @(negedge clk) disable iff(!rst_n) (current_state == IDLE && (|master_req)) |=> (master_grant[1] == 1);
+endproperty
+assert property (igjepggphknlkpfobajlmbkfjjhilchj);
+
+property mbehnnkofmiekhjfapelaidhbefipclc;
+    @(negedge clk) disable iff(!rst_n) (current_state == IDLE && (|master_req)) |=> (master_grant[2] == 1);
+endproperty
+assert property (mbehnnkofmiekhjfapelaidhbefipclc);
+
+property keekkjpmjbnikaapoobfjadkbonccmme;
+    @(negedge clk) disable iff(!rst_n) (current_state == IDLE && (|master_req)) |=> (master_grant[3] == 1);
+endproperty
+assert property (keekkjpmjbnikaapoobfjadkbonccmme);
+
+property lgijdfdhnapdkfclpoemlghihecddjfk;
+    @(negedge clk) disable iff(!rst_n) (current_state == IDLE && (|master_req)) |=> (current_state == ARB_WAIT);
+endproperty
+assert property (lgijdfdhnapdkfclpoemlghihecddjfk);
+
+property bdjjdfnkfcokkfpnaagjalpondpjcfoe;
+    @(negedge clk) disable iff(!rst_n) (current_state == IDLE && !(|master_req)) |=> (current_state == $past(current_state));
+endproperty
+assert property (bdjjdfnkfcokkfpnaagjalpondpjcfoe);
+
+property bglgbhlcclflkbpibjfmemenlahndenb;
+    @(negedge clk) disable iff(!rst_n) (current_state == ARB_WAIT && (current_state[t-1:0] == 3'b000 || master_grant[t-1])) |=> (current_state == CMD_SEND);
+endproperty
+assert property (bglgbhlcclflkbpibjfmemenlahndenb);
+
+property kmmhekmcohhhkooepjigjoggjjbmmdce;
+    @(negedge clk) disable iff(!rst_n) (current_state == IDLE && active_rw == 1'b0 && !(|master_req)) |=> (ecc_encoded_data == $past(ecc_encoded_data));
+endproperty
+assert property (kmmhekmcohhhkooepjigjoggjjbmmdce);
+
+property nhcloacaohihkohkpnapfoaojdpnbjal;
+    @(negedge clk) disable iff(!rst_n) (current_state == IDLE && active_rw == 1'b0 && (|master_req)) |=> (ecc_encoded_data[DATA_WIDTH-1:0] == active_wdata);
+endproperty
+assert property (nhcloacaohihkohkpnapfoaojdpnbjal);
+
+property njipknbpchpbkfakaifjkbfkiocbnmmd;
+    @(negedge clk) disable iff(!rst_n) (current_state == IDLE && active_rw == 1'b0 && (|master_req)) |=> (ecc_encoded_data[DATA_WIDTH +: ECC_WIDTH] == { ^(active_wdata & 32'hAAAAAAAA), ^(active_wdata & 32'hCCCCCCCC), ^(active_wdata & 32'hF0F0F0F0), ^(active_wdata & 32'hFF00FF00), ^(active_wdata & 32'hFFFF0000), ^(active_wdata & 32'hFFFFFFFF), ^(active_wdata & 32'hF0F0F0F0) ^ ^(active_wdata & 32'h0F0F0F0F) });
+endproperty
+assert property (njipknbpchpbkfakaifjkbfkiocbnmmd);
+
+
+endmodule","** Error: (vlog-13069) prueba.sv(94): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(95): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(96): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(97): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(98): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(99): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(100): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(101): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(102): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(103): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(104): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(105): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(106): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(107): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(108): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(109): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(110): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(111): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(112): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(113): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(114): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(115): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(116): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(117): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(118): near ""="": syntax error, unexpected '=', expecting ++ or --.
+** Error: (vlog-13069) prueba.sv(119): near ""="": syntax error, unexpected '=', expecting ++ or --.",569.197268486023,13091,7014

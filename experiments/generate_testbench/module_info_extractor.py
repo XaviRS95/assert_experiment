@@ -191,7 +191,7 @@ def normalize_ports_with_range(input_signals: list)-> list:
         # 2. (type)?   -> Optional logic/reg/wire
         # 3. (range)?  -> Optional [3:0]
         # 4. (name)    -> Signal name (Required)
-        pattern = r'^(?P<dir>input|output|inout)?\s*(?P<type>logic|reg|wire)?\s*(?P<range>\[.*?\])?\s*(?P<name>\w+)$'
+        pattern = r'^(?P<dir>input|output|inout)?\s*(?P<type>logic|reg|wire|bit|byte|shortint|int|longint)?\s*(?P<range>\[.*?\])?\s*(?P<name>\w+)$'
         match = re.search(pattern, part)
 
         if match:

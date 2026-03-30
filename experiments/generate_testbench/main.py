@@ -1,8 +1,7 @@
 from module_generator import generate_testbench
-
 import pandas as pd
 from config import arguments
-import requests
+import requests, time
 
 def filter_dataset(filepath: str):
     '''
@@ -12,6 +11,7 @@ def filter_dataset(filepath: str):
     '''
     file_data = pd.read_csv(filepath)
     file_data = file_data[file_data['iverilog_output'] == 'OK']
+    file_data = file_data.reset_index(drop=True)
     return file_data[['original_code','generated_code']]
 
 def try_testbench(dut_module: str, assert_module:str, testbench_module:str, host:str = 'http://localhost:8002')-> dict:
@@ -60,11 +60,47 @@ def main():
 
                 print(f'INDEX {index + 1} out of {file_data.shape[0]}')
 
-                dut_module = row['original_code']
-                assert_module = row['generated_code']
+                dut_module = '''
+                module case42(input int score, output logic [1:0] grade);
+    always_comb begin
+        case(score)
+            0:49: grade = 2'b00;   // F
+            50:69: grade = 2'b01;  // D-C
+            70:89: grade = 2'b10;  // B
+            90:100: grade = 2'b11; // A
+            default: grade = 2'b00; // invalid
+        endcase
+    end
+endmodule
 
-                print(f'DUT module: \n{dut_module}\n\n')
-                print(f'Assert module: \n{assert_module}\n\n')
+                '''
+
+                assert_module = '''
+                
+                module case42_asserts  (input int score, input logic [1:0] grade);
+
+    
+
+    
+
+    blohnadfoieakfdpohnlppajiajdaphh: assert property (@(score) score == 0 |-> grade == 2'b00) else $error("Error in immediate assert blohnadfoieakfdpohnlppajiajdaphh");
+hiepfjooghdiklchoipbglhbfhabhbnc: assert property (@(score) score == 50 |-> grade == 2'b01) else $error("Error in immediate assert hiepfjooghdiklchoipbglhbfhabhbnc");
+enanidghjddakclbafkhaifbjicbikao: assert property (@(score) score == 70 |-> grade == 2'b10) else $error("Error in immediate assert enanidghjddakclbafkhaifbjicbikao");
+lfhiechlieknkdnpafmboelmfgpiegaf: assert property (@(score) score == 90 |-> grade == 2'b11) else $error("Error in immediate assert lfhiechlieknkdnpafmboelmfgpiegaf");
+ikgddnhngoclkkaaandobhecbmogliag: assert property (@(score) score > 100 |-> grade == 2'b00) else $error("Error in immediate assert ikgddnhngoclkkaaandobhecbmogliag");
+
+
+    
+
+endmodule
+                
+                '''
+
+                #dut_module = row['original_code']
+                #assert_module = row['generated_code']
+
+                #print(f'DUT module: \n{dut_module}\n\n')
+                #print(f'Assert module: \n{assert_module}\n\n')
 
                 testbench_module = generate_testbench(
                         timescale=TIMESCALE,
@@ -81,12 +117,20 @@ def main():
                                                        assert_module=row['generated_code'],
                                                        testbench_module=testbench_module)
 
-                print(testbench_module)
+                #print(testbench_module)
 
                 print(f'Number of errors: {testbench_test_results["total_errors"]}')
                 print(f'Total coverage: {testbench_test_results["coverage_pct"]}')
-                print(f'Testing data:')
-                [print(row) for row in testbench_test_results["testing_data"]]
+                #print(f'Testing data: {testbench_test_results["testing_data"]}')
+                if testbench_test_results["testing_data"] == 'Error in Compilation step':
+                    print(dut_module)
+                    print('                   ----------                  ')
+                    print(assert_module)
+                    print('                   ----------                  ')
+                    print(testbench_module)
+                #[print(row) for row in testbench_test_results["testing_data"]]
+
+                time.sleep(1)
 
                 average_errors += 1 if testbench_test_results["total_errors"] > 0 else 0
                 average_coverage += testbench_test_results["coverage_pct"]
