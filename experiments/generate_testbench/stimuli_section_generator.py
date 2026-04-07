@@ -1,4 +1,4 @@
-from module_info_extractor import separate_grouped_activations_in_seq_or_comb, group_activations_with_ports_names
+from module_info_extractor import separate_grouped_activations_in_seq_or_comb, group_clock_activations
 import re
 
 def generate_activation_with_full_type_list(full_type_signals: list, separated_activations: dict, reset_signal: str)-> dict:
@@ -253,18 +253,17 @@ def generate_sequential_blocks(full_type_signals: list, activations_with_ports: 
 
         stimulus = generate_signal_stimulus(signals=activation_with_full_type_list[key], reset_signal=reset_signal,
                                             clock_signal=clock_signal)
-
-        sequential_template = (f'\tinitial begin\n'
-                               f'\t\t// Wait for reset to complete\n'
-                               f'\t\t#(RESET_DELAY + 5);\n'
-                               f'\t\tfor(int i=0; i<SEQ_TOTAL_TESTS; i++) begin\n'
-                               f'\t\t\t@({key});\n'
-                               f'{stimulus}'
-                               f'\t\tend\n'
-                               f'\t\tblocks_done = blocks_done + 1;\n'
-                               f'\tend\n')
-
-        sequential_blocks.append(sequential_template)
+        if stimulus:
+            sequential_template = (f'\tinitial begin\n'
+                                   f'\t\t// Wait for reset to complete\n'
+                                   f'\t\t#(RESET_DELAY + 5);\n'
+                                   f'\t\tfor(int i=0; i<SEQ_TOTAL_TESTS; i++) begin\n'
+                                   f'\t\t\t@({key});\n'
+                                   f'{stimulus}'
+                                   f'\t\tend\n'
+                                   f'\t\tblocks_done = blocks_done + 1;\n'
+                                   f'\tend\n')
+            sequential_blocks.append(sequential_template)
 
     return sequential_blocks
 
@@ -278,8 +277,10 @@ def generate_blocks(full_type_signals: list, dut_module: str, test_module: str, 
     :return:
     '''
     combinational_activations, clock_activations = separate_grouped_activations_in_seq_or_comb(dut_module = dut_module, test_module = test_module, reset_signal=reset_signal, clock_signal=clock_signal)
-    combinational_block = generate_combinational_block(full_type_signals = full_type_signals, combinational_triggers=combinational_activations, clock_signal=clock_signal, reset_signal=reset_signal)
-
+    if combinational_activations:
+        combinational_block = generate_combinational_block(full_type_signals = full_type_signals, combinational_triggers=combinational_activations, clock_signal=clock_signal, reset_signal=reset_signal)
+    else:
+        combinational_block = ''
     if clock_signal:
         sequential_blocks =  generate_sequential_blocks(full_type_signals = full_type_signals, activations_with_ports=clock_activations, clock_signal=clock_signal, reset_signal=reset_signal)
     else:
@@ -287,7 +288,8 @@ def generate_blocks(full_type_signals: list, dut_module: str, test_module: str, 
 
     total_blocks = (1 if combinational_block else 0) + len(sequential_blocks)
 
-    sequential_blocks = "\n\n".join(sequential_blocks)
+    combinational_block = '// No combinational blocks detected' if not combinational_block else combinational_block
+    sequential_blocks = '// No sequential blocks detected' if not sequential_blocks else "\n\n".join(sequential_blocks)
 
     stimulus_blocks_section = (f'// ====================================================\n'
                                f'// TEST BLOCKS STIMULATIONS\n'

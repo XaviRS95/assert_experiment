@@ -33,7 +33,7 @@ def generate_reset_initial_info(reset_trigger:str, reset_signal: str)-> str:
     TEMPLATE = (f'\t//Reset sequence:\n'
                 f'\tinitial begin\n'
                 f'\t\t{reset_signal} = {reset_info["reset_assert_value"]};\n'
-                f'\t\t#(RESET DELAY) {reset_signal} = {reset_info["reset_deassert_value"]} ;\n'
+                f'\t\t#(RESET_DELAY) {reset_signal} = {reset_info["reset_deassert_value"]} ;\n'
                 f'\tend\n')
 
     return TEMPLATE

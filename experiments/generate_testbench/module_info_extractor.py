@@ -244,7 +244,7 @@ def extract_sequential_sensitivity_list_variables(dut_module: str, reset_signal:
     # Return unique elements, cleaned of any trailing/leading whitespace
     return sequential_sensitivity_list
 
-def get_combinational_sensitivity_lists(test_module: str, sequential_sensitivity_list: list, reset_signal: str)-> list:
+def get_combinational_sensitivity_lists(test_module: str, sequential_sensitivity_list: list, clock_signal:str, reset_signal: str)-> list:
     '''
     Extracts the sensitivity list from all testing that are combinational (do not rely on clock nor reset activations)
     :param test_module:
@@ -260,30 +260,30 @@ def get_combinational_sensitivity_lists(test_module: str, sequential_sensitivity
     for sensitivity_list in matches:
         sensitivity_list = sensitivity_list.split(',')
         for signal in sensitivity_list:
-            signal = signal.replace(' ','')
-            #Avoid by mistake including the reset activation.
-            if (not reset_signal or reset_signal != signal) and signal not in sequential_sensitivity_list:
+            signal = signal.strip()
+            #Avoid by mistake including the reset activation or clock activation.
+            if (not reset_signal or reset_signal not in signal) and (not clock_signal or clock_signal not in signal) and signal not in sequential_sensitivity_list:
                 combinational_sensitivity_list.append(signal)
 
     return list(set(combinational_sensitivity_list))
 
 
-def group_activations_with_ports_names(test_module: str, clock_signal: str)-> dict:
+def group_clock_activations(test_module: str, clock_signal: str)-> dict:
     '''
-    Extracts the sensitivity list that activates each port from all the tests.
+    Extracts the sensitivity list that activates each port from all the clock-related tests.
     This is crucial to later understand what ports stimulate under what sensitivity lists,
     to build each stimulating testing block.
     :param test_module:
     :return:
     '''
-    prop_pattern = r'assert\s+property\s*\(@\((.*?)\)(.*?)\)(?:\s+else|;)'
+    prop_pattern = r'@\(([^)]+)\)\s*(.*?)\s*;'
     matches = re.findall(prop_pattern, test_module, re.DOTALL)
 
     results = {}
 
     for activation, body in matches:
 
-        all_extracted_vars = set()
+        all_extracted_vars = []
 
         if clock_signal in activation:
 
@@ -319,9 +319,12 @@ def group_activations_with_ports_names(test_module: str, clock_signal: str)-> di
                         found_vars = re.findall(r"\b(?<!['\d])[a-zA-Z_][a-zA-Z0-9_$]*\b", lhs)
 
                         for v in found_vars:
-                            all_extracted_vars.add(v)
+                            all_extracted_vars.append(v)
 
-            results[activation] = all_extracted_vars
+            if activation not in results:
+                results[activation] = all_extracted_vars
+            else:
+                results[activation] = list(set(results[activation]).union(set(all_extracted_vars)))
 
     return results
 
@@ -337,10 +340,10 @@ def separate_grouped_activations_in_seq_or_comb(dut_module:str, test_module: str
     sequential_sensitivity_list_variables = extract_sequential_sensitivity_list_variables(dut_module=dut_module, reset_signal=reset_signal)
 
     # All the combinations of the combinational blocks activation are stored.
-    combinational_sensitivity_lists_variables = get_combinational_sensitivity_lists(test_module = test_module, sequential_sensitivity_list=sequential_sensitivity_list_variables, reset_signal=reset_signal)
+    combinational_sensitivity_lists_variables = get_combinational_sensitivity_lists(test_module = test_module, sequential_sensitivity_list=sequential_sensitivity_list_variables, clock_signal=clock_signal, reset_signal=reset_signal)
 
     #Clock scenario:
-    clock_related_activations = group_activations_with_ports_names(test_module=test_module, clock_signal=clock_signal)
+    clock_related_activations = group_clock_activations(test_module=test_module, clock_signal=clock_signal)
 
     return combinational_sensitivity_lists_variables, clock_related_activations
 
