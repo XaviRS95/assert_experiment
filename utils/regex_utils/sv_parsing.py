@@ -57,6 +57,8 @@ def extract_module_interface_and_decls(code: str, comb_blocks: list, seq_blocks:
     #leaving only the inner variables to extract:
     inner_vars = extractable_code.replace('endmodule', '').strip()
 
+
+
     header = extract_module_name_parms_ports(code=header_text)
 
     return {
@@ -101,6 +103,8 @@ def extract_internal_variable_names(variables: str):
         for part in parts:
             if part not in reserved_typedef_names and part != 'logic':  # Part is not a typedef enum variable name:
                 results.append(part)
+
+
 
     return results
 

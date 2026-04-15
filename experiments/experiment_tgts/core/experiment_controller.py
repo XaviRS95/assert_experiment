@@ -7,8 +7,7 @@ from ..core.module_assembly.final_assembler import FinalAssembler
 from ..tracking.token_tracker import TokenTracker
 from ..tracking.statistics import ExperimentStatistics
 from ..tracking.results_writer import ResultsWriter
-from utils.regex_utils.module_assert_check import check_module_has_asserts_properties
-
+from ..processing.update_assert_module import process_module_complete
 class ExperimentController:
     """Controls the flow of experiment 3"""
 
@@ -46,9 +45,9 @@ class ExperimentController:
         module_info = processor.process()
 
         # Check if module has blocks to process
-        no_blocks_result = SyntaxChecker.validate_blocks_exist(module_info.get('has_blocks', False))
-        if no_blocks_result:
-            return self._create_result(module_code, None, no_blocks_result, elapsed_time=time.time() - time1)
+        model_format_output = SyntaxChecker.validate_blocks_exist(module_info.get('has_blocks', False))
+        if model_format_output:
+            return self._create_result(module_code, None, model_format_output, elapsed_time=time.time() - time1)
 
         # Generate assertions
         comb_results = self.comb_generator.generate_for_blocks(
@@ -71,8 +70,211 @@ class ExperimentController:
             comb_results['response_tkns'] + seq_results['response_tkns']
         )
 
-        # Assemble final module
-        final_module = self.assembler.assemble(module_info, comb_results, seq_results)
+        #assert_module = self.assembler.assemble(module_info, comb_results, seq_results)
+
+        assert_module = '''module axi2apb_bridge_asserts  (input logic clk,
+        input logic rst_n,
+        input logic [31:0] s_axi_awaddr,
+        input logic [2:0] s_axi_awprot,
+        input logic s_axi_awvalid,
+        input logic s_axi_awready,
+        input logic [31:0] s_axi_wdata,
+        input logic [3:0] s_axi_wstrb,
+        input logic s_axi_wvalid,
+        input logic s_axi_wready,
+        input logic [1:0] s_axi_bresp,
+        input logic s_axi_bvalid,
+        input logic s_axi_bready,
+        input logic [31:0] s_axi_araddr,
+        input logic [2:0] s_axi_arprot,
+        input logic s_axi_arvalid,
+        input logic s_axi_arready,
+        input logic [31:0] s_axi_rdata,
+        input logic [1:0] s_axi_rresp,
+        input logic s_axi_rvalid,
+        input logic s_axi_rready,
+        input logic [31:0] m_apb_paddr,
+        input logic m_apb_psel,
+        input logic m_apb_penable,
+        input logic m_apb_pwrite,
+        input logic [31:0] m_apb_pwdata,
+        input logic [31:0] m_apb_prdata,
+        input logic m_apb_pready,
+        input logic m_apb_pslverr);
+
+            typedef enum logic [1:0] {
+                IDLE,
+                SETUP,
+                ACCESS,
+                RESPONSE
+            } state_t;
+
+            state_t current_state, next_state;
+            logic [31:0] addr_reg;
+            logic write_reg;
+            logic is_write, is_read;
+            logic aw_hsk, w_hsk, ar_hsk;
+
+        dffdmdeaondckkicbmhjdakdkjdljdpa: assert property (@(s_axi_awvalid, current_state) {s_axi_awvalid && current_state == IDLE} |-> s_axi_awready == 1'b1) else $error("Error in immediate assert dffdmdeaondckkicbmhjdakdkjdljdpa");
+        abkjbiehpgggkbfgpihjldfghanbgbfj: assert property (@(current_state, s_axi_wvalid) {s_axi_wvalid && current_state == SETUP} |-> s_axi_wready == 1'b1) else $error("Error in immediate assert abkjbiehpgggkbfgpihjldfghanbgbfj");
+        fobofbnnlmjpkelfogaegieajjkjddbd: assert property (@(s_axi_arvalid, current_state) {s_axi_arvalid && current_state == IDLE} |-> s_axi_arready == 1'b1) else $error("Error in immediate assert fobofbnnlmjpkelfogaegieajjkjddbd");
+        elfppdconmiakhkfbfhkfcndmngihoic: assert property (@(s_axi_awvalid, current_state) {s_axi_awvalid && current_state == ACCESS} |-> is_write == 1'b1) else $error("Error in immediate assert elfppdconmiakhkfbfhkfcndmngihoic");
+        oocoidgbidoikalhagiafjhcbfopbdol: assert property (@(s_axi_arvalid, current_state) {s_axi_arvalid && current_state == ACCESS} |-> is_read == 1'b1) else $error("Error in immediate assert oocoidgbidoikalhagiafjhcbfopbdol");
+        jlgllciooeekkhnibkkgelpakpmbgnnf: assert property (@(m_apb_pready, current_state) {!m_apb_pready && current_state == ACCESS} |-> next_state == ACCESS) else $error("Error in immediate assert jlgllciooeekkhnibkkgelpakpmbgnnf");
+        lmlphmjocifgkokcpbhllppifolijbli: assert property (@(is_write, s_axi_rready, s_axi_bready, current_state, is_read) {is_write && s_axi_bready || is_read && s_axi_rready && current_state == RESPONSE} |-> next_state == IDLE) else $error("Error in immediate assert lmlphmjocifgkokcpbhllppifolijbli");
+
+        clidkjnmglldkfaibpcekcgkhcgbafmi: assert property (@(is_write, current_state) current_state == SETUP && is_write |-> s_axi_awready == 1'b1) else $error("Error in immediate assert clidkjnmglldkfaibpcekcgkhcgbafmi");
+        pmohjjnkkiddkmcfbglpfjpfkhfhcdik: assert property (@(is_write, current_state) current_state == ACCESS && is_write |-> s_axi_wready == 1'b1) else $error("Error in immediate assert pmohjjnkkiddkmcfbglpfjpfkhfhcdik");
+        mpfkldocidkakjmbpnjhlpfabbnknmlg: assert property (@(is_write, current_state) current_state == RESPONSE && is_write |-> s_axi_bresp == 2'b00) else $error("Error in immediate assert mpfkldocidkakjmbpnjhlpfabbnknmlg");
+        acgpjdkpgegbkfohbhimgfcddnfcigpa: assert property (@(is_write, current_state) current_state == RESPONSE && is_write |-> s_axi_bvalid == 1'b1) else $error("Error in immediate assert acgpjdkpgegbkfohbhimgfcddnfcigpa");
+        bnodigcjoaegkkceaefpaicldachjljn: assert property (@(is_read, current_state) current_state == SETUP && is_read |-> s_axi_arready == 1'b1) else $error("Error in immediate assert bnodigcjoaegkkceaefpaicldachjljn");
+        fkppapjjjojhkmbkplnibbhohjepofdk: assert property (@(is_read, current_state, m_apb_prdata) current_state == RESPONSE && is_read |-> s_axi_rdata == m_apb_prdata) else $error("Error in immediate assert fkppapjjjojhkmbkplnibbhohjepofdk");
+        lnielajpmamgkeobamlhdcggdhbpahpk: assert property (@(is_read, current_state) current_state == RESPONSE && is_read |-> s_axi_rresp == 2'b00) else $error("Error in immediate assert lnielajpmamgkeobamlhdcggdhbpahpk");
+        edgkjiagckfhkjnoblgkibgckkihojka: assert property (@(is_read, current_state) current_state == RESPONSE && is_read |-> s_axi_rvalid == 1'b1) else $error("Error in immediate assert edgkjiagckfhkjnoblgkibgckkihojka");
+
+        degjmdogdklekhbnoahdedkieagfplke: assert property (@(current_state) current_state == IDLE |-> s_axi_awready == 1'b1) else $error("Error in immediate assert degjmdogdklekhbnoahdedkieagfplke");
+        lpcjafccdcfiknemooaknbopnbfhbgah: assert property (@(current_state) current_state == IDLE |-> s_axi_wready == 1'b1) else $error("Error in immediate assert lpcjafccdcfiknemooaknbopnbfhbgah");
+        aehekdbmlckokplpocbmpgndkfinpdnl: assert property (@(current_state) current_state == IDLE |-> s_axi_arready == 1'b1) else $error("Error in immediate assert aehekdbmlckokplpocbmpgndkfinpdnl");
+        eifofbmalkfgkccdblkelobjbblcdakf: assert property (@(is_write, current_state) current_state == RESPONSE && is_write == 1'b1 |-> s_axi_bvalid == 1'b1) else $error("Error in immediate assert eifofbmalkfgkccdblkelobjbblcdakf");
+        eececjfbckickgcjpifgbimblmikmooa: assert property (@(is_write, current_state) current_state == RESPONSE && is_write == 1'b1 && m_apb_pslverr == 1'b1 |-> s_axi_bresp == 2'b10) else $error("Error in immediate assert eececjfbckickgcjpifgbimblmikmooa");
+        popdimiogjglkhhnpdbkcebljlibdfhf: assert property (@(is_write, current_state) current_state == RESPONSE && is_write == 1'b1 && m_apb_pslverr != 1'b1 |-> s_axi_bresp == 2'b00) else $error("Error in immediate assert popdimiogjglkhhnpdbkcebljlibdfhf");
+        eaodanfohjilkhpoagaeockkkeofggmp: assert property (@(is_write, current_state) current_state == RESPONSE && is_write == 1'b0 |-> s_axi_rvalid == 1'b1) else $error("Error in immediate assert eaodanfohjilkhpoagaeockkkeofggmp");
+        lcfplinlccnbkbepokphkaofifhjjkkf: assert property (@(is_write, current_state, m_apb_prdata) current_state == RESPONSE && is_write == 1'b0 |-> s_axi_rdata == m_apb_prdata) else $error("Error in immediate assert lcfplinlccnbkbepokphkaofifhjjkkf");
+        gbcojaombokbklmkacjlnjhpnmnkbgfo: assert property (@(is_write, current_state) current_state == RESPONSE && is_write == 1'b0 && m_apb_pslverr == 1'b1 |-> s_axi_rresp == 2'b10) else $error("Error in immediate assert gbcojaombokbklmkacjlnjhpnmnkbgfo");
+        jahbjldheadakbafbgbjncfcbjgjdpdc: assert property (@(is_write, current_state) current_state == RESPONSE && is_write == 1'b0 && m_apb_pslverr != 1'b1 |-> s_axi_rresp == 2'b00) else $error("Error in immediate assert jahbjldheadakbafbgbjncfcbjgjdpdc");
+
+
+            property hegddcpjibnakbmcapdfejgfapbohiae;
+            @(posedge clk) disable iff(!rst_n) (current_state == IDLE) |=> (s_axi_awready == 1);
+        endproperty
+        assert property (hegddcpjibnakbmcapdfejgfapbohiae);
+
+        property fkhibdeimfhokgncamjgiefdknddgked;
+            @(posedge clk) disable iff(!rst_n) (current_state == SETUP) |=> (s_axi_awready == 0);
+        endproperty
+        assert property (fkhibdeimfhokgncamjgiefdknddgked);
+
+        property jcocllpmglcdkanoaijjjafhheepekge;
+            @(posedge clk) disable iff(!rst_n) (current_state == ACCESS && is_write) |=> (s_axi_wready == 1);
+        endproperty
+        assert property (jcocllpmglcdkanoaijjjafhheepekge);
+
+        property chmfpickakhkkoiapgoikjdmogkpfkjg;
+            @(posedge clk) disable iff(!rst_n) (current_state == SETUP) |=> (s_axi_wready == 0);
+        endproperty
+        assert property (chmfpickakhkkoiapgoikjdmogkpfkjg);
+
+        property ebohcacjoompkapmaeocnjaagpmnpbon;
+            @(posedge clk) disable iff(!rst_n) (current_state == RESPONSE) |=> (s_axi_bresp == 2'b00);
+        endproperty
+        assert property (ebohcacjoompkapmaeocnjaagpmnpbon);
+
+        property chkomlgmgpbgkogeppeckobbcnlmfieo;
+            @(posedge clk) disable iff(!rst_n) (current_state == RESPONSE) |=> (s_axi_bvalid == 1);
+        endproperty
+        assert property (chkomlgmgpbgkogeppeckobbcnlmfieo);
+
+        property ppeejebknccckggiokkemhhegolmddib;
+            @(posedge clk) disable iff(!rst_n) (current_state == SETUP && is_write) |=> (m_apb_paddr == addr_reg);
+        endproperty
+        assert property (ppeejebknccckggiokkemhhegolmddib);
+
+        property nkokpbpbhjcckjgebodicgjpdajokeep;
+            @(posedge clk) disable iff(!rst_n) (current_state == SETUP && is_write) |=> (m_apb_psel == 1);
+        endproperty
+        assert property (nkokpbpbhjcckjgebodicgjpdajokeep);
+
+        property lbpmcmppmabfkcpooejifeohjicagpkb;
+            @(posedge clk) disable iff(!rst_n) (current_state == ACCESS) |=> (m_apb_penable == 1);
+        endproperty
+        assert property (lbpmcmppmabfkcpooejifeohjicagpkb);
+
+        property kecbkmokfmfckpgbbpdanbdjmcadhijb;
+            @(posedge clk) disable iff(!rst_n) (current_state == ACCESS && is_write) |=> (m_apb_pwrite == 1);
+        endproperty
+        assert property (kecbkmokfmfckpgbbpdanbdjmcadhijb);
+
+        property kidhhagcbenjkddipigkdfpdbdfbeadm;
+            @(posedge clk) disable iff(!rst_n) (current_state == ACCESS && is_write) |=> (m_apb_pwdata == s_axi_wdata);
+        endproperty
+        assert property (kidhhagcbenjkddipigkdfpdbdfbeadm);
+
+        property empffkjccnmnkhjebndhijbelknjkpok;
+            @(posedge clk) disable iff(!rst_n) (current_state == ACCESS && !is_write) |=> (m_apb_prdata == s_axi_rdata);
+        endproperty
+        assert property (empffkjccnmnkhjebndhijbelknjkpok);
+
+        property jbfcpgoidhahkjiipjomgnggpdggmjbd;
+            @(posedge clk) disable iff(!rst_n) (current_state == ACCESS) |=> (m_apb_pready == 1);
+        endproperty
+        assert property (jbfcpgoidhahkjiipjomgnggpdggmjbd);
+
+        property jipboikcdlgnkpjbbbmdiflnaecfdnbo;
+            @(posedge clk) disable iff(!rst_n) (current_state == ACCESS && !is_write) |=> (m_apb_pslverr == 0);
+        endproperty
+        assert property (jipboikcdlgnkpjbbbmdiflnaecfdnbo);
+
+        property nbfoihpikmagklhcpingkckahlfpbbfo;
+            @(posedge clk) disable iff(!rst_n) (current_state == IDLE && is_read) |=> (s_axi_arready == 1);
+        endproperty
+        assert property (nbfoihpikmagklhcpingkckahlfpbbfo);
+
+        property bmbjnbjlkenjkfaiblllhhedmkncolne;
+            @(posedge clk) disable iff(!rst_n) (current_state == SETUP) |=> (s_axi_arready == 0);
+        endproperty
+        assert property (bmbjnbjlkenjkfaiblllhhedmkncolne);
+
+        property leknbomldfcekeaapmdemolfegiejioi;
+            @(posedge clk) disable iff(!rst_n) (current_state == RESPONSE) |=> (s_axi_rdata == m_apb_prdata);
+        endproperty
+        assert property (leknbomldfcekeaapmdemolfegiejioi);
+
+        property bkcfhpdgoglbkldpabphbhbgmgjpompm;
+            @(posedge clk) disable iff(!rst_n) (current_state == RESPONSE) |=> (s_axi_rvalid == 1);
+        endproperty
+        assert property (bkcfhpdgoglbkldpabphbhbgmgjpompm);
+
+        property immhpjcjnpnpkapjoogjhjcddcklakdm;
+            @(posedge clk) disable iff(!rst_n) (current_state == IDLE && s_axi_awvalid && s_axi_wvalid) |=> (next_state == SETUP);
+        endproperty
+        assert property (immhpjcjnpnpkapjoogjhjcddcklakdm);
+
+        property hedgbecpocgaklonbjiljfgmjikphdao;
+            @(posedge clk) disable iff(!rst_n) (current_state == SETUP && !s_axi_bready) |=> (next_state == ACCESS);
+        endproperty
+        assert property (hedgbecpocgaklonbjiljfgmjikphdao);
+
+        property jjgamfckimbikehfafkiemifndnkmdob;
+            @(posedge clk) disable iff(!rst_n) (current_state == ACCESS && m_apb_pready) |=> (next_state == RESPONSE);
+        endproperty
+        assert property (jjgamfckimbikehfafkiemifndnkmdob);
+
+        property miahaonlapcmkocjpdmjhmljmikobaal;
+            @(posedge clk) disable iff(!rst_n) (current_state == SETUP) |=> (addr_reg == s_axi_awaddr);
+        endproperty
+        assert property (miahaonlapcmkocjpdmjhmljmikobaal);
+
+        property dfefejigoofekpampffkojefjkicccon;
+            @(posedge clk) disable iff(!rst_n) (current_state == SETUP) |=> (write_reg == s_axi_wvalid);
+        endproperty
+        assert property (dfefejigoofekpampffkojefjkicccon);
+
+        property lommefckhlfdkgpcpibckdmbfdabnafp;
+            @(posedge clk) disable iff(!rst_n) (current_state == SETUP) |=> (is_write == (s_axi_awaddr[31:20] == 12'h0) ? s_axi_wvalid : 0);
+        endproperty
+        assert property (lommefckhlfdkgpcpibckdmbfdabnafp);
+
+        property jenciaidjhaekgcgaflblgajophclbgo;
+            @(posedge clk) disable iff(!rst_n) (current_state == SETUP) |=> (is_read == !s_axi_wvalid);
+        endproperty
+        assert property (jenciaidjhaekgcgaflblgajophclbgo);
+
+
+
+        endmodule'''
+
+        final_module = process_module_complete(module_content=assert_module)
+
         print(f'Generated testing module: \n{final_module}\n')
 
         elapsed_time = time.time() - time1

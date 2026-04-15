@@ -48,7 +48,6 @@ def obtain_internal_variables(module_content):
 
     return internal_variables
 
-
 def extract_ports_and_merge(module_content, internal_variables):
     port_pattern = r'module\s+\w+\s*(?:#\s*\([^)]*\)\s*)?\s*\(\s*(.*?)\s*\)\s*;'
 
@@ -149,7 +148,7 @@ def process_module_complete(module_content):
 #         RESPONSE
 #     } state_t;
 #
-#         state_t current_state, next_state;
+#     state_t current_state, next_state;
 #     logic [31:0] addr_reg;
 #     logic write_reg;
 #     logic is_write, is_read;
@@ -157,7 +156,7 @@ def process_module_complete(module_content):
 #
 #
 #
-#     dffdmdeaondckkicbmhjdakdkjdljdpa: assert property (@(s_axi_awvalid, current_state) {s_axi_awvalid && current_state == IDLE} |-> s_axi_awready == 1'b1) else $error("Error in immediate assert dffdmdeaondckkicbmhjdakdkjdljdpa");
+# dffdmdeaondckkicbmhjdakdkjdljdpa: assert property (@(s_axi_awvalid, current_state) {s_axi_awvalid && current_state == IDLE} |-> s_axi_awready == 1'b1) else $error("Error in immediate assert dffdmdeaondckkicbmhjdakdkjdljdpa");
 # abkjbiehpgggkbfgpihjldfghanbgbfj: assert property (@(current_state, s_axi_wvalid) {s_axi_wvalid && current_state == SETUP} |-> s_axi_wready == 1'b1) else $error("Error in immediate assert abkjbiehpgggkbfgpihjldfghanbgbfj");
 # fobofbnnlmjpkelfogaegieajjkjddbd: assert property (@(s_axi_arvalid, current_state) {s_axi_arvalid && current_state == IDLE} |-> s_axi_arready == 1'b1) else $error("Error in immediate assert fobofbnnlmjpkelfogaegieajjkjddbd");
 # elfppdconmiakhkfbfhkfcndmngihoic: assert property (@(s_axi_awvalid, current_state) {s_axi_awvalid && current_state == ACCESS} |-> is_write == 1'b1) else $error("Error in immediate assert elfppdconmiakhkfbfhkfcndmngihoic");

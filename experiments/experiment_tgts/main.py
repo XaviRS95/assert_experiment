@@ -28,37 +28,16 @@ def main():
         # Read modules
         modules = file_handling.read_modules_file(args.path)
 
-        module ='''module case_simple_example (
-    input  logic       addr,      // 1-bit address
-    input  logic       sub_op,    // 1-bit sub-operation
-    input  logic [1:0] mode,      // 2-bit mode for casex
-    input  logic       data,
-    output logic       result
-);
-
+        module = '''module case4(input logic [3:0] in, output logic out);
     always_comb begin
-        case (addr)
-            1'b0: begin
-                // Nested case statement
-                case (sub_op)
-                    1'b0:   result = data;
-                    1'b1:   result = ~data;
-                endcase
-            end
-            
-            1'b1: begin
-                // casex with don't-care and range value (comma-separated)
-                casex (mode)
-                    2'b0x,           // Range: matches 2'b00 or 2'b01
-                    2'b1x: begin     // Range: matches 2'b10 or 2'b11
-                        result = data & sub_op;
-                    end
-                    default: result = 1'b0;
-                endcase
-            end
+        case(in)
+            4'b0001: out = 1;
+            4'b0010: out = 0;
+            4'b0100: out = 1;
+            4'b1000: out = 0;
+            default: out = 0;
         endcase
     end
-
 endmodule'''
 
         modules = [module]

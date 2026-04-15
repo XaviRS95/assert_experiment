@@ -15,7 +15,6 @@ class FinalAssembler:
             parameters=module_info['parameters'],
             ports=module_info['ports'],
             inner_vars=module_info['inner_vars'],
-            func_blocks=module_info['func_blocks'],
             immediate_assertions=comb_results['immediate_assertions'],
             sequential_properties=seq_results['sequential_properties']
         )

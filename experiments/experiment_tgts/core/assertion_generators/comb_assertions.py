@@ -1,7 +1,6 @@
 from utils import utils
 from prompts.tgts_experiments import comb_to_tgts_prompt
 from experiments.experiment_tgts.processing.tgts_extractions import tgts_to_immediate_asserts
-from experiments.experiment_tgts.tracking.token_tracker import TokenTracker
 from utils.regex_utils import sv_parsing
 
 class CombinationalAssertionGenerator:
