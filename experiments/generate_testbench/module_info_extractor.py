@@ -81,6 +81,10 @@ def extract_inner_vars(code: str, comb_blocks: list, seq_blocks: list, func_bloc
     # 3. Remove the header (replace with empty string)
     extractable_code = re.sub(header_pattern, '', extractable_code, count=1, flags=re.MULTILINE).strip()
 
+    # 4. Remove the typedef implementations:
+    pattern = r'typedef\s+(?:\{[\s\S]*?\}|[^{;])+\s*;\s*[\r\n]*'
+    extractable_code = re.sub(pattern, '', extractable_code, flags=re.MULTILINE).strip()
+
     #leaving only the inner variables to extract:
     inner_vars = extractable_code.replace('endmodule', '').strip()
 

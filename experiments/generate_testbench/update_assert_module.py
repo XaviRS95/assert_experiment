@@ -3,7 +3,8 @@ import re
 import re
 
 
-def extract_internal_variables(module_content, typedef_names):
+def extract_internal_variables(module_content, typedef_vars):
+    typedef_names = typedef_vars.keys()
     types = r'\b(?:bit|byte|shortint|int|longint|reg|logic|integer|' + '|'.join(typedef_names) + r')\b'
     pattern = r'(?:^|\n)\s*(' + types + r')\s+(?:signed\s+)?(?:unsigned\s+)?([^;]+);'
 
@@ -20,16 +21,23 @@ def extract_internal_variables(module_content, typedef_names):
             var_name = re.sub(r'\[\s*[^\]]*\s*\]', '', part).strip()
 
             if var_name and not var_name.startswith('//'):
+                if data_type in typedef_names:
+                    data_type = typedef_vars[data_type]
                 variables.append(f"{data_type} {var_name}")
 
     return variables
 
 
-def extract_typedef_name(module_content):
-    pattern = r'typedef\s+enum\s+logic\s*\[\d+:\d+\]\s*\{[^}]*\}\s*(\w+)\s*;'
+def extract_typedef_vars(module_content):
+    pattern = r'typedef\s+enum\s+([^\{]*?)\s*\{[^}]*\}\s*(\w+)\s*;'
     matches = re.findall(pattern, module_content, flags=re.DOTALL)
-    return matches
+    # Cleaning up whitespace from the captured type
+    typedefs = {}
 
+    for t, n in matches:
+        typedefs[n.strip()] = t.strip()
+
+    return typedefs
 
 def obtain_internal_variables(module_content):
     pattern1 = r'[a-z]{32}:\s*assert property\s*\(.*?\)\s*else\s*\$error\(".*"\)\s*;?\s*\n?'
@@ -43,10 +51,10 @@ def obtain_internal_variables(module_content):
     module_content = re.sub(pattern4, '', module_content, flags=re.MULTILINE | re.DOTALL)
     module_content = module_content.strip()
 
-    typedef_names = extract_typedef_name(module_content)
-    internal_variables = extract_internal_variables(module_content=module_content, typedef_names=typedef_names)
+    typedef_vars = extract_typedef_vars(module_content)
+    internal_variables = extract_internal_variables(module_content=module_content, typedef_vars=typedef_vars)
 
-    return internal_variables
+    return internal_variables, typedef_vars
 
 def extract_ports_and_merge(module_content, internal_variables):
     port_pattern = r'module\s+\w+\s*(?:#\s*\([^)]*\)\s*)?\s*\(\s*(.*?)\s*\)\s*;'
@@ -90,19 +98,20 @@ def remove_original_internal_variables(module_content, internal_variables):
     return module_content
 
 
-def remove_typedef_declaration(module_content):
-    pattern = r'typedef\s+enum\s+logic\s*\[\d+:\d+\]\s*\{[^}]*\}\s*\w+\s*;'
-    module_content = re.sub(pattern, '', module_content, flags=re.DOTALL)
+def remove_typedef_variables(module_content, typedef_names):
+    for name in typedef_names:
+        pattern = fr'\b{name}\s+[^;]+;'
+        module_content = re.sub(pattern, '', module_content, flags=re.DOTALL)
     return module_content
 
 
 def process_module_complete(module_content):
-    internal_vars = obtain_internal_variables(module_content)
+    internal_vars, typedef_vars = obtain_internal_variables(module_content)
     port_args = extract_ports_and_merge(module_content, internal_vars)
 
     updated_module = update_module_header(module_content, port_args)
     updated_module = remove_original_internal_variables(updated_module, internal_vars)
-    updated_module = remove_typedef_declaration(updated_module)
+    updated_module = remove_typedef_variables(updated_module, typedef_vars.keys())
 
     lines = updated_module.split('\n')
     cleaned_lines = [line for line in lines if line.strip()]

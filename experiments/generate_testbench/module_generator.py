@@ -2,7 +2,7 @@ from clock_reset_initialize import generate_reset_initial_info, generate_clock_i
 from generate_bindings import generate_dut_assert_sections
 from module_info_extractor import get_module_name, get_port_signals, get_triggers, normalize_ports_with_range, extract_internal_variables_names
 from stimuli_section_generator import generate_blocks
-
+import re
 def generate_testbench_header(CLK_HALF_PERIOD: int,
                               RESET_DELAY: int,
                               TIMEOUT_LIMIT: int,
@@ -109,8 +109,14 @@ def generate_clk_reset_initialization(clk_signal: str, rst_signal: str, rst_trig
 
     return initial_clock_section, initial_reset_section
 
+def remove_comments(module: str)-> str:
+    pattern = r'//.*|/\*[\s\S]*?\*/'
+    new_module = re.sub(pattern, '', module)
+    return new_module
 
 def generate_testbench(timescale: str, dut_module: str, assert_module: str, CLK_HALF_PERIOD: int, RESET_DELAY: int, TIMEOUT_LIMIT: int, COMB_TOTAL_TESTS: int, SEQ_TOTAL_TESTS: int, POST_COMPLETION_DELAY: int):
+
+    dut_module = remove_comments(module=dut_module)
 
     # Get the signals from the dut module ports list.
     signals = get_port_signals(module=dut_module)

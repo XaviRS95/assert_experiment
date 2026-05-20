@@ -1,4 +1,0 @@
-experiment,syntax_correct(%),mean_prompt_tokens,mean_output_tokens,avg_time_seconds
-Experiment 1,43.94,316.23,454.77,1772810538.73
-Experiment 2,26.26,3161.23,485.25,1772874691.56
-Experiment 3,97.98,653.04,424.16,238.44
